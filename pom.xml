@@ -11,6 +11,7 @@
     <modules>
         <module>models</module>
         <module>memory</module>
+        <module>logic</module>
     </modules>
 
     <properties>
