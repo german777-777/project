@@ -25,12 +25,12 @@ public class Student extends Person {
     }
 
     public Student withLastName(String lastName) {
-        setFirstName(lastName);
+        setLastName(lastName);
         return this;
     }
 
     public Student withPatronymic(String patronymic) {
-        setFirstName(patronymic);
+        setPatronymic(patronymic);
         return this;
     }
 

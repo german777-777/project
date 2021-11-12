@@ -38,8 +38,9 @@ public class PersonRepositoryLocalImpl implements PersonRepository {
                 .filter(prs -> person.getCredentials().equals(prs.getCredentials()))
                 .findAny();
         if (personOptional.isEmpty()) {
+            ID = ID + 1;
             log.info("Добавлен новый пользователь");
-            personMap.put(ID++, person);
+            personMap.put(ID, (Person) person.withId(ID));
             return person;
         }
         log.error("Переданный пользователь уже существует");

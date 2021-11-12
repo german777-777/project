@@ -27,12 +27,12 @@ public class Teacher extends Person {
     }
 
     public Teacher withLastName(String lastName) {
-        setFirstName(lastName);
+        setLastName(lastName);
         return this;
     }
 
     public Teacher withPatronymic(String patronymic) {
-        setFirstName(patronymic);
+        setPatronymic(patronymic);
         return this;
     }
 

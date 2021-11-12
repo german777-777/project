@@ -8,6 +8,7 @@ import java.util.*;
 @Slf4j
 public class SubjectRepositoryLocalImpl implements SubjectRepository {
     private final Map<Integer, Subject> subjectMap = new HashMap<>();
+    private static int ID = 0;
     private static volatile SubjectRepositoryLocalImpl instance;
 
     private SubjectRepositoryLocalImpl() {
@@ -32,8 +33,9 @@ public class SubjectRepositoryLocalImpl implements SubjectRepository {
                 .filter(subj -> subject.getName().equals(subj.getName()))
                 .findAny();
         if (optionalSubject.isEmpty()) {
+            ID++;
             log.info("Добавлен новый предмет");
-            subjectMap.put(subject.getId(), subject);
+            subjectMap.put(ID, subject.withId(ID));
             return subject;
         }
         log.error("Переданные предмет уже существует");

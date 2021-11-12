@@ -35,8 +35,9 @@ public class CredentialRepositoryLocalImpl implements CredentialRepository {
                 .filter(cred -> cred.getPassword().equals(credentials.getPassword()))
                 .findAny();
         if (optionalCredential.isEmpty()) {
+            ID++;
             log.info("Добавлены новые учётные данные");
-            credentialsMap.put(ID++, credentials);
+            credentialsMap.put(ID, credentials.withId(ID));
             return credentials;
         }
         log.error("Переданные учётные данные уже существуют");

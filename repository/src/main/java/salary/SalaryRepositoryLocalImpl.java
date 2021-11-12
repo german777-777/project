@@ -38,8 +38,9 @@ public class SalaryRepositoryLocalImpl implements SalaryRepository {
                 .filter(sal -> sal.getDateOfSalary().equals(salary.getDateOfSalary()))
                 .findAny();
         if (optionalSalary.isEmpty()) {
+            ID++;
             log.info("Добавлена новая зарплата");
-            salaryMap.put(ID++, salary);
+            salaryMap.put(ID, salary.withId(ID));
             return salary;
         }
         log.error("Переданная зарплата уже существует");

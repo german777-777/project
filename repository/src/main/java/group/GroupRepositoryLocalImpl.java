@@ -35,8 +35,9 @@ public class GroupRepositoryLocalImpl implements GroupRepository {
                 .filter(gr -> gr.getTeacher().equals(group.getTeacher()))
                 .findAny();
         if (optionalGroup.isEmpty()) {
+            ID++;
             log.info("Добавлена новая группа");
-            groupMap.put(ID++, group);
+            groupMap.put(ID, group.withId(ID));
             return group;
         }
         log.error("Переданная группа уже существует");

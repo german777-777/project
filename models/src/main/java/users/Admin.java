@@ -22,12 +22,12 @@ public class Admin extends Person {
     }
 
     public Admin withLastName(String lastName) {
-        setFirstName(lastName);
+        setLastName(lastName);
         return this;
     }
 
     public Admin withPatronymic(String patronymic) {
-        setFirstName(patronymic);
+        setPatronymic(patronymic);
         return this;
     }
 

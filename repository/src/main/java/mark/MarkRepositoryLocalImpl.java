@@ -37,8 +37,9 @@ public class MarkRepositoryLocalImpl implements MarkRepository {
                 .filter(mk -> mk.getSubject().equals(mark.getSubject()))
                 .findAny();
         if (optionalMark.isEmpty()) {
+            ID++;
             log.info("Добавлена новая оценка");
-            markMap.put(ID++, mark);
+            markMap.put(ID, mark.withMark(ID));
             return mark;
         }
         log.error("Переданная оценка уже существует");
