@@ -5,7 +5,7 @@
     <title>Страница студетов для Администратора</title>
 </head>
 <body>
-<h1>Стрнаица студентов</h1>
+<h1>Страница студентов</h1>
 <h3>Все студенты</h3>
 <table border="1" width="100%">
     <tr>
@@ -34,40 +34,76 @@
                 <td>
                     <form action="<c:url value="/StudentServlet"/>" method="post">
                         <input type="hidden" name="method" value="delete">
-                        <input type="hidden" name="id" value="${person.id}">
+                        <input type="hidden" name="ID" value="${person.id}">
                         <input type="hidden" name="firstName" value="${person.firstName}">
                         <input type="hidden" name="lastName" value="${person.lastName}">
                         <input type="hidden" name="patronymic" value="${person.patronymic}">
-                        <button type="submit">Удалить</button>
+                        <button style="align-content: center" type="submit">Удалить</button>
                     </form>
                 </td>
                 <td>
                     <form action="<c:url value="/StudentServlet"/>" method="post">
+                        <input type="hidden" name="method" value="put">
                         <input type="hidden" name="ID" value="${person.id}">
                         <label>
-                            <input type="text" name="firstName" required placeholder="Имя" value="${person.firstName}">
+                            <input style="display: block" type="text" name="newLastName" placeholder="Новая фамилия">
                         </label>
                         <label>
-                            <input type="text" name="lastName" required placeholder="Фамилия" value="${person.lastName}">
+                            <input style="display: block" type="text" name="newFirstName" placeholder="Новое имя">
                         </label>
                         <label>
-                            <input type="text" name="patronymic" required placeholder="Отчество" value="${person.patronymic}">
+                            <input style="display: block" type="text" name="newPatronymic" placeholder="Новое отчество">
                         </label>
                         <label>
-                            <input type="text" name="login" required placeholder="Логин" value="${person.credentials.login}">
+                            <input style="display: block" type="text" name="newLogin" placeholder="Новый логин">
                         </label>
                         <label>
-                            <input type="text" name="password" required placeholder="Пароль" value="${person.credentials.password}">
+                            <input style="display: block" type="text" name="newPassword" placeholder="Новый пароль">
                         </label>
                         <label>
-                            <input type="text" name="dateOfBirth" required placeholder="Дата рождения" value="${person.dateOfBirth}">
+                            <input style="display: block" type="date" name="newDateOfBirth"
+                                   placeholder="Новая дата рождения">
                         </label>
                         <button type="submit">Изменить</button>
                     </form>
                 </td>
+                <td>
+                    <a href="">Оценки</a>
+                </td>
             </tr>
         </c:if>
     </c:forEach>
+
+    <c:if test="${not empty requestScope.message}">
+        <c:out value="${requestScope.message}"/>
+    </c:if>
 </table>
+<h4>
+    Добавление нового студента
+</h4>
+<form action="<c:url value="/StudentServlet"/>">
+    <input type="hidden" name="method" value="post">
+    <label>
+        Фамилия: <input style="display: block" type="text" name="newLastName">
+    </label>
+    <label>
+        Имя:<input style="display: block" type="text" name="newFirstName">
+    </label>
+    <label>
+        Отчество:<input style="display: block" type="text" name="newPatronymic">
+    </label>
+    <label>
+        Логин:<input style="display: block" type="text" name="newLogin">
+    </label>
+    <label>
+        Пароль:<input style="display: block" type="text" name="newPassword">
+    </label>
+    <label>
+        Дата рождения:<input style="display: block" type="date" name="newDateOfBirth">
+    </label>
+    <button style="display: block" type="submit">Создать</button>
+</form>
+
+<a style="display: block" href="admin.jsp">Назад</a>
 </body>
 </html>

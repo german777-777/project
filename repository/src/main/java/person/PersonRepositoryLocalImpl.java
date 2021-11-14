@@ -1,5 +1,7 @@
 package person;
 
+import credential.CredentialRepository;
+import credential.CredentialRepositoryLocalImpl;
 import credentials.Credentials;
 import lombok.extern.slf4j.Slf4j;
 import users.Person;
@@ -11,6 +13,7 @@ import java.util.*;
 public class PersonRepositoryLocalImpl implements PersonRepository {
     private static int ID = 0;
     private final Map<Integer, Person> personMap = new HashMap<>();
+    private final CredentialRepository credentialRepository = CredentialRepositoryLocalImpl.getInstance();
     private static volatile PersonRepositoryLocalImpl instance;
     private PersonRepositoryLocalImpl() {
     }
@@ -140,6 +143,7 @@ public class PersonRepositoryLocalImpl implements PersonRepository {
         if (optionalPerson.isPresent()) {
             log.info("Изменение пользователя в репозитории");
             Person personFromOptional = optionalPerson.get();
+            updateCredentialInCredRepository(personFromOptional, newCredential);
             personFromOptional.setCredentials(newCredential);
             personMap.put(id, personFromOptional);
             return optionalPerson;
@@ -154,6 +158,8 @@ public class PersonRepositoryLocalImpl implements PersonRepository {
         Optional<Person> optionalPerson = getOptionalPersonFromMapById(personMap, id);
         if (optionalPerson.isPresent()) {
             log.info("Удаление пользователя в репозитории");
+            Person personFromOptional = optionalPerson.get();
+            deleteCredentialInCredRepository(personFromOptional);
             personMap.remove(id);
             return optionalPerson;
         }
@@ -173,6 +179,7 @@ public class PersonRepositoryLocalImpl implements PersonRepository {
         if (optionalPerson.isPresent()) {
             log.info("Удаление пользователя в репозитории");
             Person personFromOptional = optionalPerson.get();
+            deleteCredentialInCredRepository(personFromOptional);
             personMap.remove(personFromOptional.getId());
             return optionalPerson;
         }
@@ -185,5 +192,31 @@ public class PersonRepositoryLocalImpl implements PersonRepository {
                 .stream()
                 .filter(per -> id == per.getId())
                 .findAny();
+    }
+
+    private boolean updateCredentialInCredRepository(Person personFromOptional, Credentials newCredential) {
+        Credentials credentialsOfUpdatablePerson = personFromOptional.getCredentials();
+        Optional<Credentials> credentialsFromRepositoryOptional = credentialRepository
+                .getCredentialByLoginAndPassword(credentialsOfUpdatablePerson.getLogin(),
+                        credentialsOfUpdatablePerson.getPassword());
+        if (credentialsFromRepositoryOptional.isPresent()) {
+            Credentials credentialsFromRepository = credentialsFromRepositoryOptional.get();
+            credentialRepository.updateCredentialById(credentialsFromRepository.getId(), newCredential.getLogin(), newCredential.getPassword());
+            return true;
+        }
+        return false;
+    }
+
+    private boolean deleteCredentialInCredRepository(Person personFromOptional) {
+        Credentials credentialsOfDeletablePerson = personFromOptional.getCredentials();
+        Optional<Credentials> credentialsFromRepositoryOptional = credentialRepository
+                .getCredentialByLoginAndPassword(credentialsOfDeletablePerson.getLogin(),
+                        credentialsOfDeletablePerson.getPassword());
+        if (credentialsFromRepositoryOptional.isPresent()) {
+            Credentials credentialsFromRepository = credentialsFromRepositoryOptional.get();
+            credentialRepository.deleteCredentialById(credentialsFromRepository.getId());
+            return true;
+        }
+        return false;
     }
 }
