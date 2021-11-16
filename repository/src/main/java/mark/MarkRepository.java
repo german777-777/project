@@ -16,11 +16,11 @@ public interface MarkRepository {
     List<Mark> getAllMarks();
 
     //Update
-    Optional<Mark> updateSubjectMarkById(int id, Subject newSubject);
-    Optional<Mark> updateDateOfMarkById(int id, LocalDate newDateOfMark);
-    Optional<Mark> updateGroupWhereMarkWasGiven(int id, Group newGroup);
-    Optional<Mark> updateMarkById(int id, int newMark);
+    boolean updateSubjectMarkById(int id, Subject newSubject);
+    boolean updateDateOfMarkById(int id, LocalDate newDateOfMark);
+    boolean updateGroupWhereMarkWasGiven(int id, Group newGroup);
+    boolean updateMarkById(int id, int newMark);
 
     //Delete
-    Optional<Mark> deleteMarkById(int id);
+    boolean deleteMarkById(int id);
 }

@@ -23,7 +23,7 @@
     <c:forEach var="person" items="${applicationScope.person_repository.allPersons}">
         <%--@elvariable id="Role" type="role.Role"--%>
         <c:if test="${person.role.roleString.equals('Студент')}">
-            <tr>
+            <tr style="text-align: center">
                 <td><c:out value="${person.id}"/></td>
                 <td><c:out value="${person.credentials.login}"/></td>
                 <td><c:out value="${person.credentials.password}"/></td>
@@ -46,22 +46,22 @@
                         <input type="hidden" name="method" value="put">
                         <input type="hidden" name="ID" value="${person.id}">
                         <label>
-                            <input style="display: block" type="text" name="newLastName" placeholder="Новая фамилия">
+                            <input style="text-align: center; display: block" type="text" name="newLastName" placeholder="Новая фамилия">
                         </label>
                         <label>
-                            <input style="display: block" type="text" name="newFirstName" placeholder="Новое имя">
+                            <input style="text-align: center; display: block" type="text" name="newFirstName" placeholder="Новое имя">
                         </label>
                         <label>
-                            <input style="display: block" type="text" name="newPatronymic" placeholder="Новое отчество">
+                            <input style="text-align: center; display: block" type="text" name="newPatronymic" placeholder="Новое отчество">
                         </label>
                         <label>
-                            <input style="display: block" type="text" name="newLogin" placeholder="Новый логин">
+                            <input style="text-align: center; display: block" type="text" name="newLogin" placeholder="Новый логин">
                         </label>
                         <label>
-                            <input style="display: block" type="text" name="newPassword" placeholder="Новый пароль">
+                            <input style="text-align: center; display: block" type="text" name="newPassword" placeholder="Новый пароль">
                         </label>
                         <label>
-                            <input style="display: block" type="date" name="newDateOfBirth"
+                            <input style="align-content: center; display: block" type="date" name="newDateOfBirth"
                                    placeholder="Новая дата рождения">
                         </label>
                         <button type="submit">Изменить</button>
@@ -73,35 +73,36 @@
             </tr>
         </c:if>
     </c:forEach>
-
+</table>
+<h3 style="color: crimson">
     <c:if test="${not empty requestScope.message}">
         <c:out value="${requestScope.message}"/>
     </c:if>
-</table>
+</h3>
 <h4>
     Добавление нового студента
 </h4>
 <form action="<c:url value="/StudentServlet"/>">
     <input type="hidden" name="method" value="post">
     <label>
-        Фамилия: <input style="display: block" type="text" name="newLastName">
+        Фамилия: <input style="text-align: center; display: block" type="text" name="newLastName">
     </label>
     <label>
-        Имя:<input style="display: block" type="text" name="newFirstName">
+        Имя:<input style="text-align: center; display: block" type="text" name="newFirstName">
     </label>
     <label>
-        Отчество:<input style="display: block" type="text" name="newPatronymic">
+        Отчество:<input style="text-align: center; display: block" type="text" name="newPatronymic">
     </label>
     <label>
-        Логин:<input style="display: block" type="text" name="newLogin">
+        Логин:<input style="text-align: center; display: block" type="text" name="newLogin">
     </label>
     <label>
-        Пароль:<input style="display: block" type="text" name="newPassword">
+        Пароль:<input style="text-align: center; display: block" type="text" name="newPassword">
     </label>
     <label>
-        Дата рождения:<input style="display: block" type="date" name="newDateOfBirth">
+        Дата рождения:<input style="align-content: center; display: block" type="date" name="newDateOfBirth">
     </label>
-    <button style="display: block" type="submit">Создать</button>
+    <button style="align-content: center; display: block" type="submit">Создать</button>
 </form>
 
 <a style="display: block" href="admin.jsp">Назад</a>

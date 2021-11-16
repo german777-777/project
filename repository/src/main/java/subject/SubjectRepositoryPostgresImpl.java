@@ -27,22 +27,24 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
     }
 
     @Override
-    public Optional<Subject> updateSubjectNameById(int id, String newName) {
-        return Optional.empty();
+    public boolean updateSubjectNameById(int id, String newName) {
+        return false;
     }
 
     @Override
-    public Optional<Subject> updateSubjectNameByName(String oldName, String newName) {
-        return Optional.empty();
+    public boolean updateSubjectNameByName(String oldName, String newName) {
+        return false;
     }
 
     @Override
-    public Optional<Subject> deleteSubjectById(int id) {
-        return Optional.empty();
+    public boolean deleteSubjectById(int id) {
+        return false;
     }
 
     @Override
-    public Optional<Subject> deleteSubjectByName(String name) {
-        return Optional.empty();
+    public boolean deleteSubjectByName(String name) {
+        return false;
     }
+
+
 }

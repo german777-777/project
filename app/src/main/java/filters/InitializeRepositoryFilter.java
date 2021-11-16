@@ -4,6 +4,7 @@ import credentials.Credentials;
 import fabric.RepositoryFactory;
 import fabric.RepositoryFactoryLocalImpl;
 import lombok.extern.slf4j.Slf4j;
+import secondary.Salary;
 import users.Admin;
 import users.Person;
 import users.Student;
@@ -121,7 +122,11 @@ public class InitializeRepositoryFilter implements Filter {
                         .withPassword("Anonim"))
                 .withDateOfBirth(LocalDate.of(1, Month.MARCH, 1));
         factory.getPersonRepository().createPerson(admin);
+
+        Salary salary1 = new Salary()
+                .withSalary(1000)
+                .withDateOfSalary(LocalDate.of(2021, Month.JANUARY, 1))
+                .withTeacher(teacher3);
+        factory.getSalaryRepository().createSalary(salary1);
     }
-
-
 }

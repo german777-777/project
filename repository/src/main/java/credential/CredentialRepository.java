@@ -15,11 +15,11 @@ public interface CredentialRepository {
     List<Credentials> getAllCredentials();
 
     //Update
-    Optional<Credentials> updateCredentialById(int id, String newLogin, String newPassword);
+    boolean updateCredentialById(int id, String newLogin, String newPassword);
 
     //Delete
-    Optional<Credentials> deleteCredentialById(int id);
-    Optional<Credentials> deleteCredentialByLoginAndPassword(String login, String password);
+    boolean deleteCredentialById(int id);
+    boolean deleteCredentialByLoginAndPassword(String login, String password);
 
 
 }

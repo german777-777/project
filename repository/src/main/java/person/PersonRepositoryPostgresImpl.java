@@ -34,27 +34,29 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
     }
 
     @Override
-    public Optional<Person> updatePersonNameById(int id, String newFirstName, String newLastName, String newPatronymic) {
-        return Optional.empty();
+    public boolean updatePersonNameById(int id, String newFirstName, String newLastName, String newPatronymic) {
+        return false;
     }
 
     @Override
-    public Optional<Person> updateDateOfBirthById(int id, LocalDate newDateOfBirth) {
-        return Optional.empty();
+    public boolean updateDateOfBirthById(int id, LocalDate newDateOfBirth) {
+        return false;
     }
 
     @Override
-    public Optional<Person> updateCredentialByPersonId(int id, Credentials newCredential) {
-        return Optional.empty();
+    public boolean updateCredentialByPersonId(int id, Credentials newCredential) {
+        return false;
     }
 
     @Override
-    public Optional<Person> deletePersonById(int id) {
-        return Optional.empty();
+    public boolean deletePersonById(int id) {
+        return false;
     }
 
     @Override
-    public Optional<Person> deletePersonByName(String firstName, String lastName, String patronymic) {
-        return Optional.empty();
+    public boolean deletePersonByName(String firstName, String lastName, String patronymic) {
+        return false;
     }
+
+
 }

@@ -18,11 +18,11 @@ public interface PersonRepository {
     List<Person> getAllPersons();
 
     //Update
-    Optional<Person> updatePersonNameById(int id, String newFirstName, String newLastName, String newPatronymic);
-    Optional<Person> updateDateOfBirthById(int id, LocalDate newDateOfBirth);
-    Optional<Person> updateCredentialByPersonId(int id, Credentials newCredential);
+    boolean updatePersonNameById(int id, String newFirstName, String newLastName, String newPatronymic);
+    boolean updateDateOfBirthById(int id, LocalDate newDateOfBirth);
+    boolean updateCredentialByPersonId(int id, Credentials newCredential);
 
     //Delete
-    Optional<Person> deletePersonById(int id);
-    Optional<Person> deletePersonByName(String firstName, String lastName, String patronymic);
+    boolean deletePersonById(int id);
+    boolean deletePersonByName(String firstName, String lastName, String patronymic);
 }

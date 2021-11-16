@@ -27,12 +27,12 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
     }
 
     @Override
-    public Optional<Group> updateGroupNameById(int id, String newName) {
-        return Optional.empty();
+    public boolean updateGroupNameById(int id, String newName) {
+        return false;
     }
 
     @Override
-    public Optional<Group> deleteGroupById(int id) {
-        return Optional.empty();
+    public boolean deleteGroupById(int id) {
+        return false;
     }
 }

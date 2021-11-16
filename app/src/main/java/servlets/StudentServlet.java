@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
 
-@WebServlet(name = "StudentServlet", value = "/StudentServlet")
+@WebServlet("/StudentServlet")
 public class StudentServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -32,8 +32,14 @@ public class StudentServlet extends HttpServlet {
                         .withLogin(req.getParameter("newLogin"))
                         .withPassword(req.getParameter("newPassword")))
                 .withDateOfBirth(LocalDate.parse(req.getParameter("newDateOfBirth")));
-        personRepository.createPerson(newStudent);
 
+        if (checkStudentInRepository(personRepository, newStudent)) {
+            personRepository.createPerson(newStudent);
+        } else {
+            String messageAboutNotCreating = "Не создан студент";
+            req.setAttribute("message", messageAboutNotCreating);
+            req.getRequestDispatcher("/admin_student.jsp").forward(req, resp);
+        }
         req.getRequestDispatcher("/admin_student.jsp").forward(req, resp);
     }
 
@@ -43,12 +49,12 @@ public class StudentServlet extends HttpServlet {
         int updatableStudentID = Integer.parseInt(req.getParameter("ID"));
         Optional<Person> updatableStudentOptional = personRepository.getPersonById(updatableStudentID);
         if (updatableStudentOptional.isEmpty()) {
-            String messageAboutNotDeleting = "Не обновлён студент";
-            req.setAttribute("message", messageAboutNotDeleting);
+            String messageAboutNotUpdating = "Не обновлён студент";
+            req.setAttribute("message", messageAboutNotUpdating);
             req.getRequestDispatcher("/admin_student.jsp").forward(req, resp);
         }
 
-        updatePerson(req, personRepository, updatableStudentID);
+        updateStudent(req, personRepository, updatableStudentID);
 
         req.getRequestDispatcher("/admin_student.jsp").forward(req, resp);
     }
@@ -79,7 +85,7 @@ public class StudentServlet extends HttpServlet {
         }
     }
 
-    private void updatePerson(HttpServletRequest req, PersonRepository personRepository, int updatableStudentID) {
+    private void updateStudent(HttpServletRequest req, PersonRepository personRepository, int updatableStudentID) {
         String newFirstName = req.getParameter("newFirstName");
         String newLastName = req.getParameter("newLastName");
         String newPatronymic = req.getParameter("newPatronymic");
@@ -92,5 +98,14 @@ public class StudentServlet extends HttpServlet {
         String newDateOfBirthString = req.getParameter("newDateOfBirth");
         LocalDate newDateOfBirth = LocalDate.parse(newDateOfBirthString);
         personRepository.updateDateOfBirthById(updatableStudentID, newDateOfBirth);
+    }
+
+    private boolean checkStudentInRepository(PersonRepository personRepository, Person newStudent) {
+        Optional<Person> creatablePersonOptional = personRepository.getPersonByName(newStudent.getFirstName(), newStudent.getLastName(), newStudent.getPatronymic());
+        if (creatablePersonOptional.isEmpty()) {
+            creatablePersonOptional = personRepository.getPersonByCredentials(newStudent.getCredentials().getLogin(), newStudent.getCredentials().getPassword());
+            return creatablePersonOptional.isEmpty();
+        }
+        return false;
     }
 }

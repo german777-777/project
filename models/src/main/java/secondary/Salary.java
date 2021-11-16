@@ -2,6 +2,7 @@ package secondary;
 
 import entity.AbstractEntity;
 import lombok.*;
+import users.Person;
 import users.Teacher;
 
 import java.time.LocalDate;
@@ -12,7 +13,7 @@ import java.util.Objects;
 @Data
 public class Salary extends AbstractEntity {
     // для Teacher-a: кому конкретно принадлежит зарплата
-    private Teacher teacher;
+    private Person teacher;
 
     // дата выдачи зарплаты
     private LocalDate dateOfSalary;
@@ -39,7 +40,7 @@ public class Salary extends AbstractEntity {
         return this;
     }
 
-    public Salary withTeacher(Teacher teacher) {
+    public Salary withTeacher(Person teacher) {
         setTeacher(teacher);
         return this;
     }

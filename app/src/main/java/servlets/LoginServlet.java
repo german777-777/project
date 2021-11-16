@@ -22,7 +22,7 @@ public class LoginServlet extends HttpServlet {
         log.info("Получены логин и пароль пользователя, идёт проверка...");
 
         RequestDispatcher dispatcher;
-        Optional<Person> person = checkRightLoginAndPassword(login, password, request);
+        Optional<Person> person = checkRightLoginAndPassword(login, password);
         if (person.isPresent()) {
             switch (Objects.requireNonNull(checkRoleOfPerson(person.get()))) {
                 case ADMIN:
@@ -49,11 +49,10 @@ public class LoginServlet extends HttpServlet {
         }
     }
 
-    private Optional<Person> checkRightLoginAndPassword(String login, String password, HttpServletRequest request) {
+    private Optional<Person> checkRightLoginAndPassword(String login, String password) {
         PersonRepository personRepository = (PersonRepository) getServletContext().getAttribute("person_repository");
         Optional<Person> personOptional = personRepository.getPersonByCredentials(login, password);
         if (personOptional.isPresent()) {
-            putPersonToSession(personOptional.get(), request);
             return personOptional;
         }
         log.error("Введены неправильные логин или пароль...");
@@ -71,11 +70,5 @@ public class LoginServlet extends HttpServlet {
             default:
                 return null;
         }
-    }
-
-    private void putPersonToSession(Person person, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        session.setAttribute("person", person);
-        log.info("Пользователь {} {} {} в сессии", person.getFirstName(), person.getLastName(), person.getPatronymic());
     }
 }

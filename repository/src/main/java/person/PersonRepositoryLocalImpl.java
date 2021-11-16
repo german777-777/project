@@ -42,6 +42,7 @@ public class PersonRepositoryLocalImpl implements PersonRepository {
                 .findAny();
         if (personOptional.isEmpty()) {
             ID = ID + 1;
+            credentialRepository.createCredential(person.getCredentials());
             log.info("Добавлен новый пользователь");
             personMap.put(ID, (Person) person.withId(ID));
             return person;
@@ -105,7 +106,7 @@ public class PersonRepositoryLocalImpl implements PersonRepository {
     }
 
     @Override
-    public Optional<Person> updatePersonNameById(int id, String newFirstName, String newLastName, String newPatronymic) {
+    public boolean updatePersonNameById(int id, String newFirstName, String newLastName, String newPatronymic) {
         log.debug("Попытка взять пользователя по ID");
         Optional<Person> optionalPerson = getOptionalPersonFromMapById(personMap, id);
         if (optionalPerson.isPresent()) {
@@ -115,14 +116,14 @@ public class PersonRepositoryLocalImpl implements PersonRepository {
             personFromOptional.setLastName(newLastName);
             personFromOptional.setPatronymic(newPatronymic);
             personMap.put(id, personFromOptional);
-            return optionalPerson;
+            return personMap.containsValue(personFromOptional);
         }
         log.error("Пользователь не найден, изменений не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Person> updateDateOfBirthById(int id, LocalDate newDateOfBirth) {
+    public boolean updateDateOfBirthById(int id, LocalDate newDateOfBirth) {
         log.debug("Попытка взять пользователя по ID");
         Optional<Person> optionalPerson = getOptionalPersonFromMapById(personMap, id);
         if (optionalPerson.isPresent()) {
@@ -130,45 +131,51 @@ public class PersonRepositoryLocalImpl implements PersonRepository {
             Person personFromOptional = optionalPerson.get();
             personFromOptional.setDateOfBirth(newDateOfBirth);
             personMap.put(id, personFromOptional);
-            return optionalPerson;
+            return personMap.containsValue(personFromOptional);
         }
         log.error("Пользователь не найден, изменений не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Person> updateCredentialByPersonId(int id, Credentials newCredential) {
+    public boolean updateCredentialByPersonId(int id, Credentials newCredential) {
         log.debug("Попытка взять пользователя по ID");
         Optional<Person> optionalPerson = getOptionalPersonFromMapById(personMap, id);
         if (optionalPerson.isPresent()) {
             log.info("Изменение пользователя в репозитории");
             Person personFromOptional = optionalPerson.get();
-            updateCredentialInCredRepository(personFromOptional, newCredential);
-            personFromOptional.setCredentials(newCredential);
-            personMap.put(id, personFromOptional);
-            return optionalPerson;
+            if (updateCredentialInCredRepository(personFromOptional, newCredential)) {
+                personFromOptional.setCredentials(newCredential);
+                personMap.put(id, personFromOptional);
+                return personMap.containsValue(personFromOptional);
+            } else {
+                log.error("Учётные данные не обновлены, обновление пользователя не произошло");
+            }
         }
         log.error("Пользователь не найден, изменений не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Person> deletePersonById(int id) {
+    public boolean deletePersonById(int id) {
         log.debug("Попытка взять пользователя по ID");
         Optional<Person> optionalPerson = getOptionalPersonFromMapById(personMap, id);
         if (optionalPerson.isPresent()) {
             log.info("Удаление пользователя в репозитории");
             Person personFromOptional = optionalPerson.get();
-            deleteCredentialInCredRepository(personFromOptional);
-            personMap.remove(id);
-            return optionalPerson;
+            if (deleteCredentialInCredRepository(personFromOptional)) {
+                return personMap.remove(id, personFromOptional);
+            } else {
+                log.error("Учётные данные не удалены, удаление пользователя невозможно");
+                return false;
+            }
         }
         log.error("Пользователь не найден, удаления не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Person> deletePersonByName(String firstName, String lastName, String patronymic) {
+    public boolean deletePersonByName(String firstName, String lastName, String patronymic) {
         log.debug("Попытка взять пользователя по имени, фамилии и отчеству");
         Optional<Person> optionalPerson = personMap.values()
                 .stream()
@@ -179,12 +186,16 @@ public class PersonRepositoryLocalImpl implements PersonRepository {
         if (optionalPerson.isPresent()) {
             log.info("Удаление пользователя в репозитории");
             Person personFromOptional = optionalPerson.get();
-            deleteCredentialInCredRepository(personFromOptional);
-            personMap.remove(personFromOptional.getId());
-            return optionalPerson;
+            if (deleteCredentialInCredRepository(personFromOptional)) {
+                return personMap.remove(personFromOptional.getId(), personFromOptional);
+            } else {
+                log.error("Учётные данные не удалены, удаление пользователя невозможно");
+                return false;
+            }
+
         }
         log.error("Пользователь не найден, удаления не произошло");
-        return Optional.empty();
+        return false;
     }
 
     private Optional<Person> getOptionalPersonFromMapById(Map<Integer, Person> personMap, int id) {
@@ -211,7 +222,7 @@ public class PersonRepositoryLocalImpl implements PersonRepository {
         Credentials credentialsOfDeletablePerson = personFromOptional.getCredentials();
         Optional<Credentials> credentialsFromRepositoryOptional = credentialRepository
                 .getCredentialByLoginAndPassword(credentialsOfDeletablePerson.getLogin(),
-                        credentialsOfDeletablePerson.getPassword());
+                                                 credentialsOfDeletablePerson.getPassword());
         if (credentialsFromRepositoryOptional.isPresent()) {
             Credentials credentialsFromRepository = credentialsFromRepositoryOptional.get();
             credentialRepository.deleteCredentialById(credentialsFromRepository.getId());

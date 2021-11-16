@@ -17,10 +17,10 @@ public interface SalaryRepository {
     List<Salary> getAllSalaries();
 
     //Update
-    Optional<Salary> updateSalaryById(int id, int newSalary);
-    Optional<Salary> updateTeacherReceivedSalaryById(int id, Teacher teacher);
-    Optional<Salary> updateDateOfSalaryById(int id, LocalDate newDateOfSalary);
+    boolean updateSalaryById(int id, int newSalary);
+    boolean updateTeacherReceivedSalaryById(int id, Teacher teacher);
+    boolean updateDateOfSalaryById(int id, LocalDate newDateOfSalary);
 
     //Delete
-    Optional<Salary> deleteSalaryById(int id);
+    boolean deleteSalaryById(int id);
 }

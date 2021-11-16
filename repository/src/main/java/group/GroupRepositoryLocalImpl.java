@@ -27,7 +27,7 @@ public class GroupRepositoryLocalImpl implements GroupRepository {
 
     @Override
     public Group createGroup(Group group) {
-        log.debug("Попытка найти в репозитории переданную Group");
+        log.debug("Попытка найти в репозитории переданную группу");
         Optional<Group> optionalGroup = groupMap.values()
                 .stream()
                 .filter(gr -> gr.getId() == ID)
@@ -61,7 +61,7 @@ public class GroupRepositoryLocalImpl implements GroupRepository {
 
     @Override
     public Optional<Group> getGroupByName(String name) {
-        log.debug("Поыптка взять группу по имени");
+        log.debug("Попытка взять группу по имени");
         Optional<Group> optionalGroup = groupMap.values()
                 .stream()
                 .filter(group -> name.equals(group.getName()))
@@ -81,7 +81,7 @@ public class GroupRepositoryLocalImpl implements GroupRepository {
     }
 
     @Override
-    public Optional<Group> updateGroupNameById(int id, String newName) {
+    public boolean updateGroupNameById(int id, String newName) {
         log.debug("Попытка взять группу по ID");
         Optional<Group> optionalGroup = groupMap.values()
                 .stream()
@@ -92,14 +92,14 @@ public class GroupRepositoryLocalImpl implements GroupRepository {
             Group groupFromOptional = optionalGroup.get();
             groupFromOptional.setName(newName);
             groupMap.put(id, groupFromOptional);
-            return optionalGroup;
+            return groupMap.containsValue(groupFromOptional);
         }
         log.error("Группа не найдена, изменений не произошло");
-        return optionalGroup;
+        return false;
     }
 
     @Override
-    public Optional<Group> deleteGroupById(int id) {
+    public boolean deleteGroupById(int id) {
         log.debug("Попытка взять группу по ID");
         Optional<Group> optionalGroup = groupMap.values()
                 .stream()
@@ -107,10 +107,10 @@ public class GroupRepositoryLocalImpl implements GroupRepository {
                 .findAny();
         if (optionalGroup.isPresent()) {
             log.info("Удаление группы из репозитория");
-            groupMap.remove(id);
-            return optionalGroup;
+            Group groupFromOptional = optionalGroup.get();
+            return groupMap.remove(id, groupFromOptional);
         }
         log.error("Группа не найдена, удаления не произошло");
-        return Optional.empty();
+        return false;
     }
 }

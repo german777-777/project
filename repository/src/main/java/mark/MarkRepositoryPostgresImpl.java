@@ -6,7 +6,6 @@ import secondary.Subject;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public class MarkRepositoryPostgresImpl implements MarkRepository {
     @Override
@@ -20,27 +19,28 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
     }
 
     @Override
-    public Optional<Mark> updateSubjectMarkById(int id, Subject newSubject) {
-        return Optional.empty();
+    public boolean updateSubjectMarkById(int id, Subject newSubject) {
+        return false;
     }
 
     @Override
-    public Optional<Mark> updateDateOfMarkById(int id, LocalDate newDateOfMark) {
-        return Optional.empty();
+    public boolean updateDateOfMarkById(int id, LocalDate newDateOfMark) {
+        return false;
     }
 
     @Override
-    public Optional<Mark> updateGroupWhereMarkWasGiven(int id, Group newGroup) {
-        return Optional.empty();
+    public boolean updateGroupWhereMarkWasGiven(int id, Group newGroup) {
+        return false;
     }
 
     @Override
-    public Optional<Mark> updateMarkById(int id, int newMark) {
-        return Optional.empty();
+    public boolean updateMarkById(int id, int newMark) {
+        return false;
     }
 
     @Override
-    public Optional<Mark> deleteMarkById(int id) {
-        return Optional.empty();
+    public boolean deleteMarkById(int id) {
+        return false;
     }
+
 }

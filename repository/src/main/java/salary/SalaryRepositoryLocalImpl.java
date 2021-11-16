@@ -5,10 +5,7 @@ import secondary.Salary;
 import users.Teacher;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 public class SalaryRepositoryLocalImpl implements SalaryRepository {
@@ -80,11 +77,11 @@ public class SalaryRepositoryLocalImpl implements SalaryRepository {
     @Override
     public List<Salary> getAllSalaries() {
         log.info("Берём все зарплаты");
-        return null;
+        return new ArrayList<>(salaryMap.values());
     }
 
     @Override
-    public Optional<Salary> updateSalaryById(int id, int newSalary) {
+    public boolean updateSalaryById(int id, int newSalary) {
         log.debug("Попытка взять зарплату по ID");
         Optional<Salary> optionalSalary = salaryMap.values()
                 .stream()
@@ -95,14 +92,14 @@ public class SalaryRepositoryLocalImpl implements SalaryRepository {
             Salary salaryFromOptional = optionalSalary.get();
             salaryFromOptional.setSalary(newSalary);
             salaryMap.put(id, salaryFromOptional);
-            return optionalSalary;
+            return salaryMap.containsValue(salaryFromOptional);
         }
         log.error("Зарплата не найдена, изменений не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Salary> updateTeacherReceivedSalaryById(int id, Teacher newTeacher) {
+    public boolean updateTeacherReceivedSalaryById(int id, Teacher newTeacher) {
         log.debug("Попытка взять зарплату по ID");
         Optional<Salary> optionalSalary = salaryMap.values()
                 .stream()
@@ -113,14 +110,14 @@ public class SalaryRepositoryLocalImpl implements SalaryRepository {
             Salary salaryFromOptional = optionalSalary.get();
             salaryFromOptional.setTeacher(newTeacher);
             salaryMap.put(id, salaryFromOptional);
-            return optionalSalary;
+            return salaryMap.containsValue(salaryFromOptional);
         }
         log.error("Зарплата не найдена, изменений не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Salary> updateDateOfSalaryById(int id, LocalDate newDateOfSalary) {
+    public boolean updateDateOfSalaryById(int id, LocalDate newDateOfSalary) {
         log.debug("Попытка взять зарплату по ID");
         Optional<Salary> optionalSalary = salaryMap.values()
                 .stream()
@@ -131,14 +128,14 @@ public class SalaryRepositoryLocalImpl implements SalaryRepository {
             Salary salaryFromOptional = optionalSalary.get();
             salaryFromOptional.setDateOfSalary(newDateOfSalary);
             salaryMap.put(id, salaryFromOptional);
-            return optionalSalary;
+            return salaryMap.containsValue(salaryFromOptional);
         }
         log.error("Зарплата не найдена, изменений не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Salary> deleteSalaryById(int id) {
+    public boolean deleteSalaryById(int id) {
         log.debug("Попытка взять зарплату по ID");
         Optional<Salary> optionalSalary = salaryMap.values()
                 .stream()
@@ -146,9 +143,10 @@ public class SalaryRepositoryLocalImpl implements SalaryRepository {
                 .findAny();
         if (optionalSalary.isPresent()) {
             log.info("Удаление зарплаты в репозитории");
-            salaryMap.remove(id);
+            Salary salaryFromOptional = optionalSalary.get();
+            return salaryMap.remove(id, salaryFromOptional);
         }
         log.error("Зарплата не найдена, удаления не произошло");
-        return Optional.empty();
+        return false;
     }
 }

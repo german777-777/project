@@ -15,8 +15,8 @@ public interface GroupRepository {
     List<Group> getAllGroups();
 
     //Update
-    Optional<Group> updateGroupNameById(int id, String newName);
+    boolean updateGroupNameById(int id, String newName);
 
     //Delete
-    Optional<Group> deleteGroupById(int id);
+    boolean deleteGroupById(int id);
 }

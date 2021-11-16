@@ -53,7 +53,7 @@ public class MarkRepositoryLocalImpl implements MarkRepository {
     }
 
     @Override
-    public Optional<Mark> updateSubjectMarkById(int id, Subject newSubject) {
+    public boolean updateSubjectMarkById(int id, Subject newSubject) {
         log.debug("Попытка взять оцеку по ID");
         Optional<Mark> optionalMark = markMap.values()
                 .stream()
@@ -64,14 +64,14 @@ public class MarkRepositoryLocalImpl implements MarkRepository {
             Mark markFromOptional = optionalMark.get();
             markFromOptional.setSubject(newSubject);
             markMap.put(id, markFromOptional);
-            return optionalMark;
+            return markMap.containsValue(markFromOptional);
         }
         log.error("Оценка не найдена, изменений не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Mark> updateDateOfMarkById(int id, LocalDate newDateOfMark) {
+    public boolean updateDateOfMarkById(int id, LocalDate newDateOfMark) {
         log.debug("Попытка взять оценку по ID");
         Optional<Mark> optionalMark = markMap.values()
                 .stream()
@@ -82,14 +82,14 @@ public class MarkRepositoryLocalImpl implements MarkRepository {
             Mark markFromOptional = optionalMark.get();
             markFromOptional.setDateOfMark(newDateOfMark);
             markMap.put(id, markFromOptional);
-            return optionalMark;
+            return markMap.containsValue(markFromOptional);
         }
         log.error("Оценка не найдена, изменений не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Mark> updateGroupWhereMarkWasGiven(int id, Group newGroup) {
+    public boolean updateGroupWhereMarkWasGiven(int id, Group newGroup) {
         log.debug("Попытка взять оценку по ID");
         Optional<Mark> optionalMark = markMap.values()
                 .stream()
@@ -100,14 +100,14 @@ public class MarkRepositoryLocalImpl implements MarkRepository {
             Mark markFromOptional = optionalMark.get();
             markFromOptional.setGroup(newGroup);
             markMap.put(id, markFromOptional);
-            return optionalMark;
+            return markMap.containsValue(markFromOptional);
         }
         log.error("Оценка не найдена, изменений не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Mark> updateMarkById(int id, int newMark) {
+    public boolean updateMarkById(int id, int newMark) {
         log.debug("Попытка взять оценку по ID");
         Optional<Mark> optionalMark = markMap.values()
                 .stream()
@@ -117,14 +117,14 @@ public class MarkRepositoryLocalImpl implements MarkRepository {
             Mark markFromOptional = optionalMark.get();
             markFromOptional.setMark(newMark);
             markMap.put(id, markFromOptional);
-            return optionalMark;
+            return markMap.containsValue(markFromOptional);
         }
         log.error("Оценка не найдена, изменений не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Mark> deleteMarkById(int id) {
+    public boolean deleteMarkById(int id) {
         log.debug("Попытка взять оценку по ID");
         Optional<Mark> optionalMark = markMap.values()
                 .stream()
@@ -132,10 +132,10 @@ public class MarkRepositoryLocalImpl implements MarkRepository {
                 .findAny();
         if (optionalMark.isPresent()) {
             log.info("Удаление оценки из репозитория");
-            markMap.remove(id);
-            return optionalMark;
+            Mark markFromOptional = optionalMark.get();
+            return markMap.remove(id, markFromOptional);
         }
         log.error("Оценка не найдена, удаления не произошло");
-        return Optional.empty();
+        return false;
     }
 }

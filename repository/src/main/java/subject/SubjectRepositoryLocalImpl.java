@@ -80,7 +80,7 @@ public class SubjectRepositoryLocalImpl implements SubjectRepository {
     }
 
     @Override
-    public Optional<Subject> updateSubjectNameById(int id, String newName) {
+    public boolean updateSubjectNameById(int id, String newName) {
         log.debug("Попытка взять предмет по ID");
         Optional<Subject> optionalSubject = subjectMap.values()
                 .stream()
@@ -91,14 +91,14 @@ public class SubjectRepositoryLocalImpl implements SubjectRepository {
             Subject subjectFromOptional = optionalSubject.get();
             subjectFromOptional.setName(newName);
             subjectMap.put(id, subjectFromOptional);
-            return optionalSubject;
+            return subjectMap.containsValue(subjectFromOptional);
         }
         log.error("Предмет не найден, изменений не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Subject> updateSubjectNameByName(String oldName, String newName) {
+    public boolean updateSubjectNameByName(String oldName, String newName) {
         log.debug("Попытка взять предмет по имени");
         Optional<Subject> optionalSubject = subjectMap.values()
                 .stream()
@@ -109,14 +109,14 @@ public class SubjectRepositoryLocalImpl implements SubjectRepository {
             Subject subjectFromOptional = optionalSubject.get();
             subjectFromOptional.setName(newName);
             subjectMap.put(subjectFromOptional.getId(), subjectFromOptional);
-            return optionalSubject;
+            return subjectMap.containsValue(subjectFromOptional);
         }
         log.error("Предмет не найден, изменений не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Subject> deleteSubjectById(int id) {
+    public boolean deleteSubjectById(int id) {
         log.debug("Попытка взять предмет по ID");
         Optional<Subject> optionalSubject = subjectMap.values()
                 .stream()
@@ -124,15 +124,15 @@ public class SubjectRepositoryLocalImpl implements SubjectRepository {
                 .findAny();
         if (optionalSubject.isPresent()) {
             log.info("Удаление прдмета в репозитории");
-            subjectMap.remove(id);
-            return optionalSubject;
+            Subject subjectFromOptional = optionalSubject.get();
+            return subjectMap.remove(id, subjectFromOptional);
         }
         log.error("Предмет не найден, удаления не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Subject> deleteSubjectByName(String name) {
+    public boolean deleteSubjectByName(String name) {
         log.debug("Попытка взять предмет по имени");
         Optional<Subject> optionalSubject = subjectMap.values()
                 .stream()
@@ -141,10 +141,9 @@ public class SubjectRepositoryLocalImpl implements SubjectRepository {
         if (optionalSubject.isPresent()) {
             log.info("Удаление прдмета в репозитории");
             Subject subjectFromOptional = optionalSubject.get();
-            subjectMap.remove(subjectFromOptional.getId());
-            return optionalSubject;
+            return subjectMap.remove(subjectFromOptional.getId(), subjectFromOptional);
         }
         log.error("Предмет не найден, удаления не произошло");
-        return Optional.empty();
+        return false;
     }
 }

@@ -82,27 +82,26 @@ public class CredentialRepositoryLocalImpl implements CredentialRepository {
     }
 
     @Override
-    public Optional<Credentials> updateCredentialById(int id, String newLogin, String newPassword) {
+    public boolean updateCredentialById(int id, String newLogin, String newPassword) {
         log.debug("Попытка взять учётные данных по ID");
         Optional<Credentials> optionalCredential = credentialsMap.values()
                 .stream()
                 .filter(cred -> id == cred.getId())
                 .findAny();
-
         if (optionalCredential.isPresent()) {
             log.info("Изменение учётных данных в репозитории");
             Credentials credentialFromOptional = optionalCredential.get();
             credentialFromOptional.setLogin(newLogin);
             credentialFromOptional.setPassword(newPassword);
             credentialsMap.put(id, credentialFromOptional);
-            return optionalCredential;
+            return credentialsMap.containsValue(credentialFromOptional);
         }
         log.error("Учётные данные не найдены, изменений не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Credentials> deleteCredentialById(int id) {
+    public boolean deleteCredentialById(int id) {
         log.debug("Попытка взять учётные данные по ID");
         Optional<Credentials> optionalCredential = credentialsMap.values()
                 .stream()
@@ -110,14 +109,15 @@ public class CredentialRepositoryLocalImpl implements CredentialRepository {
                 .findAny();
         if (optionalCredential.isPresent()) {
             log.info("Удаление учётных данных из репозитория");
-            credentialsMap.remove(id);
+            Credentials credentialFromOptional = optionalCredential.get();
+            return credentialsMap.remove(id, credentialFromOptional);
         }
         log.error("Учётные данные не найдены, удаления не произошло");
-        return Optional.empty();
+        return false;
     }
 
     @Override
-    public Optional<Credentials> deleteCredentialByLoginAndPassword(String login, String password) {
+    public boolean deleteCredentialByLoginAndPassword(String login, String password) {
         log.debug("Попытка взять учётные данные по логину и паролю");
         Optional<Credentials> optionalCredential = credentialsMap.values()
                 .stream()
@@ -126,9 +126,10 @@ public class CredentialRepositoryLocalImpl implements CredentialRepository {
                 .findAny();
         if (optionalCredential.isPresent()) {
             log.info("Удаление учётных данных из репозитория");
-            credentialsMap.remove(optionalCredential.get().getId());
+            Credentials credentialFromOptional = optionalCredential.get();
+            return credentialsMap.remove(credentialFromOptional.getId(), credentialFromOptional);
         }
         log.error("Учётные данные не найдены, удаления не произошло");
-        return Optional.empty();
+        return false;
     }
 }

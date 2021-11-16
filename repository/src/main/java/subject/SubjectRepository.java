@@ -15,10 +15,10 @@ public interface SubjectRepository {
     List<Subject> getAllSubjects();
 
     //Update
-    Optional<Subject> updateSubjectNameById(int id, String newName);
-    Optional<Subject> updateSubjectNameByName(String oldName, String newName);
+    boolean updateSubjectNameById(int id, String newName);
+    boolean updateSubjectNameByName(String oldName, String newName);
 
     //Delete
-    Optional<Subject> deleteSubjectById(int id);
-    Optional<Subject> deleteSubjectByName(String name);
+    boolean deleteSubjectById(int id);
+    boolean deleteSubjectByName(String name);
 }

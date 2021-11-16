@@ -27,17 +27,17 @@ public class CredentialRepositoryPostgresImpl implements CredentialRepository {
     }
 
     @Override
-    public Optional<Credentials> updateCredentialById(int id, String newLogin, String password) {
-        return Optional.empty();
+    public boolean updateCredentialById(int id, String newLogin, String password) {
+        return false;
     }
 
     @Override
-    public Optional<Credentials> deleteCredentialById(int id) {
-        return Optional.empty();
+    public boolean deleteCredentialById(int id) {
+        return false;
     }
 
     @Override
-    public Optional<Credentials> deleteCredentialByLoginAndPassword(String login, String password) {
-        return Optional.empty();
+    public boolean deleteCredentialByLoginAndPassword(String login, String password) {
+        return false;
     }
 }
