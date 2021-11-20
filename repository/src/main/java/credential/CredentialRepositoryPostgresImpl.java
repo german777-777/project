@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static constants.Queries.checkCredentialsByLoginAndPassword;
 import static constants.Queries.putCredentials;
 import static constants.Queries.findCredentialsByID;
 import static constants.Queries.findCredentialsByLoginAndPassword;
@@ -44,14 +43,10 @@ public class CredentialRepositoryPostgresImpl implements CredentialRepository {
     @Override
     public Credentials createCredential(Credentials credentials) {
         log.debug("Попытка найти в репозитории учётные данные");
-        ResultSet set = null;
         try (Connection connection = pool.getConnection();
-             PreparedStatement statementForCheck = connection.prepareStatement(checkCredentialsByLoginAndPassword);
              PreparedStatement statementForInsert = connection.prepareStatement(putCredentials)) {
-            statementForCheck.setString(1, credentials.getLogin());
-            statementForCheck.setString(2, credentials.getPassword());
-            set = statementForCheck.executeQuery();
-            if (!set.next()) {
+            Optional<Credentials> optionalCredential = getCredentialByLoginAndPassword(credentials.getLogin(), credentials.getPassword());
+            if (optionalCredential.isEmpty()) {
                 log.info("Таких учётных данных не существует, вносим в таблицу");
                 statementForInsert.setString(1, credentials.getLogin());
                 statementForInsert.setString(2, credentials.getPassword());
@@ -68,8 +63,6 @@ public class CredentialRepositoryPostgresImpl implements CredentialRepository {
             }
         } catch (SQLException e) {
             log.error("Ошибка добавления: SQLException");
-        } finally {
-            closeResource(set);
         }
         return null;
     }
