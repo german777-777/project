@@ -5,8 +5,8 @@ create table "group"
         constraint group_pk
             primary key,
     teacher_id integer     not null
-        constraint group_teacher_id_fk
-            references teacher,
+        constraint group__teacher__fk
+            references person,
     name       varchar(20) not null
 );
 
