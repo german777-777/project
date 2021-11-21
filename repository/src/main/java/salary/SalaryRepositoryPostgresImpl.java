@@ -1,5 +1,7 @@
 package salary;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import group.GroupRepositoryPostgresImpl;
 import secondary.Salary;
 import users.Teacher;
 
@@ -8,6 +10,24 @@ import java.util.List;
 import java.util.Optional;
 
 public class SalaryRepositoryPostgresImpl implements SalaryRepository {
+    private static volatile SalaryRepositoryPostgresImpl instance;
+    private final ComboPooledDataSource pool;
+
+    private SalaryRepositoryPostgresImpl(ComboPooledDataSource pool) {
+        this.pool = pool;
+    }
+
+    public static SalaryRepositoryPostgresImpl getInstance(ComboPooledDataSource pool) {
+        if (instance == null) {
+            synchronized (GroupRepositoryPostgresImpl.class) {
+                if (instance == null) {
+                    instance = new SalaryRepositoryPostgresImpl(pool);
+                }
+            }
+        }
+        return instance;
+    }
+
     @Override
     public Salary createSalary(Salary salary) {
         return null;

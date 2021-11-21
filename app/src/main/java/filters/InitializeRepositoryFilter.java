@@ -1,8 +1,11 @@
 package filters;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 import credentials.Credentials;
 import fabric.RepositoryFactory;
 import fabric.RepositoryFactoryLocalImpl;
+import fabric.RepositoryFactoryPostgresImpl;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import secondary.Salary;
 import users.Admin;
@@ -12,6 +15,7 @@ import users.Teacher;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
+import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Month;
@@ -20,10 +24,13 @@ import java.util.ResourceBundle;
 @WebFilter(filterName = "InitializeRepository")
 @Slf4j
 public class InitializeRepositoryFilter implements Filter {
+    private final ResourceBundle bundle = ResourceBundle.getBundle("repository");
+
+    @SneakyThrows
     @Override
     public void init(FilterConfig filterConfig) {
         log.debug("Получение типа репозитория");
-        String typeOfRepository = ResourceBundle.getBundle("repository").getString("type");
+        String typeOfRepository = bundle.getString("type");
 
         switch (typeOfRepository) {
             case ("postgres"):
@@ -47,8 +54,16 @@ public class InitializeRepositoryFilter implements Filter {
         setValuesToRepositories(factory);
     }
 
-    private void loadRepositoryPostgres(FilterConfig config) {
-
+    private void loadRepositoryPostgres(FilterConfig config) throws PropertyVetoException {
+        RepositoryFactory factory;
+        if (isDriverLoad()) {
+            ComboPooledDataSource pool = setPoolPropertiesAndReturn();
+            factory = RepositoryFactoryPostgresImpl.getInstance(pool);
+        } else {
+            factory = RepositoryFactoryLocalImpl.getInstance();
+        }
+        setRepositoriesToContext(config, factory);
+        setValuesToRepositories(factory);
     }
 
     private void setRepositoriesToContext(FilterConfig config, RepositoryFactory factory) {
@@ -60,6 +75,32 @@ public class InitializeRepositoryFilter implements Filter {
         context.setAttribute("person_repository", factory.getPersonRepository());
         context.setAttribute("salary_repository", factory.getSalaryRepository());
         context.setAttribute("subject_repository", factory.getSubjectRepository());
+    }
+
+    private boolean isDriverLoad() {
+        try {
+            Class.forName(bundle.getString("driver"));
+            log.info("Драйвер загружен");
+            return true;
+        } catch (ClassNotFoundException e) {
+            log.error("Драйвер не загружен");
+        }
+        return false;
+    }
+
+    private ComboPooledDataSource setPoolPropertiesAndReturn() throws PropertyVetoException {
+        ComboPooledDataSource pool = new ComboPooledDataSource();
+        pool.setJdbcUrl(bundle.getString("url"));
+        pool.setUser(bundle.getString("login"));
+        pool.setPassword(bundle.getString("password"));
+
+        pool.setInitialPoolSize(5);
+        pool.setMinPoolSize(3);
+        pool.setAcquireIncrement(2);
+        pool.setMaxPoolSize(10);
+        pool.setMaxStatements(50);
+        pool.setDriverClass(bundle.getString("driver"));
+        return pool;
     }
 
     private void setValuesToRepositories(RepositoryFactory factory) {

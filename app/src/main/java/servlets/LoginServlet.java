@@ -44,7 +44,7 @@ public class LoginServlet extends HttpServlet {
             }
         } else {
             request.setAttribute("error", "Неправильный логин или пароль...");
-            dispatcher = request.getRequestDispatcher("/login_page.jsp");
+            dispatcher = request.getRequestDispatcher("/index.jsp");
             dispatcher.forward(request, response);
         }
     }
