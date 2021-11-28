@@ -2,10 +2,13 @@ package secondary;
 
 import entity.AbstractEntity;
 import lombok.*;
+import role.Role;
+import users.Person;
 import users.Student;
 import users.Teacher;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,9 +17,9 @@ import java.util.Objects;
 @Data
 public class Group extends AbstractEntity {
     private String name;
-    private Teacher teacher;
-    private List<Student> students;
-    private List<Subject> subjects;
+    private Person teacher;
+    private List<Person> students = new ArrayList<>();
+    private List<Subject> subjects = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
@@ -42,18 +45,22 @@ public class Group extends AbstractEntity {
         return this;
     }
 
-    public Group withTeacher(Teacher teacher) {
-        setTeacher(teacher);
+    public Group withTeacher(Person teacher) {
+        if (teacher.getRole() == Role.TEACHER) {
+            setTeacher(teacher);
+        }
         return this;
     }
 
-    public Group withStudents(List<Student> students) {
-        setStudents(students);
+    public Group withStudents(Person student) {
+        if (student.getRole() == Role.STUDENT) {
+            this.students.add(student);
+        }
         return this;
     }
 
-    public Group withSubject(List<Subject> subjects) {
-        setSubjects(subjects);
+    public Group withSubject(Subject subject) {
+        this.subjects.add(subject);
         return this;
     }
 }

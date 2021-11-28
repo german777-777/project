@@ -14,8 +14,8 @@ create table person
     role          varchar(10) not null
 );
 
-alter table person
+alter table persons
     owner to mongol;
 
 create unique index person_id_uindex
-    on person (id);
+    on persons (id);

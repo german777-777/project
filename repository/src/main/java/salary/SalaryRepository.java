@@ -12,8 +12,9 @@ public interface SalaryRepository {
     Salary createSalary(Salary salary);
 
     //Read
-    Optional<Salary> getSalaryByTeacherId(int teacherId);
-    Optional<Salary> getSalaryByDateOfSalary(LocalDate dateOfSalary);
+    Optional<Salary> getSalaryByID(int salaryID);
+    List<Salary> getSalariesByTeacherId(int teacherId);
+    List<Salary> getSalariesByDateOfSalary(LocalDate dateOfSalary);
     List<Salary> getAllSalaries();
 
     //Update

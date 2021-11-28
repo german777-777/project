@@ -6,20 +6,20 @@ create table mark
             primary key,
     student_id   integer not null
         constraint mark_student_id__fk
-            references person,
+            references persons,
     group_id     integer not null
         constraint mark_group_id_fk
-            references "group",
+            references groups,
     subject_id   integer not null
         constraint mark_subject_id_fk
-            references subject,
+            references subjects,
     date_of_mark date    not null,
     point        integer not null
 );
 
-alter table mark
+alter table marks
     owner to mongol;
 
 create unique index mark_id_uindex
-    on mark (id);
+    on marks (id);
 

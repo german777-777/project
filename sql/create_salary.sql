@@ -6,14 +6,14 @@ create table salary
             primary key,
     teacher_id     integer not null
         constraint salary_teacher_id__fk
-            references person,
+            references persons,
     date_of_salary date    not null,
     count          integer not null
 );
 
-alter table salary
+alter table salaries
     owner to mongol;
 
 create unique index salary_id_uindex
-    on salary (id);
+    on salaries (id);
 

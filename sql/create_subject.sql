@@ -7,9 +7,9 @@ create table subject
     name varchar(40) not null
 );
 
-alter table subject
+alter table subjects
     owner to mongol;
 
 create unique index subject_id_uindex
-    on subject (id);
+    on subjects (id);
 

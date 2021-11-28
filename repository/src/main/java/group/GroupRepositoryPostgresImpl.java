@@ -1,17 +1,23 @@
 package group;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import lombok.extern.slf4j.Slf4j;
+import person.PersonRepository;
+import person.PersonRepositoryPostgresImpl;
 import secondary.Group;
 
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 public class GroupRepositoryPostgresImpl implements GroupRepository {
     private static volatile GroupRepositoryPostgresImpl instance;
     private final ComboPooledDataSource pool;
+    private final PersonRepository personRepository;
 
     private GroupRepositoryPostgresImpl(ComboPooledDataSource pool) {
         this.pool = pool;
+        personRepository = PersonRepositoryPostgresImpl.getInstance(pool);
     }
 
     public static GroupRepositoryPostgresImpl getInstance(ComboPooledDataSource pool) {

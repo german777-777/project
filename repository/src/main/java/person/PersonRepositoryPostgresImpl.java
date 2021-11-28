@@ -306,7 +306,8 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
             if (optionalPerson.isPresent()) {
                 log.info("Попытка удаления учётных данных пользователя из репозитория");
                 Person person = optionalPerson.get();
-                if (credentialRepository.deleteCredentialByLoginAndPassword(person.getCredentials().getLogin(),
+                if (credentialRepository.deleteCredentialByLoginAndPassword(
+                        person.getCredentials().getLogin(),
                         person.getCredentials().getPassword())) {
                     log.info("Учётные данные пользователя удалены, продолжаем удаление");
                     statementForDeletePerson.setString(1, firstName);

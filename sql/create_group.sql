@@ -6,13 +6,13 @@ create table "group"
             primary key,
     teacher_id integer     not null
         constraint group__teacher__fk
-            references person,
+            references persons,
     name       varchar(20) not null
 );
 
-alter table "group"
+alter table groups
     owner to mongol;
 
 create unique index group_id_uindex
-    on "group" (id);
+    on groups (id);
 

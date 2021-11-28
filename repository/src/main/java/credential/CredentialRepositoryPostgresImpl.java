@@ -87,10 +87,10 @@ public class CredentialRepositoryPostgresImpl implements CredentialRepository {
             }
         } catch (SQLException e) {
             log.error("Ошибка получения: SQLException");
+            return Optional.empty();
         } finally {
             closeResource(set);
         }
-        return Optional.empty();
     }
 
     @Override

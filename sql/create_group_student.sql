@@ -3,10 +3,10 @@ create table group_student
 (
     student_id integer not null
         constraint group_student_id__fk
-            references person,
+            references persons,
     group_id   integer not null
         constraint group_group_id_fk
-            references "group"
+            references groups
 );
 
 alter table group_student

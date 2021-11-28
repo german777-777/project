@@ -37,52 +37,167 @@ public final class Queries {
 
     // вставка Person в БД
     //language=SQL
-    public static final String putPerson = "INSERT INTO person (first_name, last_name, patronymic, date_of_birth, credential_id, role) " +
+    public static final String putPerson = "INSERT INTO persons (first_name, last_name, patronymic, date_of_birth, credential_id, role) " +
             "VALUES (?, ?, ?, ?, ?, ?)";
 
     // "взятие" Person по ID
     //language=SQL
     public static final String findPersonByID = "SELECT p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, p.role, c.id, c.login, c.password " +
-            "FROM person p LEFT OUTER JOIN credentials c on p.credential_id = c.id WHERE p.id = ?";
+            "FROM persons p LEFT OUTER JOIN credentials c on p.credential_id = c.id WHERE p.id = ?";
 
     // "взятие" Person по Credentials
     //language=SQL
     public static final String findPersonByCredentials = "SELECT p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, p.role, c.id, c.login, c.password " +
-            "FROM person p LEFT OUTER JOIN credentials c on p.credential_id = c.id WHERE p.credential_id = ?";
+            "FROM persons p LEFT OUTER JOIN credentials c on p.credential_id = c.id WHERE p.credential_id = ?";
 
     // "взятие" Person по ФИО
     //language=SQL
     public static final String findPersonByName = "SELECT p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, p.role, c.id, c.login, c.password " +
-            "FROM person p LEFT OUTER JOIN credentials c on p.credential_id = c.id " +
+            "FROM persons p LEFT OUTER JOIN credentials c on p.credential_id = c.id " +
             "WHERE first_name = ? AND last_name = ? AND patronymic = ?";
 
     // "взятие" всех Persons и их Credentials
     //language=SQL
     public static final String findAllPersons = "SELECT p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, p.role, c.id, c.login, c.password " +
-            "FROM person p LEFT OUTER JOIN credentials c on p.credential_id = c.id";
+            "FROM persons p LEFT OUTER JOIN credentials c on p.credential_id = c.id";
 
     // обновление ФИО по ID Person
     //language=SQL
-    public static final String updatePersonNameByID = "UPDATE person " +
+    public static final String updatePersonNameByID = "UPDATE persons " +
             "SET first_name = ?, last_name = ?, patronymic = ? WHERE id = ?";
 
     // обновление даты рождения Person по ID
     //language=SQL
-    public static final String updatePersonDateOfBirthByID = "UPDATE person " +
+    public static final String updatePersonDateOfBirthByID = "UPDATE persons " +
             "SET date_of_birth = ? WHERE id = ?";
 
     // обновление Credentials Person по ID
     //language=SQL
     public static final String updatePersonCredentialsByID = "UPDATE credentials c SET login = ?, password = ? " +
-            "FROM person p WHERE p.credential_id = c.id AND p.id = ?";
+            "FROM persons p WHERE p.credential_id = c.id AND p.id = ?";
 
     // удаление Person по ID
     //language=SQL
-    public static final String deletePersonByID = "DELETE FROM person WHERE id = ?";
+    public static final String deletePersonByID = "DELETE FROM persons WHERE id = ?";
 
     // удаление Person по ФИО
     //language=SQL
-    public static final String deletePersonByName = "DELETE FROM person WHERE first_name = ? AND last_name = ? AND patronymic = ?";
+    public static final String deletePersonByName = "DELETE FROM persons WHERE first_name = ? AND last_name = ? AND patronymic = ?";
 
 
+
+    // запросы к таблице Group
+
+
+    // вставка Group в БД
+    //language=SQL
+    public static final String putGroup = "INSERT INTO groups (teacher_id, name) VALUES (?, ?)";
+
+
+
+    // запросы к таблице Subjects
+
+    // вставка Subject в БД
+    //language=SQL
+    public static final String putSubject = "INSERT INTO subjects (name) VALUES (?)";
+
+    // "взятие" Subject по ID
+    //language=SQL
+    public static final String findSubjectByID = "SELECT * FROM subjects WHERE id = ?";
+
+    // "взятие" Subject по имени
+    //language=SQL
+    public static final String findSubjectByName = "SELECT * FROM subjects WHERE name = ?";
+
+    // "взятие" всех Subject
+    //language=SQL
+    public static final String findAllSubjects = "SELECT * FROM subjects";
+
+    // обновление названия Subject по ID
+    //language=SQL
+    public static final String updateSubjectNameByID = "UPDATE subjects SET name = ? WHERE id = ?";
+
+    // обновление названия Subject по имени
+    //language=SQL
+    public static final String updateSubjectNameByName = "UPDATE subjects SET name = ? WHERE name = ?";
+
+    // удаление Subject по ID
+    //language=SQL
+    public static final String deleteSubjectByID = "DELETE FROM subjects WHERE id = ?";
+
+    // удаление Subject по названию
+    //language=SQL
+    public static final String deleteSubjectByName = "DELETE FROM subjects WHERE name = ?";
+
+
+    // запросы к таблице Salaries
+
+    // вставка Salary в БД
+    //language=SQL
+    public static final String putSalary = "INSERT INTO salaries (teacher_id, date_of_salary, count) VALUES (?, ?, ?)";
+
+    // "взятие" Salaries по ID учителя
+    //language=SQL
+    public static final String findSalaryByID = "SELECT " +
+            "s.id, p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, c.id ,c.login, c.password, s.date_of_salary, s.count" +
+            " FROM salaries s " +
+            "LEFT OUTER JOIN persons p on p.id = s.teacher_id" +
+            " LEFT OUTER JOIN credentials c on p.credential_id = c.id " +
+            "WHERE s.id = ?";
+
+    // "взятие" Salaries по ID учителя
+    //language=SQL
+    public static final String findSalariesByTeacherID = "SELECT " +
+            "s.id, p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, c.id ,c.login, c.password, s.date_of_salary, s.count" +
+            " FROM salaries s " +
+            "LEFT OUTER JOIN persons p on p.id = s.teacher_id" +
+            " LEFT OUTER JOIN credentials c on p.credential_id = c.id " +
+            "WHERE s.teacher_id = ?";
+
+    // "взятие" Salaries по дате
+    //language=SQL
+    public static final String findSalariesByDate = "SELECT " +
+            "s.id, p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, c.id ,c.login, c.password, s.date_of_salary, s.count" +
+            " FROM salaries s " +
+            "LEFT OUTER JOIN persons p on p.id = s.teacher_id" +
+            " LEFT OUTER JOIN credentials c on p.credential_id = c.id " +
+            "WHERE s.date_of_salary = ?";
+
+    // "взятие" всех Salaries
+    //language=SQL
+    public static final String findAllSalaries = "SELECT " +
+            "s.id, p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, c.id ,c.login, c.password, s.date_of_salary, s.count" +
+            " FROM salaries s " +
+            "LEFT OUTER JOIN persons p on p.id = s.teacher_id" +
+            " LEFT OUTER JOIN credentials c on p.credential_id = c.id";
+
+    // обновление суммы Salary по ID
+    //language=SQL
+    public static final String updateSalaryByID = "UPDATE salaries SET count = ? WHERE id = ?";
+
+    // обновление Teacher, имеющего Salary по ID
+    //language=SQL
+    public static final String updateTeacherReceivedBySalaryID = "UPDATE salaries SET teacher_id = ? WHERE id = ?";
+
+    // обновление даты Salary по ID
+    //language=SQL
+    public static final String updateDateOfSalary = "UPDATE salaries SET date_of_salary = ? WHERE id = ?";
+
+    // удаление Salary по ID
+    //language=SQL
+    public static final String deleteSalaryByID = "DELETE FROM salaries WHERE id = ?";
+
+    // запросы к таблице Group-Student
+
+    // вставка Group ID и Student ID в БД
+    //language=SQL
+    public static final String putStudentAndGroupID = "INSERT INTO group_student (student_id, group_id) VALUES (?, ?)";
+
+
+
+    // запросы к таблице Group-Subject
+
+    // вставка Group ID и Subject ID в БД
+    //language=SQL
+    public static final String putSubjectAndGroupID = "INSERT INTO group_subject (subject_id, group_id) VALUES (?, ?)";
 }

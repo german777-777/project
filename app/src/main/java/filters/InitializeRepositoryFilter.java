@@ -7,7 +7,9 @@ import fabric.RepositoryFactoryLocalImpl;
 import fabric.RepositoryFactoryPostgresImpl;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import secondary.Group;
 import secondary.Salary;
+import secondary.Subject;
 import users.Admin;
 import users.Person;
 import users.Student;
@@ -164,10 +166,37 @@ public class InitializeRepositoryFilter implements Filter {
                 .withDateOfBirth(LocalDate.of(1, Month.MARCH, 1));
         factory.getPersonRepository().createPerson(admin);
 
+        log.info("Добавление зарплаты учителю {}", teacher3.getFirstName());
         Salary salary1 = new Salary()
                 .withSalary(1000)
                 .withDateOfSalary(LocalDate.of(2021, Month.JANUARY, 1))
                 .withTeacher(teacher3);
         factory.getSalaryRepository().createSalary(salary1);
+
+        log.info("Добавление предмета");
+        Subject subject1 = new Subject()
+                .withName("GIT");
+        factory.getSubjectRepository().createSubject(subject1);
+
+        log.info("Добавление предмета");
+        Subject subject2 = new Subject()
+                .withName("Maven");
+        factory.getSubjectRepository().createSubject(subject2);
+
+        log.info("Добавление предмета");
+        Subject subject3 = new Subject()
+                .withName("Tomcat");
+        factory.getSubjectRepository().createSubject(subject3);
+
+        log.info("Добавление группы");
+        Group group1 = new Group()
+                .withName("JEE-2021")
+                .withTeacher(teacher3)
+                .withStudents(student1)
+                .withStudents(student2)
+                .withSubject(subject1)
+                .withSubject(subject2)
+                .withSubject(subject3);
+        factory.getGroupRepository().createGroup(group1);
     }
 }

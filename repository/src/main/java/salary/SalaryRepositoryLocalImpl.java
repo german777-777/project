@@ -6,6 +6,7 @@ import users.Teacher;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class SalaryRepositoryLocalImpl implements SalaryRepository {
@@ -13,7 +14,8 @@ public class SalaryRepositoryLocalImpl implements SalaryRepository {
     private static int ID = 0;
     private static volatile SalaryRepositoryLocalImpl instance;
 
-    private SalaryRepositoryLocalImpl(){}
+    private SalaryRepositoryLocalImpl() {
+    }
 
     public static SalaryRepositoryLocalImpl getInstance() {
         if (instance == null) {
@@ -25,6 +27,7 @@ public class SalaryRepositoryLocalImpl implements SalaryRepository {
         }
         return instance;
     }
+
     @Override
     public Salary createSalary(Salary salary) {
         log.debug("Попытка найти зарплату по учителю и дате зарплаты");
@@ -45,33 +48,41 @@ public class SalaryRepositoryLocalImpl implements SalaryRepository {
     }
 
     @Override
-    public Optional<Salary> getSalaryByTeacherId(int teacherId) {
-        log.debug("Попытка взять зарплату по ID учителя");
+    public Optional<Salary> getSalaryByID(int salaryID) {
+        log.debug("Попытка взять зарплату по ID");
         Optional<Salary> optionalSalary = salaryMap.values()
                 .stream()
-                .filter(salary -> teacherId == salary.getTeacher().getId())
+                .filter(salary -> salaryID == salary.getId())
                 .findAny();
         if (optionalSalary.isPresent()) {
-            log.info("Берём зарплату из репозитория");
+            log.info("Найдена зарплата");
             return optionalSalary;
+        } else {
+            log.error("Зарплата не найдена");
+            return Optional.empty();
         }
-        log.error("Зарплата не найдена");
-        return Optional.empty();
     }
 
     @Override
-    public Optional<Salary> getSalaryByDateOfSalary(LocalDate dateOfSalary) {
-        log.debug("Попытка взять зарплату по дате выдачи");
-        Optional<Salary> optionalSalary = salaryMap.values()
+    public List<Salary> getSalariesByTeacherId(int teacherId) {
+        log.debug("Попытка взять зарплаты по ID учителя");
+        List<Salary> salaries = salaryMap.values()
+                .stream()
+                .filter(salary -> teacherId == salary.getTeacher().getId())
+                .collect(Collectors.toList());
+        log.info("Берём зарплаты из репозитория");
+        return salaries;
+    }
+
+    @Override
+    public List<Salary> getSalariesByDateOfSalary(LocalDate dateOfSalary) {
+        log.debug("Попытка взять зарплаты по дате выдачи");
+        List<Salary> salaries = salaryMap.values()
                 .stream()
                 .filter(salary -> dateOfSalary.equals(salary.getDateOfSalary()))
-                .findAny();
-        if (optionalSalary.isPresent()) {
-            log.info("Берём зарплату из репозитория");
-            return optionalSalary;
-        }
-        log.error("Зарплата не найдена");
-        return Optional.empty();
+                .collect(Collectors.toList());
+        log.info("Берём зарплаты из репозитория");
+        return salaries;
     }
 
     @Override
