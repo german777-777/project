@@ -13,11 +13,9 @@ import java.util.Optional;
 public class GroupRepositoryPostgresImpl implements GroupRepository {
     private static volatile GroupRepositoryPostgresImpl instance;
     private final ComboPooledDataSource pool;
-    private final PersonRepository personRepository;
 
     private GroupRepositoryPostgresImpl(ComboPooledDataSource pool) {
         this.pool = pool;
-        personRepository = PersonRepositoryPostgresImpl.getInstance(pool);
     }
 
     public static GroupRepositoryPostgresImpl getInstance(ComboPooledDataSource pool) {

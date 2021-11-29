@@ -48,7 +48,7 @@ public final class Queries {
     // "взятие" Person по Credentials
     //language=SQL
     public static final String findPersonByCredentials = "SELECT p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, p.role, c.id, c.login, c.password " +
-            "FROM persons p LEFT OUTER JOIN credentials c on p.credential_id = c.id WHERE p.credential_id = ?";
+            "FROM persons p LEFT OUTER JOIN credentials c on p.credential_id = c.id WHERE c.login = ? AND c.password = ?";
 
     // "взятие" Person по ФИО
     //language=SQL
@@ -194,6 +194,39 @@ public final class Queries {
     public static final String putStudentAndGroupID = "INSERT INTO group_student (student_id, group_id) VALUES (?, ?)";
 
 
+    // запросы к таблице Marks
+
+    // вставка Mark в БД
+    //language=SQL
+    public static final String putMark = "INSERT INTO marks (student_id, group_id, subject_id, date_of_mark, point) VALUES (?, ?, ?, ?, ?)";
+
+    // "взятие" Mark по ID
+    //language=SQL
+    public static final String findMarkByID = "SELECT * FROM marks WHERE id = ?";
+
+    // "взятие" всех Marks
+    //language=SQL
+    public static final String findAllMarks = "SELECT * FROM marks";
+
+    // обновление Subject у Mark по ID
+    //language=SQL
+    public static final String updateSubjectOfMarkByID = "UPDATE marks SET subject_id = ? WHERE id = ?";
+
+    // обновление даты получения Mark по ID
+    //language=SQL
+    public static final String updateDateOfMarkByID = "UPDATE marks SET date_of_mark = ? WHERE id = ?";
+
+    // обновление Group у Mark по ID
+    //language=SQL
+    public static final String updateGroupOfMarkByID = "UPDATE marks SET group_id = ? WHERE id = ?";
+
+    // обновление значения Mark по ID
+    //language=SQL
+    public static final String updateCountOfMarkByID = "UPDATE marks SET point = ? WHERE id = ?";
+
+    // удаление Mark по ID
+    //language=SQL
+    public static final String deleteMarkByID = "DELETE FROM marks WHERE id = ?";
 
     // запросы к таблице Group-Subject
 

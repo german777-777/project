@@ -34,7 +34,7 @@ public class MarkRepositoryLocalImpl implements MarkRepository {
         Optional<Mark> optionalMark = markMap.values()
                 .stream()
                 .filter(mk -> mk.getId() == ID)
-                .filter(mk -> mk.getSubject().equals(mark.getSubject()))
+                .filter(mk -> mk.getSubjectId() == mark.getSubjectId())
                 .findAny();
         if (optionalMark.isEmpty()) {
             ID++;
@@ -44,6 +44,22 @@ public class MarkRepositoryLocalImpl implements MarkRepository {
         }
         log.error("Переданная оценка уже существует");
         return null;
+    }
+
+    @Override
+    public Optional<Mark> getMarkByID(int id) {
+        log.debug("Попытка найти оценку по ID");
+        Optional<Mark> optionalMark = markMap.values()
+                .stream()
+                .filter(mk -> mk.getId() == id)
+                .findAny();
+        if (optionalMark.isPresent()) {
+            log.info("Оценка найдена");
+            return optionalMark;
+        } else {
+            log.error("Оценка не найдена");
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -62,7 +78,7 @@ public class MarkRepositoryLocalImpl implements MarkRepository {
         if (optionalMark.isPresent()) {
             log.info("Изменение оценки в репозитории");
             Mark markFromOptional = optionalMark.get();
-            markFromOptional.setSubject(newSubject);
+            markFromOptional.setSubjectId(newSubject.getId());
             markMap.put(id, markFromOptional);
             return markMap.containsValue(markFromOptional);
         }
@@ -98,7 +114,7 @@ public class MarkRepositoryLocalImpl implements MarkRepository {
         if (optionalMark.isPresent()) {
             log.info("Измнений оценки в репозитории");
             Mark markFromOptional = optionalMark.get();
-            markFromOptional.setGroup(newGroup);
+            markFromOptional.setGroupId(newGroup.getId());
             markMap.put(id, markFromOptional);
             return markMap.containsValue(markFromOptional);
         }

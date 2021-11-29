@@ -14,13 +14,13 @@ public class Mark extends AbstractEntity {
     private int studentId;
 
     // по какому предмету оценка
-    private Subject subject;
+    private int subjectId;
 
     // дата выставления оценки
     private LocalDate dateOfMark;
 
     // из какой группы, так сказать, идёт оценка
-    private Group group;
+    private int groupId;
 
     // сама оценка
     private int mark;
@@ -31,12 +31,12 @@ public class Mark extends AbstractEntity {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Mark mark1 = (Mark) o;
-        return studentId == mark1.studentId && mark == mark1.mark && subject.equals(mark1.subject) && group.equals(mark1.group);
+        return studentId == mark1.studentId && mark == mark1.mark && subjectId == mark1.subjectId && groupId == mark1.groupId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), studentId, subject, group, mark);
+        return Objects.hash(super.hashCode(), studentId, subjectId, groupId, mark);
     }
 
     public Mark withId(int id) {
@@ -44,8 +44,13 @@ public class Mark extends AbstractEntity {
         return this;
     }
 
-    public Mark withSubject(Subject subject) {
-        setSubject(subject);
+    public Mark withStudentId(int studentId) {
+        setStudentId(studentId);
+        return this;
+    }
+
+    public Mark withSubjectId(int subjectId) {
+        setSubjectId(subjectId);
         return this;
     }
 
@@ -54,8 +59,8 @@ public class Mark extends AbstractEntity {
         return this;
     }
 
-    public Mark withGroup(Group group) {
-        setGroup(group);
+    public Mark withGroupId(int groupId) {
+        setGroupId(groupId);
         return this;
     }
 

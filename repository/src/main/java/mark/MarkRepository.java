@@ -13,6 +13,7 @@ public interface MarkRepository {
     Mark createMark(Mark mark);
 
     //Read
+    Optional<Mark> getMarkByID(int id);
     List<Mark> getAllMarks();
 
     //Update
