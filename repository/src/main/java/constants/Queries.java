@@ -94,6 +94,11 @@ public final class Queries {
     public static final String putGroup = "INSERT INTO groups (teacher_id, name) VALUES (?, ?)";
 
 
+    // выставление id Teacher на null
+    //language=SQL
+    public static final String updateTeacherIdAsNull = "UPDATE groups SET teacher_id = null WHERE teacher_id = ?";
+
+
 
     // запросы к таблице Subjects
 
@@ -187,11 +192,19 @@ public final class Queries {
     //language=SQL
     public static final String deleteSalaryByID = "DELETE FROM salaries WHERE id = ?";
 
+    // удаление Salary по teacher_ID
+    //language=SQL
+    public static final String deleteSalaryByTeacherID = "DELETE FROM salaries WHERE teacher_id = ?";
+
     // запросы к таблице Group-Student
 
     // вставка Group ID и Student ID в БД
     //language=SQL
     public static final String putStudentAndGroupID = "INSERT INTO group_student (student_id, group_id) VALUES (?, ?)";
+
+    // удаление Student из Group по ID
+    //language=SQL
+    public static final String deleteStudentFromGroupByID = "DELETE FROM group_student WHERE student_id = ?";
 
 
     // запросы к таблице Marks
@@ -228,9 +241,21 @@ public final class Queries {
     //language=SQL
     public static final String deleteMarkByID = "DELETE FROM marks WHERE id = ?";
 
+    // удаление Marks по ID Student
+    //language=SQL
+    public static final String deleteMarksByStudentID = "DELETE FROM marks WHERE student_id = ?";
+
+    // удаление Marks по ID Subject
+    //language=SQL
+    public static final String deleteMarksBySubjectId = "DELETE FROM marks WHERE subject_id = ?";
+
     // запросы к таблице Group-Subject
 
     // вставка Group ID и Subject ID в БД
     //language=SQL
     public static final String putSubjectAndGroupID = "INSERT INTO group_subject (subject_id, group_id) VALUES (?, ?)";
+
+    // удаление Subject из Group_Subject по ID
+    //language=SQL
+    public static final String deleteSubjectFromGroupById = "DELETE FROM group_subject WHERE subject_id = ?";
 }

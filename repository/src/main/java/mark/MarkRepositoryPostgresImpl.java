@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static constants.Queries.*;
+
 @Slf4j
 public class MarkRepositoryPostgresImpl implements MarkRepository {
     private static volatile MarkRepositoryPostgresImpl instance;
@@ -36,25 +37,37 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
 
     @Override
     public Mark createMark(Mark mark) {
+        Connection con = null;
+        PreparedStatement st = null;
+        Savepoint save = null;
         log.debug("Попытка добавить оценку");
-        try (Connection connection = pool.getConnection();
-             PreparedStatement statementForInsert = connection.prepareStatement(putMark))
-        {
-            statementForInsert.setInt(1, mark.getStudentId());
-            statementForInsert.setInt(2, mark.getGroupId());
-            statementForInsert.setInt(3, mark.getSubjectId());
-            statementForInsert.setDate(4, Date.valueOf(mark.getDateOfMark()));
-            statementForInsert.setInt(5, mark.getMark());
-            if (statementForInsert.executeUpdate() > 0) {
+        try {
+            con = pool.getConnection();
+            con.setAutoCommit(false);
+            st = con.prepareStatement(putMark);
+            save = con.setSavepoint();
+
+            st.setInt(1, mark.getStudentId());
+            st.setInt(2, mark.getGroupId());
+            st.setInt(3, mark.getSubjectId());
+            st.setDate(4, Date.valueOf(mark.getDateOfMark()));
+            st.setInt(5, mark.getMark());
+            if (st.executeUpdate() > 0) {
                 log.info("Оценка успешно добавлена");
+                con.commit();
                 return mark;
             } else {
                 log.error("Оценка не добавлена");
+                con.rollback(save);
                 return null;
             }
         } catch (SQLException e) {
             log.error("Ошибка получения: SQLException");
+            myRollback(con, save);
             return null;
+        } finally {
+            closeResource(st);
+            closeResource(con);
         }
     }
 
@@ -62,11 +75,10 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
     public Optional<Mark> getMarkByID(int id) {
         log.debug("Попытка найти оценку по id");
         ResultSet set = null;
-        try (Connection connection = pool.getConnection();
-            PreparedStatement statementForFind = connection.prepareStatement(findMarkByID))
-        {
-            statementForFind.setInt(1, id);
-            set = statementForFind.executeQuery();
+        try (Connection con = pool.getConnection();
+             PreparedStatement st = con.prepareStatement(findMarkByID)) {
+            st.setInt(1, id);
+            set = st.executeQuery();
             if (set.next()) {
                 log.info("Оценка найдена");
                 return Optional.of(new Mark()
@@ -92,10 +104,10 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
     public List<Mark> getAllMarks() {
         log.debug("Попытка получения всех оценок");
         List<Mark> marks = new ArrayList<>();
-        try (Connection connection = pool.getConnection();
-            PreparedStatement statementForFind = connection.prepareStatement(findAllMarks);
-            ResultSet set = statementForFind.executeQuery())
-        {
+        ResultSet set = null;
+        try (Connection con = pool.getConnection();
+             PreparedStatement st = con.prepareStatement(findAllMarks)) {
+            set = st.executeQuery();
             while (set.next()) {
                 marks.add(new Mark()
                         .withId(set.getInt(1))
@@ -110,6 +122,8 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
         } catch (SQLException e) {
             log.error("Ошибка получения: SQLException");
             return marks;
+        } finally {
+            closeResource(set);
         }
     }
 
@@ -121,21 +135,33 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
             log.error("Оценка не найдена, обновления не произошло");
             return false;
         } else {
-            try (Connection connection = pool.getConnection();
-                PreparedStatement statementForUpdate = connection.prepareStatement(updateSubjectOfMarkByID))
-            {
-                statementForUpdate.setInt(1, newSubject.getId());
-                statementForUpdate.setInt(2, id);
-                if (statementForUpdate.executeUpdate() > 0) {
+            Connection con = null;
+            PreparedStatement st = null;
+            Savepoint save = null;
+            try {
+                con = pool.getConnection();
+                con.setAutoCommit(false);
+                st = con.prepareStatement(updateSubjectOfMarkByID);
+                save = con.setSavepoint();
+
+                st.setInt(1, newSubject.getId());
+                st.setInt(2, id);
+                if (st.executeUpdate() > 0) {
                     log.info("Оценка обновлена");
+                    con.commit();
                     return true;
                 } else {
                     log.error("Ошибка обновления");
+                    con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
                 log.error("Ошибка получения: SQLException");
+                myRollback(con, save);
                 return false;
+            } finally {
+                closeResource(st);
+                closeResource(con);
             }
         }
     }
@@ -148,21 +174,33 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
             log.error("Оценка не найдена, обновления не произошло");
             return false;
         } else {
-            try (Connection connection = pool.getConnection();
-                 PreparedStatement statementForUpdate = connection.prepareStatement(updateDateOfMarkByID))
-            {
-                statementForUpdate.setDate(1, Date.valueOf(newDateOfMark));
-                statementForUpdate.setInt(2, id);
-                if (statementForUpdate.executeUpdate() > 0) {
+            Connection con = null;
+            PreparedStatement st = null;
+            Savepoint save = null;
+            try {
+                con = pool.getConnection();
+                con.setAutoCommit(false);
+                st = con.prepareStatement(updateSubjectOfMarkByID);
+                save = con.setSavepoint();
+
+                st.setDate(1, Date.valueOf(newDateOfMark));
+                st.setInt(2, id);
+                if (st.executeUpdate() > 0) {
                     log.info("Оценка обновлена");
+                    con.commit();
                     return true;
                 } else {
                     log.error("Ошибка обновления");
+                    con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
                 log.error("Ошибка получения: SQLException");
+                myRollback(con, save);
                 return false;
+            } finally {
+                closeResource(st);
+                closeResource(con);
             }
         }
     }
@@ -175,21 +213,33 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
             log.error("Оценка не найдена, обновления не произошло");
             return false;
         } else {
-            try (Connection connection = pool.getConnection();
-                 PreparedStatement statementForUpdate = connection.prepareStatement(updateGroupOfMarkByID))
-            {
-                statementForUpdate.setInt(1, newGroup.getId());
-                statementForUpdate.setInt(2, id);
-                if (statementForUpdate.executeUpdate() > 0) {
+            Connection con = null;
+            PreparedStatement st = null;
+            Savepoint save = null;
+            try {
+                con = pool.getConnection();
+                con.setAutoCommit(false);
+                st = con.prepareStatement(updateSubjectOfMarkByID);
+                save = con.setSavepoint();
+
+                st.setInt(1, newGroup.getId());
+                st.setInt(2, id);
+                if (st.executeUpdate() > 0) {
                     log.info("Оценка обновлена");
+                    con.commit();
                     return true;
                 } else {
                     log.error("Ошибка обновления");
+                    con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
                 log.error("Ошибка получения: SQLException");
+                myRollback(con, save);
                 return false;
+            } finally {
+                closeResource(st);
+                closeResource(con);
             }
         }
     }
@@ -202,21 +252,33 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
             log.error("Оценка не найдена, обновления не произошло");
             return false;
         } else {
-            try (Connection connection = pool.getConnection();
-                 PreparedStatement statementForUpdate = connection.prepareStatement(updateCountOfMarkByID))
-            {
-                statementForUpdate.setInt(1, newMark);
-                statementForUpdate.setInt(2, id);
-                if (statementForUpdate.executeUpdate() > 0) {
+            Connection con = null;
+            PreparedStatement st = null;
+            Savepoint save = null;
+            try {
+                con = pool.getConnection();
+                con.setAutoCommit(false);
+                st = con.prepareStatement(updateCountOfMarkByID);
+                save = con.setSavepoint();
+
+                st.setInt(1, newMark);
+                st.setInt(2, id);
+                if (st.executeUpdate() > 0) {
                     log.info("Оценка обновлена");
+                    con.commit();
                     return true;
                 } else {
                     log.error("Ошибка обновления");
+                    con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
                 log.error("Ошибка получения: SQLException");
+                myRollback(con, save);
                 return false;
+            } finally {
+                closeResource(st);
+                closeResource(con);
             }
         }
     }
@@ -229,21 +291,44 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
             log.error("Оценка не найдена, уделания не произошло");
             return false;
         } else {
-            try (Connection connection = pool.getConnection();
-                 PreparedStatement statementForUpdate = connection.prepareStatement(deleteMarkByID))
-            {
-                statementForUpdate.setInt(1, id);
-                if (statementForUpdate.executeUpdate() > 0) {
+            Connection con = null;
+            PreparedStatement st = null;
+            Savepoint save = null;
+            try {
+                con = pool.getConnection();
+                con.setAutoCommit(false);
+                st = con.prepareStatement(deleteMarkByID);
+                save = con.setSavepoint();
+
+                st.setInt(1, id);
+                if (st.executeUpdate() > 0) {
                     log.info("Оценка удалена");
+                    con.commit();
                     return true;
                 } else {
                     log.error("Ошибка удаления");
+                    con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
                 log.error("Ошибка получения: SQLException");
+                myRollback(con, save);
                 return false;
+            } finally {
+                closeResource(st);
+                closeResource(con);
             }
+        }
+    }
+
+
+    private void myRollback(Connection con, Savepoint save) {
+        try {
+            if (con != null) {
+                con.rollback(save);
+            }
+        } catch (SQLException ex) {
+            log.error("Rollback не удался");
         }
     }
 

@@ -8,13 +8,33 @@ import users.Person;
 import users.Student;
 import users.Teacher;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static constants.Queries.*;
+import static constants.Queries.deleteCredentialsByLoginAndPassword;
+import static constants.Queries.deleteMarksByStudentID;
+import static constants.Queries.deletePersonByID;
+import static constants.Queries.deleteSalaryByTeacherID;
+import static constants.Queries.deleteStudentFromGroupByID;
+import static constants.Queries.findAllPersons;
+import static constants.Queries.findCredentialsByLoginAndPassword;
+import static constants.Queries.findPersonByCredentials;
+import static constants.Queries.findPersonByID;
+import static constants.Queries.findPersonByName;
+import static constants.Queries.putCredentials;
+import static constants.Queries.putPerson;
+import static constants.Queries.updatePersonCredentialsByID;
+import static constants.Queries.updatePersonDateOfBirthByID;
+import static constants.Queries.updatePersonNameByID;
+import static constants.Queries.updateTeacherIdAsNull;
 
 @Slf4j
 public class PersonRepositoryPostgresImpl implements PersonRepository {
@@ -39,46 +59,48 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
     @Override
     public Person createPerson(Person person) {
         log.debug("Попытка найти пользователя");
-        Connection connection = null;
-        PreparedStatement statementForInsertCredentials = null;
-        PreparedStatement statementForInsertPerson = null;
-        Savepoint firstSavePoint = null;
+        Connection con = null;
+        PreparedStatement stForInsertCred = null;
+        PreparedStatement stForInsertPerson = null;
+        Savepoint save = null;
         if (!isPersonFind(person)) {
             try {
-                connection = pool.getConnection();
-                statementForInsertCredentials = connection.prepareStatement(putCredentials);
-                statementForInsertPerson = connection.prepareStatement(putPerson);
-                connection.setAutoCommit(false);
-                firstSavePoint = connection.setSavepoint();
+                con = pool.getConnection();
+                stForInsertCred = con.prepareStatement(putCredentials);
+                stForInsertPerson = con.prepareStatement(putPerson);
+                con.setAutoCommit(false);
+                save = con.setSavepoint();
 
-                statementForInsertCredentials.setString(1, person.getCredentials().getLogin());
-                statementForInsertCredentials.setString(2, person.getCredentials().getPassword());
-                if (statementForInsertCredentials.executeUpdate() > 0) {
+                stForInsertCred.setString(1, person.getCredentials().getLogin());
+                stForInsertCred.setString(2, person.getCredentials().getPassword());
+                if (stForInsertCred.executeUpdate() > 0) {
                     log.debug("Учётные данные вставлены, продолжение создания");
-                    if (isInsertPerson(statementForInsertPerson, person)) {
+                    con.commit();
+                    if (isInsertPerson(stForInsertPerson, person)) {
                         log.info("Пользователь успешно добавлен");
-                        connection.commit();
+                        con.commit();
                         return person;
                     } else {
                         log.error("Ошибка вставки пользователя");
-                        connection.rollback(firstSavePoint);
+                        con.rollback(save);
                         return null;
                     }
                 } else {
                     log.error("Ошибка вставки учётных данных");
-                    connection.rollback(firstSavePoint);
+                    con.rollback(save);
                     return null;
                 }
             } catch (SQLException e) {
                 log.error("Ошибка получения: SQLException");
-                myRollback(connection, firstSavePoint);
+                myRollback(con, save);
                 return null;
             } finally {
-                closeResource(statementForInsertCredentials);
-                closeResource(statementForInsertPerson);
-                closeResource(connection);
+                closeResource(stForInsertCred);
+                closeResource(stForInsertPerson);
+                closeResource(con);
             }
         } else {
+            log.error("Пользователь уже есть в системе");
             return null;
         }
     }
@@ -86,14 +108,14 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
     @Override
     public Optional<Person> getPersonById(int id) {
         log.debug("Попытка найти пользователя в репозитории");
-        ResultSet setForPerson = null;
-        try (Connection connection = pool.getConnection();
-             PreparedStatement statementForFindPerson = connection.prepareStatement(findPersonByID)) {
-            statementForFindPerson.setInt(1, id);
-            setForPerson = statementForFindPerson.executeQuery();
-            if (setForPerson.next()) {
+        ResultSet set = null;
+        try (Connection con = pool.getConnection();
+             PreparedStatement st = con.prepareStatement(findPersonByID)) {
+            st.setInt(1, id);
+            set = st.executeQuery();
+            if (set.next()) {
                 log.info("Пользователь найден");
-                return findRoleAndReturnPerson(setForPerson);
+                return findRoleAndReturnPerson(set);
             } else {
                 log.error("Пользователь не найден");
                 return Optional.empty();
@@ -102,23 +124,23 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
             log.error("Ошибка получения: SQLException");
             return Optional.empty();
         } finally {
-            closeResource(setForPerson);
+            closeResource(set);
         }
     }
 
     @Override
     public Optional<Person> getPersonByName(String firstName, String lastName, String patronymic) {
         log.debug("Попытка найти пользователя в репозитории");
-        ResultSet setForPerson = null;
-        try (Connection connection = pool.getConnection();
-             PreparedStatement statementForPerson = connection.prepareStatement(findPersonByName)) {
-            statementForPerson.setString(1, firstName);
-            statementForPerson.setString(2, lastName);
-            statementForPerson.setString(3, patronymic);
-            setForPerson = statementForPerson.executeQuery();
-            if (setForPerson.next()) {
+        ResultSet set = null;
+        try (Connection con = pool.getConnection();
+             PreparedStatement st = con.prepareStatement(findPersonByName)) {
+            st.setString(1, firstName);
+            st.setString(2, lastName);
+            st.setString(3, patronymic);
+            set = st.executeQuery();
+            if (set.next()) {
                 log.info("Пользователь найден");
-                return findRoleAndReturnPerson(setForPerson);
+                return findRoleAndReturnPerson(set);
             } else {
                 log.error("Пользователь не найден");
                 return Optional.empty();
@@ -127,7 +149,7 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
             log.error("Ошибка получения: SQLException");
             return Optional.empty();
         } finally {
-            closeResource(setForPerson);
+            closeResource(set);
         }
     }
 
@@ -135,11 +157,11 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
     public Optional<Person> getPersonByCredentials(String login, String password) {
         log.debug("Попытка найти пользователя в репозитории");
         ResultSet set = null;
-        try (Connection connection = pool.getConnection();
-             PreparedStatement statementForFind = connection.prepareStatement(findPersonByCredentials)) {
-            statementForFind.setString(1, login);
-            statementForFind.setString(2, password);
-            set = statementForFind.executeQuery();
+        try (Connection con = pool.getConnection();
+             PreparedStatement st = con.prepareStatement(findPersonByCredentials)) {
+            st.setString(1, login);
+            st.setString(2, password);
+            set = st.executeQuery();
             if (set.next()) {
                 log.info("Пользователь найден");
                 return findRoleAndReturnPerson(set);
@@ -159,12 +181,12 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
     public List<Person> getAllPersons() {
         List<Person> allPersons = new ArrayList<>();
         log.info("Берём всех пользователей из репозитория");
-        ResultSet setForPerson = null;
-        try (Connection connection = pool.getConnection();
-             PreparedStatement statementForPerson = connection.prepareStatement(findAllPersons)) {
-            setForPerson = statementForPerson.executeQuery();
-            while (setForPerson.next()) {
-                Optional<Person> optionalPerson = findRoleAndReturnPerson(setForPerson);
+        ResultSet set = null;
+        try (Connection con = pool.getConnection();
+             PreparedStatement st = con.prepareStatement(findAllPersons)) {
+            set = st.executeQuery();
+            while (set.next()) {
+                Optional<Person> optionalPerson = findRoleAndReturnPerson(set);
                 if (optionalPerson.isPresent()) {
                     Person person = optionalPerson.get();
                     allPersons.add(person);
@@ -175,182 +197,385 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
         } catch (SQLException e) {
             log.error("Ошибка получения: SQLException");
         } finally {
-            closeResource(setForPerson);
+            closeResource(set);
         }
         return allPersons;
     }
 
     @Override
     public boolean updatePersonNameById(int id, String newFirstName, String newLastName, String newPatronymic) {
-        try (Connection connection = pool.getConnection();
-             PreparedStatement statementForUpdate = connection.prepareStatement(updatePersonNameByID)) {
-            statementForUpdate.setString(1, newFirstName);
-            statementForUpdate.setString(2, newLastName);
-            statementForUpdate.setString(3, newPatronymic);
-            statementForUpdate.setInt(4, id);
-            if (statementForUpdate.executeUpdate() > 0) {
+        Connection con = null;
+        PreparedStatement st = null;
+        Savepoint save = null;
+        try {
+            con = pool.getConnection();
+            con.setAutoCommit(false);
+            st = con.prepareStatement(updatePersonNameByID);
+            save = con.setSavepoint();
+
+            st.setString(1, newFirstName);
+            st.setString(2, newLastName);
+            st.setString(3, newPatronymic);
+            st.setInt(4, id);
+            if (st.executeUpdate() > 0) {
                 log.info("Изменение ФИО пользователя в репозитории");
+                con.commit();
                 return true;
             } else {
                 log.error("Пользователь не найден, изменений не произошло");
+                con.rollback(save);
                 return false;
             }
         } catch (SQLException e) {
             log.error("Ошибка получения: SQLException");
+            myRollback(con, save);
             return false;
+        } finally {
+            closeResource(st);
+            closeResource(con);
         }
     }
 
     @Override
     public boolean updateDateOfBirthById(int id, LocalDate newDateOfBirth) {
-        try (Connection connection = pool.getConnection();
-             PreparedStatement statementForUpdate = connection.prepareStatement(updatePersonDateOfBirthByID)) {
-            statementForUpdate.setDate(1, Date.valueOf(newDateOfBirth));
-            statementForUpdate.setInt(2, id);
-            if (statementForUpdate.executeUpdate() > 0) {
+        Connection con = null;
+        PreparedStatement st = null;
+        Savepoint save = null;
+        try {
+            con = pool.getConnection();
+            con.setAutoCommit(false);
+            st = con.prepareStatement(updatePersonDateOfBirthByID);
+            save = con.setSavepoint();
+
+            st.setDate(1, Date.valueOf(newDateOfBirth));
+            st.setInt(2, id);
+            if (st.executeUpdate() > 0) {
                 log.info("Изменение даты рождения пользователя в репозитории");
+                con.commit();
                 return true;
             } else {
                 log.error("Пользователь не найден, изменений не произошло");
+                con.rollback(save);
                 return false;
             }
         } catch (SQLException e) {
             log.error("Ошибка получения: SQLException");
+            myRollback(con, save);
             return false;
+        } finally {
+            closeResource(st);
+            closeResource(con);
         }
 
     }
 
     @Override
     public boolean updateCredentialByPersonId(int id, Credentials newCredential) {
-        try (Connection connection = pool.getConnection();
-             PreparedStatement statementForUpdate = connection.prepareStatement(updatePersonCredentialsByID)) {
-            statementForUpdate.setString(1, newCredential.getLogin());
-            statementForUpdate.setString(2, newCredential.getPassword());
-            statementForUpdate.setInt(3, id);
-            if (statementForUpdate.executeUpdate() > 0) {
+        Connection con = null;
+        PreparedStatement st = null;
+        Savepoint save = null;
+        try {
+            con = pool.getConnection();
+            con.setAutoCommit(false);
+            st = con.prepareStatement(updatePersonCredentialsByID);
+            save = con.setSavepoint();
+
+            st.setString(1, newCredential.getLogin());
+            st.setString(2, newCredential.getPassword());
+            st.setInt(3, id);
+            if (st.executeUpdate() > 0) {
                 log.info("Изменение учётных данных пользователя в репозитории");
+                con.commit();
                 return true;
             } else {
                 log.error("Пользователь не найден, изменений не произошло");
+                con.rollback(save);
                 return false;
             }
         } catch (SQLException e) {
             log.error("Ошибка получения: SQLException");
+            myRollback(con, save);
             return false;
+        } finally {
+            closeResource(st);
+            closeResource(con);
         }
     }
 
     @Override
     public boolean deletePersonById(int id) {
-        Connection connection = null;
-        PreparedStatement statementForDeletePerson = null;
-        PreparedStatement statementForDeleteCredentials = null;
-        Savepoint firstSavePoint = null;
+        Connection con = null;
+        PreparedStatement stForDeletePerson = null;
+        PreparedStatement stForDeleteCred = null;
+        PreparedStatement stForDeleteSalaries = null;
+        PreparedStatement stForSetTeacherNull = null;
+        PreparedStatement stForDeleteMarks = null;
+        PreparedStatement stForDeleteStudentFromGroup = null;
+        Savepoint save = null;
         try {
-            connection = pool.getConnection();
-            statementForDeletePerson = connection.prepareStatement(deletePersonByID);
-            statementForDeleteCredentials = connection.prepareStatement(deleteCredentialsByLoginAndPassword);
-            connection.setAutoCommit(false);
-            firstSavePoint = connection.setSavepoint();
+            con = pool.getConnection();
+            // Statements для удаления пользователя и его учётных данных
+            stForDeletePerson = con.prepareStatement(deletePersonByID);
+            stForDeleteCred = con.prepareStatement(deleteCredentialsByLoginAndPassword);
+            // Statements для удаления данных об учителе
+            stForDeleteSalaries = con.prepareStatement(deleteSalaryByTeacherID);
+            stForSetTeacherNull = con.prepareStatement(updateTeacherIdAsNull);
+            // Statements для удаления данных об студенте
+            stForDeleteMarks = con.prepareStatement(deleteMarksByStudentID);
+            stForDeleteStudentFromGroup = con.prepareStatement(deleteStudentFromGroupByID);
+
+            con.setAutoCommit(false);
+            save = con.setSavepoint();
 
             Optional<Person> optionalPerson = getPersonById(id);
             if (optionalPerson.isPresent()) {
-                log.info("Попытка удалить пользователя из репозитория");
-                statementForDeletePerson.setInt(1, id);
-                if (statementForDeletePerson.executeUpdate() > 0) {
-                    log.info("Пользователь успешно удалён");
-                } else {
-                    log.error("Пользователь не найден, удаления не произошло");
-                    connection.rollback(firstSavePoint);
-                    return false;
-                }
-                log.info("Попытка удаления учётных данных пользователя из репозитория");
                 Person person = optionalPerson.get();
-                statementForDeleteCredentials.setString(1, person.getCredentials().getLogin());
-                statementForDeleteCredentials.setString(2, person.getCredentials().getPassword());
-                if (statementForDeleteCredentials.executeUpdate() > 0) {
-                    log.info("Учётные данные пользователя удалены, удаление пользователя завершено");
-                    connection.commit();
-                    return true;
-                } else {
-                    log.error("Учётные данные пользователя не удалены, удаление прервано");
-                    connection.rollback(firstSavePoint);
-                    return false;
-                }
+                switch (person.getRole()) {
+                    case TEACHER:
+                        if (isSalariesDeleted(stForDeleteSalaries, person.getId())) {
+                            log.info("Зарплаты удалены");
+                            con.commit();
+                        } else {
+                            log.error("Зарплаты не удалены, удаление прервано");
+                            con.rollback(save);
+                            return false;
+                        }
 
+                        if (isTeacherDeleteFromGroup(stForSetTeacherNull, person.getId())) {
+                            log.info("Учитель удалён из группы");
+                            con.commit();
+                        } else {
+                            log.error("Учитель не удалён из группы, удаление прервано");
+                            con.rollback(save);
+                            return false;
+                        }
+
+                        if (isPersonAndCredentialsDeleted(stForDeletePerson, stForDeleteCred, person)) {
+                            log.info("Пользователь и его учётные данные успешно удалены");
+                            con.commit();
+                            return true;
+                        } else {
+                            log.error("Пользователь или его учёиные данные не удалены, удаления не произошло");
+                            con.rollback(save);
+                            return false;
+                        }
+
+
+                    case STUDENT:
+                        if (isMarkDeleted(stForDeleteMarks, person.getId())) {
+                            log.info("Оценки удалены");
+                            con.commit();
+                        } else {
+                            log.error("Оценки не удалены, удаление прервано");
+                            con.rollback(save);
+                            return false;
+                        }
+
+                        if (isStudentDeletedFromGroup(stForDeleteStudentFromGroup, person.getId())) {
+                            log.info("Студент удалён из группы");
+                            con.commit();
+                        } else {
+                            log.error("Студент не удалён из группы, удаление прервано");
+                            con.rollback(save);
+                            return false;
+                        }
+
+                        if (isPersonAndCredentialsDeleted(stForDeletePerson, stForDeleteCred, person)) {
+                            log.info("Пользователь и его учётные данные успешно удалены");
+                            con.commit();
+                            return true;
+                        } else {
+                            log.error("Пользователь или его учёиные данные не удалены, удаления не произошло");
+                            con.rollback(save);
+                            return false;
+                        }
+
+                    default:
+                        log.error("Пользователь не найден, не удалён");
+                        return false;
+                }
             } else {
                 log.error("Пользователь не найден, удаления не произошло");
-                connection.rollback(firstSavePoint);
+                con.rollback(save);
                 return false;
             }
         } catch (SQLException e) {
             log.error("Ошибка получения: SQLException");
-            myRollback(connection, firstSavePoint);
+            myRollback(con, save);
             return false;
         } finally {
-            closeResource(statementForDeletePerson);
-            closeResource(statementForDeleteCredentials);
-            closeResource(connection);
+            closeResource(stForDeleteMarks);
+            closeResource(stForDeleteStudentFromGroup);
+            closeResource(stForDeleteSalaries);
+            closeResource(stForSetTeacherNull);
+            closeResource(stForDeletePerson);
+            closeResource(stForDeleteCred);
+            closeResource(con);
         }
     }
 
     @Override
     public boolean deletePersonByName(String firstName, String lastName, String patronymic) {
-        Connection connection = null;
-        PreparedStatement statementForDeletePerson = null;
-        PreparedStatement statementForDeleteCredentials = null;
-        Savepoint firstSavePoint = null;
+        Connection con = null;
+        PreparedStatement stForDeletePerson = null;
+        PreparedStatement stForDeleteCred = null;
+        PreparedStatement stForDeleteSalaries = null;
+        PreparedStatement stForSetTeacherNull = null;
+        PreparedStatement stForDeleteMarks = null;
+        PreparedStatement stForDeleteStudentFromGroup = null;
+        Savepoint save = null;
         try {
-            connection = pool.getConnection();
-            statementForDeletePerson = connection.prepareStatement(deletePersonByName);
-            statementForDeleteCredentials = connection.prepareStatement(deleteCredentialsByLoginAndPassword);
-            connection.setAutoCommit(false);
-            firstSavePoint = connection.setSavepoint();
+            con = pool.getConnection();
+            // Statements для удаления пользователя и его учётных данных
+            stForDeletePerson = con.prepareStatement(deletePersonByID);
+            stForDeleteCred = con.prepareStatement(deleteCredentialsByLoginAndPassword);
+            // Statements для удаления данных об учителе
+            stForDeleteSalaries = con.prepareStatement(deleteSalaryByTeacherID);
+            stForSetTeacherNull = con.prepareStatement(updateTeacherIdAsNull);
+            // Statements для удаления данных об студенте
+            stForDeleteMarks = con.prepareStatement(deleteMarksByStudentID);
+            stForDeleteStudentFromGroup = con.prepareStatement(deleteStudentFromGroupByID);
+
+            con.setAutoCommit(false);
+            save = con.setSavepoint();
 
             Optional<Person> optionalPerson = getPersonByName(firstName, lastName, patronymic);
             if (optionalPerson.isPresent()) {
-                log.info("Попытка удалить пользователя из репозитория");
-                statementForDeletePerson.setString(1, firstName);
-                statementForDeletePerson.setString(2, lastName);
-                statementForDeletePerson.setString(3, patronymic);
-                if (statementForDeletePerson.executeUpdate() > 0) {
-                    log.info("Пользователь успешно удалён");
-                } else {
-                    log.error("Пользователь не найден, удаления не произошло");
-                    connection.rollback(firstSavePoint);
-                    return false;
-                }
-                log.info("Попытка удаления учётных данных пользователя из репозитория");
                 Person person = optionalPerson.get();
-                statementForDeleteCredentials.setString(1, person.getCredentials().getLogin());
-                statementForDeleteCredentials.setString(2, person.getCredentials().getPassword());
-                if (statementForDeleteCredentials.executeUpdate() > 0) {
-                    log.info("Учётные данные пользователя удалены, удаление пользователя завершено");
-                    connection.commit();
-                    return true;
-                } else {
-                    log.error("Учётные данные пользователя не удалены, удаление прервано");
-                    connection.rollback(firstSavePoint);
-                    return false;
-                }
+                switch (person.getRole()) {
+                    case TEACHER:
+                        if (isSalariesDeleted(stForDeleteSalaries, person.getId())) {
+                            log.info("Зарплаты удалены");
+                            con.commit();
+                        } else {
+                            log.error("Зарплаты не удалены, удаление прервано");
+                            con.rollback(save);
+                            return false;
+                        }
 
+                        if (isTeacherDeleteFromGroup(stForSetTeacherNull, person.getId())) {
+                            log.info("Учитель удалён из группы");
+                            con.commit();
+                        } else {
+                            log.error("Учитель не удалён из группы, удаление прервано");
+                            con.rollback(save);
+                            return false;
+                        }
+
+                        if (isPersonAndCredentialsDeleted(stForDeletePerson, stForDeleteCred, person)) {
+                            log.info("Пользователь и его учётные данные успешно удалены");
+                            con.commit();
+                            return true;
+                        } else {
+                            log.error("Пользователь или его учёиные данные не удалены, удаления не произошло");
+                            con.rollback(save);
+                            return false;
+                        }
+
+
+                    case STUDENT:
+                        if (isMarkDeleted(stForDeleteMarks, person.getId())) {
+                            log.info("Оценки удалены");
+                            con.commit();
+                        } else {
+                            log.error("Оценки не удалены, удаление прервано");
+                            con.rollback(save);
+                            return false;
+                        }
+
+                        if (isStudentDeletedFromGroup(stForDeleteStudentFromGroup, person.getId())) {
+                            log.info("Студент удалён из группы");
+                            con.commit();
+                        } else {
+                            log.error("Студент не удалён из группы, удаление прервано");
+                            con.rollback(save);
+                            return false;
+                        }
+
+                        if (isPersonAndCredentialsDeleted(stForDeletePerson, stForDeleteCred, person)) {
+                            log.info("Пользователь и его учётные данные успешно удалены");
+                            con.commit();
+                            return true;
+                        } else {
+                            log.error("Пользователь или его учёиные данные не удалены, удаления не произошло");
+                            con.rollback(save);
+                            return false;
+                        }
+
+                    default:
+                        log.error("Пользователь не найден, не удалён");
+                        return false;
+                }
             } else {
                 log.error("Пользователь не найден, удаления не произошло");
-                connection.rollback(firstSavePoint);
+                con.rollback(save);
                 return false;
             }
         } catch (SQLException e) {
             log.error("Ошибка получения: SQLException");
-            myRollback(connection, firstSavePoint);
+            myRollback(con, save);
             return false;
         } finally {
-            closeResource(statementForDeletePerson);
-            closeResource(statementForDeleteCredentials);
-            closeResource(connection);
+            closeResource(stForDeleteMarks);
+            closeResource(stForDeleteStudentFromGroup);
+            closeResource(stForDeleteSalaries);
+            closeResource(stForSetTeacherNull);
+            closeResource(stForDeletePerson);
+            closeResource(stForDeleteCred);
+            closeResource(con);
         }
     }
 
+    // метод удаления Student из Group_Student
+
+    private boolean isStudentDeletedFromGroup(PreparedStatement stForDeleteStudentFromGroup, int studentId) throws SQLException {
+        log.info("Поыптка удаления студента из группы");
+        stForDeleteStudentFromGroup.setInt(1, studentId);
+        return stForDeleteStudentFromGroup.executeUpdate() > 0;
+    }
+
+    // метод удаления Marks у Student
+
+    private boolean isMarkDeleted(PreparedStatement stForDeleteMarks, int studentId) throws SQLException {
+        log.info("Попытка удаления оценок студента");
+        stForDeleteMarks.setInt(1, studentId);
+        return stForDeleteMarks.executeUpdate() > 0;
+    }
+
+    // метод по вставлению teacherId у Group как null
+
+    private boolean isTeacherDeleteFromGroup(PreparedStatement stForSetTeacherNull, int teacherId) throws SQLException {
+        log.info("Попытка удаления учителя из группы");
+        stForSetTeacherNull.setInt(1, teacherId);
+        return stForSetTeacherNull.executeUpdate() > 0;
+    }
+
+    // метод для удаления Salaries у Teacher
+
+    private boolean isSalariesDeleted(PreparedStatement stForDeleteSalaries, int teacherId) throws SQLException {
+        log.info("Попытка удаления зарплат учителя");
+        stForDeleteSalaries.setInt(1, teacherId);
+        return stForDeleteSalaries.executeUpdate() > 0;
+    }
+
+    // метод по удалению самого Person и его Credentials
+
+    private boolean isPersonAndCredentialsDeleted(PreparedStatement stForDeletePerson, PreparedStatement stForDeleteCred, Person person) throws SQLException {
+        boolean result;
+
+        log.info("Попытка удаления пользователя из репозитория");
+        stForDeletePerson.setInt(1, person.getId());
+
+        log.info("Попытка удаления учётных данных пользователя из репозитория");
+        stForDeleteCred.setString(1, person.getCredentials().getLogin());
+        stForDeleteCred.setString(2, person.getCredentials().getPassword());
+
+        result = stForDeleteCred.executeUpdate() > 0 && stForDeletePerson.executeUpdate() > 0;
+
+        return result;
+    }
+
+    // методы для возврата и поиска определённого пользователя
 
     private Optional<Person> returnAdmin(ResultSet setForPerson) throws SQLException {
         return Optional.of(new Admin()
@@ -392,7 +617,7 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
     }
 
     private Optional<Person> findRoleAndReturnPerson(ResultSet setForPerson) throws SQLException {
-        switch (setForPerson.getString(6)) {
+        switch (setForPerson.getString("role")) {
             case "Админ":
                 log.info("Пользователь - Admin");
                 return returnAdmin(setForPerson);
@@ -406,15 +631,27 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
         return Optional.empty();
     }
 
-    private boolean isInsertPerson(PreparedStatement statementForInsertPerson, Person person) throws SQLException {
-        statementForInsertPerson.setString(1, person.getFirstName());
-        statementForInsertPerson.setString(2, person.getLastName());
-        statementForInsertPerson.setString(3, person.getPatronymic());
-        statementForInsertPerson.setDate(4, Date.valueOf(person.getDateOfBirth()));
-        statementForInsertPerson.setInt(5, getCredentialID(person.getCredentials().getLogin(), person.getCredentials().getPassword()));
-        statementForInsertPerson.setString(6, person.getRole().getRoleString());
-        return statementForInsertPerson.executeUpdate() > 0;
+    // метод для вставки пользователя
+
+    private boolean isInsertPerson(PreparedStatement st, Person person) throws SQLException {
+        st.setString(1, person.getFirstName());
+        st.setString(2, person.getLastName());
+        st.setString(3, person.getPatronymic());
+        st.setDate(4, Date.valueOf(person.getDateOfBirth()));
+
+        int credId = getCredentialID(person.getCredentials().getLogin(), person.getCredentials().getPassword());
+        if (credId != 0) {
+            st.setInt(5, credId);
+        } else {
+            log.error("Учётные данные не найдены");
+            return false;
+        }
+
+        st.setString(6, person.getRole().getRoleString());
+        return st.executeUpdate() > 0;
     }
+
+    // метод для поиска пользователя
 
     private boolean isPersonFind(Person person) {
         Optional<Person> optionalPerson = getPersonByName(person.getFirstName(), person.getLastName(), person.getPatronymic());
@@ -431,13 +668,15 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
         return false;
     }
 
+    // метод для поиска ID у Credentials
+
     private int getCredentialID(String login, String password) {
         ResultSet set = null;
-        try (Connection connection = pool.getConnection();
-             PreparedStatement statementForFind = connection.prepareStatement(findCredentialsByLoginAndPassword)) {
-            statementForFind.setString(1, login);
-            statementForFind.setString(2, password);
-            set = statementForFind.executeQuery();
+        try (Connection con = pool.getConnection();
+             PreparedStatement st = con.prepareStatement(findCredentialsByLoginAndPassword)) {
+            st.setString(1, login);
+            st.setString(2, password);
+            set = st.executeQuery();
             if (set.next()) {
                 return set.getInt(1);
             } else {
@@ -452,10 +691,12 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
         }
     }
 
-    private void myRollback(Connection connection, Savepoint firstSavePoint) {
+    // Rollback
+
+    private void myRollback(Connection con, Savepoint save) {
         try {
-            if (connection != null) {
-                connection.rollback(firstSavePoint);
+            if (con != null) {
+                con.rollback(save);
             }
         } catch (SQLException ex) {
             log.error("Rollback не удался");

@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,20 +44,33 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
             log.error("Ошибка добавления: такой предмет уже существует");
             return null;
         } else {
+            Connection con = null;
+            PreparedStatement st = null;
+            Savepoint save = null;
             log.info("Такого предмета не существует, вносим в таблицу");
-            try (Connection connection = pool.getConnection();
-                 PreparedStatement statementForInsert = connection.prepareStatement(putSubject)) {
-                statementForInsert.setString(1, subject.getName());
-                if (statementForInsert.executeUpdate() > 0) {
+            try {
+                con = pool.getConnection();
+                con.setAutoCommit(false);
+                st = con.prepareStatement(putSubject);
+                save = con.setSavepoint();
+
+                st.setString(1, subject.getName());
+                if (st.executeUpdate() > 0) {
                     log.info("Предмет успешно добавлен");
+                    con.commit();
                     return subject;
                 } else {
                     log.error("Ошибка добавления");
+                    con.rollback(save);
                     return null;
                 }
             } catch (SQLException e) {
                 log.error("Ошибка добавления: SQLException");
+                myRollback(con, save);
                 return null;
+            } finally {
+                closeResource(st);
+                closeResource(con);
             }
         }
     }
@@ -65,11 +79,11 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
     public Optional<Subject> getSubjectById(int id) {
         log.debug("Попытка взять предмет по ID");
         ResultSet set = null;
-        try (Connection connection = pool.getConnection();
-             PreparedStatement statementForFind = connection.prepareStatement(findSubjectByID))
+        try (Connection con = pool.getConnection();
+             PreparedStatement st = con.prepareStatement(findSubjectByID))
         {
-            statementForFind.setInt(1, id);
-            set = statementForFind.executeQuery();
+            st.setInt(1, id);
+            set = st.executeQuery();
             if (set.next()) {
                 log.info("Берём предмет");
                 return Optional.of(new Subject()
@@ -91,11 +105,11 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
     public Optional<Subject> getSubjectByName(String name) {
         log.debug("Попытка взять предмет по названию");
         ResultSet set = null;
-        try (Connection connection = pool.getConnection();
-             PreparedStatement statementForFind = connection.prepareStatement(findSubjectByName))
+        try (Connection con = pool.getConnection();
+             PreparedStatement st = con.prepareStatement(findSubjectByName))
         {
-            statementForFind.setString(1, name);
-            set = statementForFind.executeQuery();
+            st.setString(1, name);
+            set = st.executeQuery();
             if (set.next()) {
                 log.info("Берём предмет");
                 return Optional.of(new Subject()
@@ -118,10 +132,10 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
         List<Subject> subjects = new ArrayList<>();
         log.debug("Попытка взять все предметы");
         ResultSet set = null;
-        try (Connection connection = pool.getConnection();
-             PreparedStatement statementForFind = connection.prepareStatement(findAllSubjects))
+        try (Connection con = pool.getConnection();
+             PreparedStatement st = con.prepareStatement(findAllSubjects))
         {
-            set = statementForFind.executeQuery();
+            set = st.executeQuery();
             while (set.next()) {
                 log.info("Берём предмет");
                 subjects.add(new Subject()
@@ -142,21 +156,33 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
         log.info("Попытка найти предмет по ID");
         Optional<Subject> optionalSubject = getSubjectById(id);
         if (optionalSubject.isPresent()) {
-            try (Connection connection = pool.getConnection();
-                PreparedStatement statementForUpdate = connection.prepareStatement(updateSubjectNameByID))
-            {
-                statementForUpdate.setString(1, newName);
-                statementForUpdate.setInt(2, id);
-                if (statementForUpdate.executeUpdate() > 0) {
-                    log.info("Изменение предмета в репозитории");
+            Connection con = null;
+            PreparedStatement st = null;
+            Savepoint save = null;
+            try {
+                con = pool.getConnection();
+                con.setAutoCommit(false);
+                st = con.prepareStatement(updateSubjectNameByID);
+                save = con.setSavepoint();
+
+                st.setString(1, newName);
+                st.setInt(2, id);
+                if (st.executeUpdate() > 0) {
+                    log.info("Изменение предмета прошло успешно");
+                    con.commit();
                     return true;
                 } else {
                     log.error("Предмет не найден, изменений не произошло");
+                    con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
                 log.error("Ошибка получения: SQLException");
+                myRollback(con, save);
                 return false;
+            } finally {
+                closeResource(st);
+                closeResource(con);
             }
         } else {
             log.error("Предмет не найден, изменений не произошло");
@@ -169,21 +195,33 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
         log.info("Попытка найти предмет по названию");
         Optional<Subject> optionalSubject = getSubjectByName(oldName);
         if (optionalSubject.isPresent()) {
-            try (Connection connection = pool.getConnection();
-                 PreparedStatement statementForUpdate = connection.prepareStatement(updateSubjectNameByName))
-            {
-                statementForUpdate.setString(1, newName);
-                statementForUpdate.setString(2, oldName);
-                if (statementForUpdate.executeUpdate() > 0) {
+            Connection con = null;
+            PreparedStatement st = null;
+            Savepoint save = null;
+            try {
+                con = pool.getConnection();
+                con.setAutoCommit(false);
+                st = con.prepareStatement(updateSubjectNameByName);
+                save = con.setSavepoint();
+
+                st.setString(1, newName);
+                st.setString(2, oldName);
+                if (st.executeUpdate() > 0) {
                     log.info("Изменение предмета в репозитории");
+                    con.commit();
                     return true;
                 } else {
                     log.error("Предмет не найден, изменений не произошло");
+                    con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
                 log.error("Ошибка получения: SQLException");
+                myRollback(con, save);
                 return false;
+            } finally {
+                closeResource(st);
+                closeResource(con);
             }
         } else {
             log.error("Предмет не найден, изменений не произошло");
@@ -196,20 +234,58 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
         log.info("Попытка найти предмет по названию");
         Optional<Subject> optionalSubject = getSubjectById(id);
         if (optionalSubject.isPresent()) {
-            try (Connection connection = pool.getConnection();
-                 PreparedStatement statementForUpdate = connection.prepareStatement(deleteSubjectByID))
-            {
-                statementForUpdate.setInt(1, id);
-                if (statementForUpdate.executeUpdate() > 0) {
+            Connection con = null;
+            PreparedStatement stForDeleteSubject = null;
+            PreparedStatement stForDeleteSubjectFromGroup = null;
+            PreparedStatement stForDeleteSubjectFromMarks = null;
+            Savepoint save = null;
+            try {
+                con = pool.getConnection();
+                con.setAutoCommit(false);
+                stForDeleteSubject = con.prepareStatement(deleteSubjectByID);
+                stForDeleteSubjectFromGroup = con.prepareStatement(deleteSubjectFromGroupById);
+                stForDeleteSubjectFromMarks = con.prepareStatement(deleteMarksBySubjectId);
+                save = con.setSavepoint();
+
+                stForDeleteSubjectFromGroup.setInt(1, id);
+                if (stForDeleteSubjectFromGroup.executeUpdate() > 0) {
+                    log.info("Предмет удалён из группы");
+                    con.commit();
+                } else {
+                    log.error("Предмет не удалён из группы, удаление прервано");
+                    con.rollback(save);
+                    return false;
+                }
+
+                stForDeleteSubjectFromMarks.setInt(1, id);
+                if (stForDeleteSubjectFromMarks.executeUpdate() > 0) {
+                    log.info("Оценки удалены");
+                    con.commit();
+                } else {
+                    log.error("Оценки не удалены, удаление прервано");
+                    con.rollback(save);
+                    return false;
+                }
+
+                stForDeleteSubject.setInt(1, id);
+                if (stForDeleteSubject.executeUpdate() > 0) {
                     log.info("Удаление предмета в репозитории");
+                    con.commit();
                     return true;
                 } else {
                     log.error("Предмет не найден, удаления не произошло");
+                    con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
                 log.error("Ошибка получения: SQLException");
+                myRollback(con, save);
                 return false;
+            } finally {
+                closeResource(stForDeleteSubjectFromGroup);
+                closeResource(stForDeleteSubjectFromMarks);
+                closeResource(stForDeleteSubject);
+                closeResource(con);
             }
         } else {
             log.error("Предмет не найден, удаления не произошло");
@@ -222,24 +298,73 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
         log.info("Попытка найти предмет по названию");
         Optional<Subject> optionalSubject = getSubjectByName(name);
         if (optionalSubject.isPresent()) {
-            try (Connection connection = pool.getConnection();
-                 PreparedStatement statementForUpdate = connection.prepareStatement(deleteSubjectByName))
-            {
-                statementForUpdate.setString(1, name);
-                if (statementForUpdate.executeUpdate() > 0) {
+            Subject subject = optionalSubject.get();
+            Connection con = null;
+            PreparedStatement stForDeleteSubject = null;
+            PreparedStatement stForDeleteSubjectFromGroup = null;
+            PreparedStatement stForDeleteSubjectFromMarks = null;
+            Savepoint save = null;
+            try {
+                con = pool.getConnection();
+                con.setAutoCommit(false);
+                stForDeleteSubject = con.prepareStatement(deleteSubjectByID);
+                stForDeleteSubjectFromGroup = con.prepareStatement(deleteSubjectFromGroupById);
+                stForDeleteSubjectFromMarks = con.prepareStatement(deleteMarksBySubjectId);
+                save = con.setSavepoint();
+
+                stForDeleteSubjectFromGroup.setInt(1, subject.getId());
+                if (stForDeleteSubjectFromGroup.executeUpdate() > 0) {
+                    log.info("Предмет удалён из группы");
+                    con.commit();
+                } else {
+                    log.error("Предмет не удалён из группы, удаление прервано");
+                    con.rollback(save);
+                    return false;
+                }
+
+                stForDeleteSubjectFromMarks.setInt(1, subject.getId());
+                if (stForDeleteSubjectFromMarks.executeUpdate() > 0) {
+                    log.info("Оценки удалены");
+                    con.commit();
+                } else {
+                    log.error("Оценки не удалены, удаление прервано");
+                    con.rollback(save);
+                    return false;
+                }
+
+                stForDeleteSubject.setInt(1, subject.getId());
+                if (stForDeleteSubject.executeUpdate() > 0) {
                     log.info("Удаление предмета в репозитории");
+                    con.commit();
                     return true;
                 } else {
                     log.error("Предмет не найден, удаления не произошло");
+                    con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
                 log.error("Ошибка получения: SQLException");
+                myRollback(con, save);
                 return false;
+            } finally {
+                closeResource(stForDeleteSubjectFromGroup);
+                closeResource(stForDeleteSubjectFromMarks);
+                closeResource(stForDeleteSubject);
+                closeResource(con);
             }
         } else {
             log.error("Предмет не найден, удаления не произошло");
             return false;
+        }
+    }
+
+    private void myRollback(Connection connection, Savepoint firstSavePoint) {
+        try {
+            if (connection != null) {
+                connection.rollback(firstSavePoint);
+            }
+        } catch (SQLException ex) {
+            log.error("Rollback не удался");
         }
     }
 

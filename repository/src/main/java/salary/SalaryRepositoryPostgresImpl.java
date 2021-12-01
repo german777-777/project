@@ -37,22 +37,44 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
 
     @Override
     public Salary createSalary(Salary salary) {
-        try (Connection connection = pool.getConnection();
-             PreparedStatement statementForInsert = connection.prepareStatement(putSalary))
-        {
-            statementForInsert.setInt(1, salary.getTeacher().getId());
-            statementForInsert.setDate(2, Date.valueOf(salary.getDateOfSalary()));
-            statementForInsert.setInt(3, salary.getSalary());
-            if (statementForInsert.executeUpdate() > 0) {
-                log.info("Зарплата успешно добавлена");
-                return salary;
+        Connection con = null;
+        PreparedStatement stForInsertSalary = null;
+        PreparedStatement stForFindTeacher = null;
+        Savepoint save = null;
+        try {
+            con = pool.getConnection();
+            con.setAutoCommit(false);
+            stForInsertSalary = con.prepareStatement(putSalary);
+            stForFindTeacher = con.prepareStatement(findPersonByCredentials);
+            save = con.setSavepoint();
+
+            int teacherId = foundTeacherId(stForFindTeacher, (Teacher) salary.getTeacher());
+            if (teacherId > 0) {
+                stForInsertSalary.setInt(1, teacherId);
+                stForInsertSalary.setDate(2, Date.valueOf(salary.getDateOfSalary()));
+                stForInsertSalary.setInt(3, salary.getSalary());
+                if (stForInsertSalary.executeUpdate() > 0) {
+                    log.info("Зарплата успешно добавлена");
+                    con.commit();
+                    return salary;
+                } else {
+                    log.error("Ошибка добавления");
+                    con.rollback(save);
+                    return null;
+                }
             } else {
-                log.error("Ошибка добавления");
+                log.error("Не найден Teacher");
+                con.rollback(save);
                 return null;
             }
         } catch (SQLException e) {
             log.error("Ошибка добавления: SQLException");
+            myRollback(con, save);
             return null;
+        } finally {
+            closeResource(stForFindTeacher);
+            closeResource(stForInsertSalary);
+            closeResource(con);
         }
     }
 
@@ -60,27 +82,13 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
     public Optional<Salary> getSalaryByID(int salaryID) {
         log.info("Попытка взять зарплату по ID");
         ResultSet set = null;
-        try (Connection connection = pool.getConnection();
-            PreparedStatement statementForFind = connection.prepareStatement(findSalaryByID))
-        {
-            statementForFind.setInt(1, salaryID);
-            set = statementForFind.executeQuery();
+        try (Connection con = pool.getConnection();
+             PreparedStatement st = con.prepareStatement(findSalaryByID)) {
+            st.setInt(1, salaryID);
+            set = st.executeQuery();
             if (set.next()) {
                 log.info("Найдена зарплата");
-                return Optional.of(new Salary()
-                        .withId(set.getInt(1))
-                        .withTeacher(new Teacher()
-                                .withId(set.getInt(2))
-                                .withFirstName(set.getString(3))
-                                .withLastName(set.getString(4))
-                                .withPatronymic(set.getString(5))
-                                .withDateOfBirth(set.getDate(6).toLocalDate())
-                                .withCredentials(new Credentials()
-                                        .withId(set.getInt(7))
-                                        .withLogin(set.getString(8))
-                                        .withPassword(set.getString(9))))
-                        .withDateOfSalary(set.getDate(10).toLocalDate())
-                        .withSalary(set.getInt(11)));
+                return Optional.of(createSalaryFromSet(set));
             } else {
                 log.error("Зарплата не найдена");
                 return Optional.empty();
@@ -98,26 +106,12 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
         log.debug("Попытка взять зарплаты по ID учителя");
         List<Salary> salaries = new ArrayList<>();
         ResultSet set = null;
-        try (Connection connection = pool.getConnection();
-            PreparedStatement statementForFind = connection.prepareStatement(findSalariesByTeacherID))
-        {
-            statementForFind.setInt(1, teacherId);
-            set = statementForFind.executeQuery();
+        try (Connection con = pool.getConnection();
+             PreparedStatement st = con.prepareStatement(findSalariesByTeacherID)) {
+            st.setInt(1, teacherId);
+            set = st.executeQuery();
             while (set.next()) {
-                salaries.add(new Salary()
-                        .withId(set.getInt(1))
-                        .withTeacher(new Teacher()
-                                .withId(set.getInt(2))
-                                .withFirstName(set.getString(3))
-                                .withLastName(set.getString(4))
-                                .withPatronymic(set.getString(5))
-                                .withDateOfBirth(set.getDate(6).toLocalDate())
-                                .withCredentials(new Credentials()
-                                        .withId(set.getInt(7))
-                                        .withLogin(set.getString(8))
-                                        .withPassword(set.getString(9))))
-                        .withDateOfSalary(set.getDate(10).toLocalDate())
-                        .withSalary(set.getInt(11)));
+                salaries.add(createSalaryFromSet(set));
                 log.info("Найдена зарплата");
             }
             return salaries;
@@ -134,26 +128,12 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
         log.debug("Попытка взять зарплаты по дате получения");
         List<Salary> salaries = new ArrayList<>();
         ResultSet set = null;
-        try (Connection connection = pool.getConnection();
-             PreparedStatement statementForFind = connection.prepareStatement(findSalariesByDate))
-        {
-            statementForFind.setDate(1, Date.valueOf(dateOfSalary));
-            set = statementForFind.executeQuery();
+        try (Connection con = pool.getConnection();
+             PreparedStatement st = con.prepareStatement(findSalariesByDate)) {
+            st.setDate(1, Date.valueOf(dateOfSalary));
+            set = st.executeQuery();
             while (set.next()) {
-                salaries.add(new Salary()
-                        .withId(set.getInt(1))
-                        .withTeacher(new Teacher()
-                                .withId(set.getInt(2))
-                                .withFirstName(set.getString(3))
-                                .withLastName(set.getString(4))
-                                .withPatronymic(set.getString(5))
-                                .withDateOfBirth(set.getDate(6).toLocalDate())
-                                .withCredentials(new Credentials()
-                                        .withId(set.getInt(7))
-                                        .withLogin(set.getString(8))
-                                        .withPassword(set.getString(9))))
-                        .withDateOfSalary(set.getDate(10).toLocalDate())
-                        .withSalary(set.getInt(11)));
+                salaries.add(createSalaryFromSet(set));
                 log.info("Найдена зарплата");
             }
             return salaries;
@@ -170,25 +150,11 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
         log.debug("Попытка взять все зарплаты");
         List<Salary> salaries = new ArrayList<>();
         ResultSet set = null;
-        try (Connection connection = pool.getConnection();
-             PreparedStatement statementForFind = connection.prepareStatement(findAllSalaries))
-        {
-            set = statementForFind.executeQuery();
+        try (Connection con = pool.getConnection();
+             PreparedStatement st = con.prepareStatement(findAllSalaries)) {
+            set = st.executeQuery();
             while (set.next()) {
-                salaries.add(new Salary()
-                        .withId(set.getInt(1))
-                        .withTeacher(new Teacher()
-                                .withId(set.getInt(2))
-                                .withFirstName(set.getString(3))
-                                .withLastName(set.getString(4))
-                                .withPatronymic(set.getString(5))
-                                .withDateOfBirth(set.getDate(6).toLocalDate())
-                                .withCredentials(new Credentials()
-                                        .withId(set.getInt(7))
-                                        .withLogin(set.getString(8))
-                                        .withPassword(set.getString(9))))
-                        .withDateOfSalary(set.getDate(10).toLocalDate())
-                        .withSalary(set.getInt(11)));
+                salaries.add(createSalaryFromSet(set));
                 log.info("Найдена зарплата");
             }
             return salaries;
@@ -208,21 +174,33 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
             log.error("Зарплата не найдена, изменений не произошло");
             return false;
         } else {
-            try (Connection connection = pool.getConnection();
-                PreparedStatement statementForUpdate = connection.prepareStatement(updateSalaryByID))
-            {
-                statementForUpdate.setInt(1, newSalary);
-                statementForUpdate.setInt(2, id);
-                if (statementForUpdate.executeUpdate() > 0) {
+            Connection con = null;
+            PreparedStatement st = null;
+            Savepoint save = null;
+            try {
+                con = pool.getConnection();
+                con.setAutoCommit(false);
+                st = con.prepareStatement(updateSalaryByID);
+                save = con.setSavepoint();
+
+                st.setInt(1, newSalary);
+                st.setInt(2, id);
+                if (st.executeUpdate() > 0) {
                     log.info("Зарплата успешно обновлена");
+                    con.commit();
                     return true;
                 } else {
                     log.error("Зарплата не обновлена");
+                    con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
                 log.error("Зарплата не найдена, изменения не произошло");
+                myRollback(con ,save);
                 return false;
+            } finally {
+                closeResource(st);
+                closeResource(con);
             }
         }
     }
@@ -235,21 +213,43 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
             log.error("Зарплата не найдена, изменений не произошло");
             return false;
         } else {
-            try (Connection connection = pool.getConnection();
-                 PreparedStatement statementForUpdate = connection.prepareStatement(updateTeacherReceivedBySalaryID))
-            {
-                statementForUpdate.setInt(1, teacher.getId());
-                statementForUpdate.setInt(2, id);
-                if (statementForUpdate.executeUpdate() > 0) {
-                    log.info("Зарплата успешно обновлена");
-                    return true;
+            Connection con = null;
+            PreparedStatement stForUpdateSalary = null;
+            PreparedStatement stForFindTeacher = null;
+            Savepoint save = null;
+            try {
+                con = pool.getConnection();
+                con.setAutoCommit(false);
+                stForUpdateSalary = con.prepareStatement(updateTeacherReceivedBySalaryID);
+                stForFindTeacher = con.prepareStatement(findPersonByCredentials);
+                save = con.setSavepoint();
+
+                int teacherId = foundTeacherId(stForFindTeacher, teacher);
+                if (teacherId > 0) {
+                    stForUpdateSalary.setInt(1, teacherId);
+                    stForUpdateSalary.setInt(2, id);
+                    if (stForUpdateSalary.executeUpdate() > 0) {
+                        log.info("Зарплата успешно обновлена");
+                        con.commit();
+                        return true;
+                    } else {
+                        log.error("Зарплата не обновлена");
+                        con.rollback(save);
+                        return false;
+                    }
                 } else {
-                    log.error("Зарплата не обновлена");
+                    log.error("Не найден Teacher");
+                    con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
                 log.error("Зарплата не найдена, изменения не произошло");
+                myRollback(con ,save);
                 return false;
+            } finally {
+                closeResource(stForFindTeacher);
+                closeResource(stForUpdateSalary);
+                closeResource(con);
             }
         }
     }
@@ -262,21 +262,33 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
             log.error("Зарплата не найдена, изменений не произошло");
             return false;
         } else {
-            try (Connection connection = pool.getConnection();
-                 PreparedStatement statementForUpdate = connection.prepareStatement(updateDateOfSalary))
-            {
-                statementForUpdate.setDate(1, Date.valueOf(newDateOfSalary));
-                statementForUpdate.setInt(2, id);
-                if (statementForUpdate.executeUpdate() > 0) {
+            Connection con = null;
+            PreparedStatement st = null;
+            Savepoint save = null;
+            try {
+                con = pool.getConnection();
+                con.setAutoCommit(false);
+                st = con.prepareStatement(updateDateOfSalary);
+                save = con.setSavepoint();
+
+                st.setDate(1, Date.valueOf(newDateOfSalary));
+                st.setInt(2, id);
+                if (st.executeUpdate() > 0) {
                     log.info("Зарплата успешно обновлена");
+                    con.commit();
                     return true;
                 } else {
                     log.error("Зарплата не обновлена");
+                    con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
                 log.error("Зарплата не найдена, изменения не произошло");
+                myRollback(con, save);
                 return false;
+            } finally {
+                closeResource(st);
+                closeResource(con);
             }
         }
     }
@@ -289,21 +301,66 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
             log.error("Зарплата не найдена, изменений не произошло");
             return false;
         } else {
-            try (Connection connection = pool.getConnection();
-                 PreparedStatement statementForUpdate = connection.prepareStatement(deleteSalaryByID))
-            {
-                statementForUpdate.setInt(1, id);
-                if (statementForUpdate.executeUpdate() > 0) {
+            Connection con = null;
+            PreparedStatement st = null;
+            Savepoint save = null;
+            try {
+                con = pool.getConnection();
+                con.setAutoCommit(false);
+                st = con.prepareStatement(deleteSalaryByID);
+                save = con.setSavepoint();
+
+                st.setInt(1, id);
+                if (st.executeUpdate() > 0) {
                     log.info("Зарплата успешно удалена");
+                    con.commit();
                     return true;
                 } else {
                     log.error("Зарплата не удалена");
+                    con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
                 log.error("Зарплата не найдена, удаления не произошло");
+                myRollback(con ,save);
                 return false;
+            } finally {
+                closeResource(st);
+                closeResource(con);
             }
+        }
+    }
+
+    private int foundTeacherId(PreparedStatement stForFindTeacher, Teacher teacher) throws SQLException {
+        stForFindTeacher.setString(1, teacher.getCredentials().getLogin());
+        stForFindTeacher.setString(2, teacher.getCredentials().getPassword());
+        return stForFindTeacher.executeQuery().getInt("id");
+    }
+
+    public Salary createSalaryFromSet(ResultSet set) throws SQLException {
+        return new Salary()
+                .withId(set.getInt(1))
+                .withTeacher(new Teacher()
+                        .withId(set.getInt(2))
+                        .withFirstName(set.getString(3))
+                        .withLastName(set.getString(4))
+                        .withPatronymic(set.getString(5))
+                        .withDateOfBirth(set.getDate(6).toLocalDate())
+                        .withCredentials(new Credentials()
+                                .withId(set.getInt(7))
+                                .withLogin(set.getString(8))
+                                .withPassword(set.getString(9))))
+                .withDateOfSalary(set.getDate(10).toLocalDate())
+                .withSalary(set.getInt(11));
+    }
+
+    private void myRollback(Connection connection, Savepoint firstSavePoint) {
+        try {
+            if (connection != null) {
+                connection.rollback(firstSavePoint);
+            }
+        } catch (SQLException ex) {
+            log.error("Rollback не удался");
         }
     }
 
