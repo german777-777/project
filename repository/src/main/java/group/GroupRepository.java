@@ -1,6 +1,7 @@
 package group;
 
 import secondary.Group;
+import users.Person;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,7 @@ public interface GroupRepository {
 
     //Update
     boolean updateGroupNameById(int id, String newName);
+    boolean updateGroupTeacherById(int id, Person newTeacher);
 
     //Delete
     boolean deleteGroupById(int id);

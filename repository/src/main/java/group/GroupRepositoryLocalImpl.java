@@ -2,6 +2,7 @@ package group;
 
 import lombok.extern.slf4j.Slf4j;
 import secondary.Group;
+import users.Person;
 
 import java.util.*;
 
@@ -91,6 +92,24 @@ public class GroupRepositoryLocalImpl implements GroupRepository {
             log.info("Изменение группы в репозитории");
             Group groupFromOptional = optionalGroup.get();
             groupFromOptional.setName(newName);
+            groupMap.put(id, groupFromOptional);
+            return groupMap.containsValue(groupFromOptional);
+        }
+        log.error("Группа не найдена, изменений не произошло");
+        return false;
+    }
+
+    @Override
+    public boolean updateGroupTeacherById(int id, Person newTeacher) {
+        log.debug("Попытка взять группу по ID");
+        Optional<Group> optionalGroup = groupMap.values()
+                .stream()
+                .filter(gr -> id == gr.getId())
+                .findAny();
+        if (optionalGroup.isPresent()) {
+            log.info("Изменение группы в репозитории");
+            Group groupFromOptional = optionalGroup.get();
+            groupFromOptional.setTeacher(newTeacher);
             groupMap.put(id, groupFromOptional);
             return groupMap.containsValue(groupFromOptional);
         }

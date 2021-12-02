@@ -180,7 +180,7 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
             try {
                 con = pool.getConnection();
                 con.setAutoCommit(false);
-                st = con.prepareStatement(updateSubjectOfMarkByID);
+                st = con.prepareStatement(updateDateOfMarkByID);
                 save = con.setSavepoint();
 
                 st.setDate(1, Date.valueOf(newDateOfMark));
@@ -219,7 +219,7 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
             try {
                 con = pool.getConnection();
                 con.setAutoCommit(false);
-                st = con.prepareStatement(updateSubjectOfMarkByID);
+                st = con.prepareStatement(updateGroupOfMarkByID);
                 save = con.setSavepoint();
 
                 st.setInt(1, newGroup.getId());

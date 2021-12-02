@@ -82,7 +82,7 @@ public final class Queries {
 
     // удаление Person по ФИО
     //language=SQL
-    public static final String deletePersonByName = "DELETE FROM persons WHERE first_name = ? AND last_name = ? AND patronymic = ?";
+    //public static final String deletePersonByName = "DELETE FROM persons WHERE first_name = ? AND last_name = ? AND patronymic = ?";
 
 
 
@@ -93,6 +93,37 @@ public final class Queries {
     //language=SQL
     public static final String putGroup = "INSERT INTO groups (teacher_id, name) VALUES (?, ?)";
 
+
+    // поиск Group по ID
+    //language=SQL
+    public static final String findGroupByID = "SELECT g.id, g.name, p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, c.id, c.login, c.password " +
+            "FROM groups g " +
+            "LEFT JOIN persons p on p.id = g.teacher_id " +
+            "LEFT JOIN credentials c on p.credential_id = c.id " +
+            "WHERE g.id = ?";
+
+    // поиск Group по названию
+    //language=SQL
+    public static final String findGroupByName = "SELECT g.id, g.name, p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, c.id, c.login, c.password " +
+            "FROM groups g " +
+            "LEFT JOIN persons p on p.id = g.teacher_id " +
+            "LEFT JOIN credentials c on p.credential_id = c.id " +
+            "WHERE g.name = ?";
+
+    // поиск всех Group
+    //language=SQL
+    public static final String findAllGroups = "SELECT g.id, g.name, p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, c.id, c.login, c.password " +
+            "FROM groups g " +
+            "LEFT JOIN persons p on p.id = g.teacher_id " +
+            "LEFT JOIN credentials c on p.credential_id = c.id";
+
+    // обновление названия группы по ID
+    //language=SQL
+    public static final String updateGroupNameByID = "UPDATE groups SET name = ? WHERE id = ?";
+
+    // обновление Teacher у Group по ID
+    //language=SQL
+    public static final String updateGroupTeacherByID = "UPDATE groups SET teacher_id = ? WHERE id = ?";
 
     // выставление id Teacher на null
     //language=SQL
@@ -132,7 +163,7 @@ public final class Queries {
 
     // удаление Subject по названию
     //language=SQL
-    public static final String deleteSubjectByName = "DELETE FROM subjects WHERE name = ?";
+    //public static final String deleteSubjectByName = "DELETE FROM subjects WHERE name = ?";
 
 
     // запросы к таблице Salaries
