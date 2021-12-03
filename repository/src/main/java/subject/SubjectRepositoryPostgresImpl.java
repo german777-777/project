@@ -243,8 +243,8 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
                 con = pool.getConnection();
                 con.setAutoCommit(false);
                 stForDeleteSubject = con.prepareStatement(deleteSubjectByID);
-                stForDeleteSubjectFromGroup = con.prepareStatement(deleteSubjectFromGroupById);
-                stForDeleteSubjectFromMarks = con.prepareStatement(deleteMarksBySubjectId);
+                stForDeleteSubjectFromGroup = con.prepareStatement(deleteSubjectFromGroupByID);
+                stForDeleteSubjectFromMarks = con.prepareStatement(deleteMarksBySubjectID);
                 save = con.setSavepoint();
 
                 stForDeleteSubjectFromGroup.setInt(1, id);
@@ -308,8 +308,8 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
                 con = pool.getConnection();
                 con.setAutoCommit(false);
                 stForDeleteSubject = con.prepareStatement(deleteSubjectByID);
-                stForDeleteSubjectFromGroup = con.prepareStatement(deleteSubjectFromGroupById);
-                stForDeleteSubjectFromMarks = con.prepareStatement(deleteMarksBySubjectId);
+                stForDeleteSubjectFromGroup = con.prepareStatement(deleteSubjectFromGroupByID);
+                stForDeleteSubjectFromMarks = con.prepareStatement(deleteMarksBySubjectID);
                 save = con.setSavepoint();
 
                 stForDeleteSubjectFromGroup.setInt(1, subject.getId());

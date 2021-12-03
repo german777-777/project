@@ -17,11 +17,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static constants.Queries.deleteGroupById;
+import static constants.Queries.deleteGroupWithStudentsByID;
+import static constants.Queries.deleteGroupWithSubjectsByID;
+import static constants.Queries.deleteMarksByGroupID;
 import static constants.Queries.findAllGroups;
 import static constants.Queries.findGroupByID;
 import static constants.Queries.findGroupByName;
+import static constants.Queries.findGroupWithStudentsByID;
+import static constants.Queries.findMarksByGroupID;
 import static constants.Queries.findPersonByName;
 import static constants.Queries.findSubjectByName;
+import static constants.Queries.findSubjectsByGroupID;
 import static constants.Queries.putGroup;
 import static constants.Queries.putStudentAndGroupID;
 import static constants.Queries.putSubjectAndGroupID;
@@ -350,7 +357,148 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
 
     @Override
     public boolean deleteGroupById(int id) {
-        return false;
+        Connection con = null;
+        PreparedStatement stForFindStudentWithThisGroup = null;
+        PreparedStatement stForFindMarksWithThisGroup = null;
+        PreparedStatement stForFindSubjectsWithThisGroup = null;
+        PreparedStatement stForDeleteStudentsWithThisGroup = null;
+        PreparedStatement stForDeleteMarksWithThisGroup = null;
+        PreparedStatement stForDeleteSubjectsWithThisGroup = null;
+        PreparedStatement stForDeleteGroup = null;
+        Savepoint save = null;
+        try {
+            con = pool.getConnection();
+            con.setAutoCommit(false);
+            stForFindStudentWithThisGroup = con.prepareStatement(findGroupWithStudentsByID);
+            stForFindMarksWithThisGroup = con.prepareStatement(findMarksByGroupID);
+            stForFindSubjectsWithThisGroup = con.prepareStatement(findSubjectsByGroupID);
+            stForDeleteStudentsWithThisGroup = con.prepareStatement(deleteGroupWithStudentsByID);
+            stForDeleteMarksWithThisGroup = con.prepareStatement(deleteMarksByGroupID);
+            stForDeleteSubjectsWithThisGroup = con.prepareStatement(deleteGroupWithSubjectsByID);
+            stForDeleteGroup = con.prepareStatement(deleteGroupById);
+            save = con.setSavepoint();
+
+            Optional<Group> optionalGroup = getGroupById(id);
+            if (optionalGroup.isPresent()) {
+
+                if (isGroupHasStudents(stForFindStudentWithThisGroup, id)) {
+                    if (isStudentsHadDeleted(stForDeleteStudentsWithThisGroup, id)) {
+                        log.info("Студенты удалены");
+                        con.commit();
+                    } else {
+                        log.error("Студенты не удалены, удаление группы прервано");
+                        con.rollback(save);
+                        return false;
+                    }
+                }
+
+                if (isGroupHasMarks(stForFindMarksWithThisGroup, id)) {
+                    if (isMarksHadDeleted(stForDeleteMarksWithThisGroup, id)) {
+                        log.info("Оценки удалены");
+                        con.commit();
+                    } else {
+                        log.error("Оценки не удалены, удаление группы прервано");
+                        con.rollback(save);
+                        return false;
+                    }
+                }
+
+                if (isGroupHasSubjects(stForFindSubjectsWithThisGroup, id)) {
+                    if (isSubjectsHadDeleted(stForDeleteSubjectsWithThisGroup, id)) {
+                        log.info("Предметы удалены");
+                        con.commit();
+                    } else {
+                        log.error("Предметы не удалены, удаление группы прервано");
+                        con.rollback(save);
+                        return false;
+                    }
+                }
+
+                if (isGroupHasDeleted(stForDeleteGroup, id)) {
+                    log.info("Группа полностью удалена, удаление завершено");
+                    con.commit();
+                    return true;
+                } else {
+                    log.error("Группа не удалена, удаление прервано");
+                    con.rollback(save);
+                    return false;
+                }
+
+            } else {
+                log.error("Группа не найдена, удаления не произошло");
+                con.rollback(save);
+                return false;
+            }
+        } catch (SQLException e) {
+            log.error("Ошибка получения: SQLException");
+            myRollback(con, save);
+            return false;
+        } finally {
+            closeResource(stForFindStudentWithThisGroup);
+            closeResource(stForFindMarksWithThisGroup);
+            closeResource(stForFindSubjectsWithThisGroup);
+            closeResource(stForDeleteStudentsWithThisGroup);
+            closeResource(stForDeleteMarksWithThisGroup);
+            closeResource(stForDeleteSubjectsWithThisGroup);
+            closeResource(stForDeleteGroup);
+            closeResource(con);
+        }
+    }
+
+    // метод удаления самой группы
+
+    private boolean isGroupHasDeleted(PreparedStatement stForDeleteGroup, int groupId) throws SQLException {
+        log.info("Попытка удалить группу");
+        stForDeleteGroup.setInt(1, groupId);
+        return stForDeleteGroup.executeUpdate() > 0;
+    }
+
+    // метод для удаления предметов из этой группы
+
+    private boolean isSubjectsHadDeleted(PreparedStatement stForDeleteSubjects, int groupId) throws SQLException {
+        log.info("Попытка удалиения прдметов из этой группы");
+        stForDeleteSubjects.setInt(1, groupId);
+        return stForDeleteSubjects.executeUpdate() > 0;
+    }
+
+    // метод для проверки на наличие предметов в этой группе
+
+    private boolean isGroupHasSubjects(PreparedStatement stForFindSubjects, int groupId) throws SQLException {
+        log.info("Проверка, есть ли в группе предметы");
+        stForFindSubjects.setInt(1, groupId);
+        return stForFindSubjects.executeQuery().next();
+    }
+
+    // метод для удаления оценок из этой группы
+
+    private boolean isMarksHadDeleted(PreparedStatement stForDeleteMarks, int groupId) throws SQLException {
+        log.info("Попытка удаления оценок из этой группы");
+        stForDeleteMarks.setInt(1, groupId);
+        return stForDeleteMarks.executeUpdate() > 0;
+    }
+
+    // метод для проверки выставления в этой группе оценок
+
+    private boolean isGroupHasMarks(PreparedStatement stForFindMarks, int groupId) throws SQLException {
+        log.info("Проверка, есть ли в группе оценки");
+        stForFindMarks.setInt(1, groupId);
+        return stForFindMarks.executeQuery().next();
+    }
+
+    // метод дял удаления студентов из этой группы
+
+    private boolean isStudentsHadDeleted(PreparedStatement stForDeleteStudents, int groupId) throws SQLException {
+        log.info("Попытка удаления студентов из этой группы");
+        stForDeleteStudents.setInt(1, groupId);
+        return stForDeleteStudents.executeUpdate() > 0;
+    }
+
+    // метод для проверки есть ли в этой группе студенты
+
+    private boolean isGroupHasStudents(PreparedStatement stForFindStudents, int groupId) throws SQLException {
+        log.info("Проверка, есть ли у группы студенты");
+        stForFindStudents.setInt(1, groupId);
+        return stForFindStudents.executeQuery().next();
     }
 
     // метод для поиска группы

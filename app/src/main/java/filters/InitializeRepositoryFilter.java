@@ -106,6 +106,18 @@ public class InitializeRepositoryFilter implements Filter {
     }
 
     private void setValuesToRepositories(RepositoryFactory factory) {
+
+        log.info("Добавление админа");
+        Person admin = new Admin()
+                .withFirstName("Someone")
+                .withLastName("Anon")
+                .withPatronymic("No")
+                .withCredentials(new Credentials()
+                        .withLogin("Anonymous")
+                        .withPassword("Anonim"))
+                .withDateOfBirth(LocalDate.of(1, Month.MARCH, 1));
+        factory.getPersonRepository().createPerson(admin);
+
         log.info("Добавление учителей");
         Person teacher1 = new Teacher()
                 .withFirstName("Гришечкин")
@@ -155,16 +167,7 @@ public class InitializeRepositoryFilter implements Filter {
         factory.getPersonRepository().createPerson(student1);
         factory.getPersonRepository().createPerson(student2);
 
-        log.info("Добавление админа");
-        Person admin = new Admin()
-                .withFirstName("Someone")
-                .withLastName("Anon")
-                .withPatronymic("No")
-                .withCredentials(new Credentials()
-                        .withLogin("Anonymous")
-                        .withPassword("Anonim"))
-                .withDateOfBirth(LocalDate.of(1, Month.MARCH, 1));
-        factory.getPersonRepository().createPerson(admin);
+
 
         log.info("Добавление зарплаты учителю {}", teacher3.getFirstName());
         Salary salary1 = new Salary()

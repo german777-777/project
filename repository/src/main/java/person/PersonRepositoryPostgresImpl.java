@@ -26,9 +26,13 @@ import static constants.Queries.deleteSalaryByTeacherID;
 import static constants.Queries.deleteStudentFromGroupByID;
 import static constants.Queries.findAllPersons;
 import static constants.Queries.findCredentialsByLoginAndPassword;
+import static constants.Queries.findGroupByTeacherID;
+import static constants.Queries.findMarksByStudentID;
 import static constants.Queries.findPersonByCredentials;
 import static constants.Queries.findPersonByID;
 import static constants.Queries.findPersonByName;
+import static constants.Queries.findSalariesByTeacherID;
+import static constants.Queries.findStudentsByID;
 import static constants.Queries.putCredentials;
 import static constants.Queries.putPerson;
 import static constants.Queries.updatePersonCredentialsByID;
@@ -305,6 +309,10 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
     @Override
     public boolean deletePersonById(int id) {
         Connection con = null;
+        PreparedStatement stForFindSalaries = null;
+        PreparedStatement stForFindTeacherInGroup = null;
+        PreparedStatement stForFindMarks = null;
+        PreparedStatement stForFindStudentInGroup = null;
         PreparedStatement stForDeletePerson = null;
         PreparedStatement stForDeleteCred = null;
         PreparedStatement stForDeleteSalaries = null;
@@ -314,6 +322,11 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
         Savepoint save = null;
         try {
             con = pool.getConnection();
+            // Statements для проверки
+            stForFindMarks = con.prepareStatement(findMarksByStudentID);
+            stForFindStudentInGroup = con.prepareStatement(findStudentsByID);
+            stForFindSalaries = con.prepareStatement(findSalariesByTeacherID);
+            stForFindTeacherInGroup = con.prepareStatement(findGroupByTeacherID);
             // Statements для удаления пользователя и его учётных данных
             stForDeletePerson = con.prepareStatement(deletePersonByID);
             stForDeleteCred = con.prepareStatement(deleteCredentialsByLoginAndPassword);
@@ -332,60 +345,86 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                 Person person = optionalPerson.get();
                 switch (person.getRole()) {
                     case TEACHER:
-                        if (isSalariesDeleted(stForDeleteSalaries, person.getId())) {
-                            log.info("Зарплаты удалены");
+                        if (isTeacherHasSalaries(stForFindSalaries, person.getId())) {
+                            if (isSalariesDeleted(stForDeleteSalaries, person.getId())) {
+                                log.info("Зарплаты удалены");
+                                con.commit();
+                            } else {
+                                log.error("Зарплаты не удалены, удаление прервано");
+                                con.rollback(save);
+                                return false;
+                            }
+                        }
+
+                        if (isTeacherHasGroup(stForFindTeacherInGroup, person.getId())) {
+                            if (isTeacherDeleteFromGroup(stForSetTeacherNull, person.getId())) {
+                                log.info("Учитель удалён из группы");
+                                con.commit();
+                            } else {
+                                log.error("Учитель не удалён из группы, удаление прервано");
+                                con.rollback(save);
+                                return false;
+                            }
+                        }
+
+                        if (isPersonDeleted(stForDeletePerson, person)) {
+                            log.info("Пользователь удалён");
                             con.commit();
                         } else {
-                            log.error("Зарплаты не удалены, удаление прервано");
+                            log.error("Пользовательне удалён, удаления не произошло");
                             con.rollback(save);
                             return false;
                         }
 
-                        if (isTeacherDeleteFromGroup(stForSetTeacherNull, person.getId())) {
-                            log.info("Учитель удалён из группы");
-                            con.commit();
-                        } else {
-                            log.error("Учитель не удалён из группы, удаление прервано");
-                            con.rollback(save);
-                            return false;
-                        }
-
-                        if (isPersonAndCredentialsDeleted(stForDeletePerson, stForDeleteCred, person)) {
-                            log.info("Пользователь и его учётные данные успешно удалены");
+                        if (isCredentialsDeleted(stForDeleteCred, person)) {
+                            log.info("Учётные данные удалены, пользователь полновстью удалён");
                             con.commit();
                             return true;
                         } else {
-                            log.error("Пользователь или его учёиные данные не удалены, удаления не произошло");
+                            log.error("Учётные данные пользователя не удалены, удаления не произошло");
                             con.rollback(save);
                             return false;
                         }
 
 
                     case STUDENT:
-                        if (isMarkDeleted(stForDeleteMarks, person.getId())) {
-                            log.info("Оценки удалены");
+                        if (isStudentHasMarks(stForFindMarks, person.getId())) {
+                            if (isMarkDeleted(stForDeleteMarks, person.getId())) {
+                                log.info("Оценки удалены");
+                                con.commit();
+                            } else {
+                                log.error("Оценки не удалены, удаление прервано");
+                                con.rollback(save);
+                                return false;
+                            }
+                        }
+
+                        if (isStudentInGroup(stForFindStudentInGroup, person.getId())) {
+                            if (isStudentDeletedFromGroup(stForDeleteStudentFromGroup, person.getId())) {
+                                log.info("Студент удалён из группы");
+                                con.commit();
+                            } else {
+                                log.error("Студент не удалён из группы, удаление прервано");
+                                con.rollback(save);
+                                return false;
+                            }
+                        }
+
+                        if (isPersonDeleted(stForDeletePerson, person)) {
+                            log.info("Пользователь удалён");
                             con.commit();
                         } else {
-                            log.error("Оценки не удалены, удаление прервано");
+                            log.error("Пользовательне удалён, удаления не произошло");
                             con.rollback(save);
                             return false;
                         }
 
-                        if (isStudentDeletedFromGroup(stForDeleteStudentFromGroup, person.getId())) {
-                            log.info("Студент удалён из группы");
-                            con.commit();
-                        } else {
-                            log.error("Студент не удалён из группы, удаление прервано");
-                            con.rollback(save);
-                            return false;
-                        }
-
-                        if (isPersonAndCredentialsDeleted(stForDeletePerson, stForDeleteCred, person)) {
-                            log.info("Пользователь и его учётные данные успешно удалены");
+                        if (isCredentialsDeleted(stForDeleteCred, person)) {
+                            log.info("Учётные данные удалены, пользователь полновстью удалён");
                             con.commit();
                             return true;
                         } else {
-                            log.error("Пользователь или его учёиные данные не удалены, удаления не произошло");
+                            log.error("Учётные данные пользователя не удалены, удаления не произошло");
                             con.rollback(save);
                             return false;
                         }
@@ -404,6 +443,10 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
             myRollback(con, save);
             return false;
         } finally {
+            closeResource(stForFindSalaries);
+            closeResource(stForFindTeacherInGroup);
+            closeResource(stForFindMarks);
+            closeResource(stForFindStudentInGroup);
             closeResource(stForDeleteMarks);
             closeResource(stForDeleteStudentFromGroup);
             closeResource(stForDeleteSalaries);
@@ -417,6 +460,10 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
     @Override
     public boolean deletePersonByName(String firstName, String lastName, String patronymic) {
         Connection con = null;
+        PreparedStatement stForFindSalaries = null;
+        PreparedStatement stForFindTeacherInGroup = null;
+        PreparedStatement stForFindMarks = null;
+        PreparedStatement stForFindStudentInGroup = null;
         PreparedStatement stForDeletePerson = null;
         PreparedStatement stForDeleteCred = null;
         PreparedStatement stForDeleteSalaries = null;
@@ -426,6 +473,11 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
         Savepoint save = null;
         try {
             con = pool.getConnection();
+            // Statements для проверки
+            stForFindMarks = con.prepareStatement(findMarksByStudentID);
+            stForFindStudentInGroup = con.prepareStatement(findStudentsByID);
+            stForFindSalaries = con.prepareStatement(findSalariesByTeacherID);
+            stForFindTeacherInGroup = con.prepareStatement(findGroupByTeacherID);
             // Statements для удаления пользователя и его учётных данных
             stForDeletePerson = con.prepareStatement(deletePersonByID);
             stForDeleteCred = con.prepareStatement(deleteCredentialsByLoginAndPassword);
@@ -444,60 +496,86 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                 Person person = optionalPerson.get();
                 switch (person.getRole()) {
                     case TEACHER:
-                        if (isSalariesDeleted(stForDeleteSalaries, person.getId())) {
-                            log.info("Зарплаты удалены");
+                        if (isTeacherHasSalaries(stForFindSalaries, person.getId())) {
+                            if (isSalariesDeleted(stForDeleteSalaries, person.getId())) {
+                                log.info("Зарплаты удалены");
+                                con.commit();
+                            } else {
+                                log.error("Зарплаты не удалены, удаление прервано");
+                                con.rollback(save);
+                                return false;
+                            }
+                        }
+
+                        if (isTeacherHasGroup(stForFindTeacherInGroup, person.getId())) {
+                            if (isTeacherDeleteFromGroup(stForSetTeacherNull, person.getId())) {
+                                log.info("Учитель удалён из группы");
+                                con.commit();
+                            } else {
+                                log.error("Учитель не удалён из группы, удаление прервано");
+                                con.rollback(save);
+                                return false;
+                            }
+                        }
+
+                        if (isPersonDeleted(stForDeletePerson, person)) {
+                            log.info("Пользователь удалён");
                             con.commit();
                         } else {
-                            log.error("Зарплаты не удалены, удаление прервано");
+                            log.error("Пользовательне удалён, удаления не произошло");
                             con.rollback(save);
                             return false;
                         }
 
-                        if (isTeacherDeleteFromGroup(stForSetTeacherNull, person.getId())) {
-                            log.info("Учитель удалён из группы");
-                            con.commit();
-                        } else {
-                            log.error("Учитель не удалён из группы, удаление прервано");
-                            con.rollback(save);
-                            return false;
-                        }
-
-                        if (isPersonAndCredentialsDeleted(stForDeletePerson, stForDeleteCred, person)) {
-                            log.info("Пользователь и его учётные данные успешно удалены");
+                        if (isCredentialsDeleted(stForDeleteCred, person)) {
+                            log.info("Учётные данные удалены, пользователь полновстью удалён");
                             con.commit();
                             return true;
                         } else {
-                            log.error("Пользователь или его учёиные данные не удалены, удаления не произошло");
+                            log.error("Учётные данные пользователя не удалены, удаления не произошло");
                             con.rollback(save);
                             return false;
                         }
 
 
                     case STUDENT:
-                        if (isMarkDeleted(stForDeleteMarks, person.getId())) {
-                            log.info("Оценки удалены");
+                        if (isStudentHasMarks(stForFindMarks, person.getId())) {
+                            if (isMarkDeleted(stForDeleteMarks, person.getId())) {
+                                log.info("Оценки удалены");
+                                con.commit();
+                            } else {
+                                log.error("Оценки не удалены, удаление прервано");
+                                con.rollback(save);
+                                return false;
+                            }
+                        }
+
+                        if (isStudentInGroup(stForFindStudentInGroup, person.getId())) {
+                            if (isStudentDeletedFromGroup(stForDeleteStudentFromGroup, person.getId())) {
+                                log.info("Студент удалён из группы");
+                                con.commit();
+                            } else {
+                                log.error("Студент не удалён из группы, удаление прервано");
+                                con.rollback(save);
+                                return false;
+                            }
+                        }
+
+                        if (isPersonDeleted(stForDeletePerson, person)) {
+                            log.info("Пользователь удалён");
                             con.commit();
                         } else {
-                            log.error("Оценки не удалены, удаление прервано");
+                            log.error("Пользовательне удалён, удаления не произошло");
                             con.rollback(save);
                             return false;
                         }
 
-                        if (isStudentDeletedFromGroup(stForDeleteStudentFromGroup, person.getId())) {
-                            log.info("Студент удалён из группы");
-                            con.commit();
-                        } else {
-                            log.error("Студент не удалён из группы, удаление прервано");
-                            con.rollback(save);
-                            return false;
-                        }
-
-                        if (isPersonAndCredentialsDeleted(stForDeletePerson, stForDeleteCred, person)) {
-                            log.info("Пользователь и его учётные данные успешно удалены");
+                        if (isCredentialsDeleted(stForDeleteCred, person)) {
+                            log.info("Учётные данные удалены, пользователь полновстью удалён");
                             con.commit();
                             return true;
                         } else {
-                            log.error("Пользователь или его учёиные данные не удалены, удаления не произошло");
+                            log.error("Учётные данные пользователя не удалены, удаления не произошло");
                             con.rollback(save);
                             return false;
                         }
@@ -516,6 +594,10 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
             myRollback(con, save);
             return false;
         } finally {
+            closeResource(stForFindSalaries);
+            closeResource(stForFindTeacherInGroup);
+            closeResource(stForFindMarks);
+            closeResource(stForFindStudentInGroup);
             closeResource(stForDeleteMarks);
             closeResource(stForDeleteStudentFromGroup);
             closeResource(stForDeleteSalaries);
@@ -524,6 +606,38 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
             closeResource(stForDeleteCred);
             closeResource(con);
         }
+    }
+
+    // метод для проверки есть ли студент в группе
+
+    private boolean isStudentInGroup(PreparedStatement stForFindStudentInGroup, int studentId) throws SQLException {
+        log.info("Проверка, состоит ли студент в группах");
+        stForFindStudentInGroup.setInt(1, studentId);
+        return stForFindStudentInGroup.executeQuery().next();
+    }
+
+    // метод для проверки есть ли у студента оценки
+
+    private boolean isStudentHasMarks(PreparedStatement stForFindMarks, int studentId) throws SQLException {
+        log.info("Проверка, есть ли у студента оценки");
+        stForFindMarks.setInt(1, studentId);
+        return stForFindMarks.executeQuery().next();
+    }
+
+    // метод для проверки ведёт ли учитель у какой-либо группы
+
+    private boolean isTeacherHasGroup(PreparedStatement stForFindTeacherInGroup, int teacherId) throws SQLException {
+        log.info("Проверка, есть ли у учителя группа, которую он ведёт");
+        stForFindTeacherInGroup.setInt(1, teacherId);
+        return stForFindTeacherInGroup.executeQuery().next();
+    }
+
+    // метод для проверки есть ли у учителя зарплаты
+
+    private boolean isTeacherHasSalaries(PreparedStatement stForFindSalaries, int teacherId) throws SQLException {
+        log.info("Проврека, есть ли у учителя зарплаты");
+        stForFindSalaries.setInt(1, teacherId);
+        return stForFindSalaries.executeQuery().next();
     }
 
     // метод удаления Student из Group_Student
@@ -558,20 +672,29 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
         return stForDeleteSalaries.executeUpdate() > 0;
     }
 
-    // метод по удалению самого Person и его Credentials
+    // метод по удалению самого Person
 
-    private boolean isPersonAndCredentialsDeleted(PreparedStatement stForDeletePerson, PreparedStatement stForDeleteCred, Person person) throws SQLException {
+    private boolean isPersonDeleted(PreparedStatement stForDeletePerson, Person person) throws SQLException {
         boolean result;
 
         log.info("Попытка удаления пользователя из репозитория");
         stForDeletePerson.setInt(1, person.getId());
+        result = stForDeletePerson.executeUpdate() > 0;
+        if (!result) {
+            log.error("Пользователь не удалён");
+        }
+        return result;
+    }
 
+    private boolean isCredentialsDeleted(PreparedStatement stForDeleteCred, Person person) throws SQLException {
+        boolean result;
         log.info("Попытка удаления учётных данных пользователя из репозитория");
         stForDeleteCred.setString(1, person.getCredentials().getLogin());
         stForDeleteCred.setString(2, person.getCredentials().getPassword());
-
-        result = stForDeleteCred.executeUpdate() > 0 && stForDeletePerson.executeUpdate() > 0;
-
+        result = stForDeleteCred.executeUpdate() > 0;
+        if (!result) {
+            log.error("Учётные данные не удалены");
+        }
         return result;
     }
 
