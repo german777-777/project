@@ -110,7 +110,7 @@
         Дата рождения:<input style="align-content: center; display: block" type="date" name="newDateOfBirth">
     </label>
     <button style="align-content: center; display: block" type="submit">Создать</button>
-    <a style="display: block" href="admin.jsp">Назад</a>
 </form>
+<a style="display: block" href="admin.jsp">Назад</a>
 </body>
 </html>

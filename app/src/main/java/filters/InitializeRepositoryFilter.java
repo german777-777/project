@@ -8,6 +8,7 @@ import fabric.RepositoryFactoryPostgresImpl;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import secondary.Group;
+import secondary.Mark;
 import secondary.Salary;
 import secondary.Subject;
 import users.Admin;

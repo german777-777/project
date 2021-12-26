@@ -81,17 +81,13 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
 
                 if (teacherId != 0) {
                     stForInsertGroup.setInt(1, teacherId);
-                    stForInsertGroup.setString(2, group.getName());
-                    if (stForInsertGroup.executeUpdate() > 0) {
-                        log.info("Группа добавлена, продолжение создания");
-                        con.commit();
-                    } else {
-                        log.error("Группа не добавлена, создание прекращено");
-                        con.rollback(save);
-                        return null;
-                    }
+                }
+                stForInsertGroup.setString(2, group.getName());
+                if (stForInsertGroup.executeUpdate() > 0) {
+                    log.info("Группа добавлена, продолжение создания");
+                    con.commit();
                 } else {
-                    log.error("Учитель для группы не найден, создание прекращено");
+                    log.error("Группа не добавлена, создание прекращено");
                     con.rollback(save);
                     return null;
                 }

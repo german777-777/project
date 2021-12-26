@@ -334,7 +334,12 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
     private int foundTeacherId(PreparedStatement stForFindTeacher, Teacher teacher) throws SQLException {
         stForFindTeacher.setString(1, teacher.getCredentials().getLogin());
         stForFindTeacher.setString(2, teacher.getCredentials().getPassword());
-        return stForFindTeacher.executeQuery().getInt("id");
+        ResultSet set = stForFindTeacher.executeQuery();
+        if (set.next()) {
+            return set.getInt(1);
+        } else {
+            return 0;
+        }
     }
 
     public Salary createSalaryFromSet(ResultSet set) throws SQLException {

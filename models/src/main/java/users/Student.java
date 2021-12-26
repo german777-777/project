@@ -6,13 +6,14 @@ import role.Role;
 import secondary.Mark;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class Student extends Person {
     private final Role role = Role.STUDENT;
-    List<Mark> marks;
+    List<Mark> marks = new ArrayList<>();
 
     public Student withId(int id) {
         setId(id);

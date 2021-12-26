@@ -12,12 +12,12 @@ import java.util.Objects;
 @AllArgsConstructor
 @Data
 public abstract class Person extends AbstractEntity {
-    private String firstName;
-    private String lastName;
-    private String patronymic;
-    private LocalDate dateOfBirth;
-    private Credentials credentials;
-    private Role role;
+    protected String firstName;
+    protected String lastName;
+    protected String patronymic;
+    protected LocalDate dateOfBirth;
+    protected Credentials credentials;
+    protected Role role;
 
     @Override
     public boolean equals(Object o) {
