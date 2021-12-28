@@ -101,7 +101,7 @@ public class InitializeRepositoryFilter implements Filter {
         pool.setMinPoolSize(3);
         pool.setAcquireIncrement(2);
         pool.setMaxPoolSize(10);
-        pool.setMaxStatements(50);
+        pool.setMaxStatements(100);
         pool.setDriverClass(bundle.getString("driver"));
         return pool;
     }
@@ -121,8 +121,8 @@ public class InitializeRepositoryFilter implements Filter {
 
         log.info("Добавление учителей");
         Person teacher1 = new Teacher()
-                .withFirstName("Гришечкин")
-                .withLastName("Юрий")
+                .withFirstName("Юрий")
+                .withLastName("Гришечкин")
                 .withPatronymic("Геннадьевич")
                 .withCredentials(new Credentials()
                         .withLogin("Grisha")

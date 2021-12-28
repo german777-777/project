@@ -77,11 +77,14 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
                 stForInsertSubjects = con.prepareStatement(putSubjectAndGroupID);
                 save = con.setSavepoint();
 
-                int teacherId = findTeacherId(group, stForFindTeacherId);
+                if (group.getTeacher() != null) {
+                    int teacherId = findTeacherId(group, stForFindTeacherId);
 
-                if (teacherId != 0) {
-                    stForInsertGroup.setInt(1, teacherId);
+                    if (teacherId != 0) {
+                        stForInsertGroup.setInt(1, teacherId);
+                    }
                 }
+
                 stForInsertGroup.setString(2, group.getName());
                 if (stForInsertGroup.executeUpdate() > 0) {
                     log.info("Группа добавлена, продолжение создания");

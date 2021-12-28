@@ -10,6 +10,7 @@
         <a style="display: block" href="admin_student.jsp">На страницу со студентами</a>
         <a style="display: block" href="admin_teacher.jsp">На страницу с учителями</a>
         <a style="display: block" href="admin_groups.jsp">На страницу с группами</a>
+        <a style="display: block" href="admin_subjects.jsp">На страницу с предметами</a>
     </h2>
     <h3>
         <a style="display: block" href="index.jsp">Выход из аккаунта</a>

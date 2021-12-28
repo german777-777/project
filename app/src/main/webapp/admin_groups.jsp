@@ -26,6 +26,7 @@
                               ${group.teacher.patronymic}"/>
             </td>
             <td>
+                <%-- тут будет передаваться ID группы в requestScope (в сервлете) --%>
                 <form action="<c:url value="/GroupServlet"/>" method="get">
                     <input type="hidden" name="method" value="get">
                     <input type="hidden" name="ID" value="${group.id}">
@@ -38,7 +39,7 @@
                     <input type="hidden" name="ID" value="${group.id}">
                     <label>
                         Новый учитель ('фамилия' 'имя' 'отчество'):
-                        <input style="display: block; text-align: center" type="text" name="newTeacher"
+                        <input style="display: block; text-align: center" type="text" name="newLastFirstPatronymic"
                                placeholder="Новый учитель">
                     </label>
                     <label>
@@ -64,7 +65,7 @@
     </c:if>
 </h3>
 <h4>
-    Добавление нового учителя
+    Добавление новой группы
 </h4>
 <form action="<c:url value="/GroupServlet"/>">
     <input type="hidden" name="method" value="post">
@@ -73,7 +74,7 @@
     </label>
     <label>
         Учитель ('фамилия' 'имя' 'отчество'): <input style="text-align: center; display: block" type="text"
-                                                     name="newName">
+                                                     name="lastFirstPatronymic">
     </label>
     <button style="align-content: center; display: block" type="submit">Создать</button>
 </form>

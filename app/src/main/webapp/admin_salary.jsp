@@ -21,7 +21,11 @@
             <tr style="text-align: center">
             <td><c:out value="${salary.id}"/></td>
             <td><c:out
-                    value="${salary.teacher.firstName} ${salary.teacher.lastName} ${salary.teacher.patronymic}"/></td>
+                    value="
+                    ${salary.teacher.firstName}
+                    ${salary.teacher.lastName}
+                    ${salary.teacher.patronymic}"/>
+            </td>
             <td><c:out value="${salary.dateOfSalary}"/></td>
             <td><c:out value="${salary.salary}"/></td>
             <td>
@@ -49,5 +53,9 @@
         </c:if>
     </c:forEach>
 </table>
+
+<h4>Добавить зарплату</h4>
+
+
 </body>
 </html>
