@@ -202,5 +202,18 @@ public class InitializeRepositoryFilter implements Filter {
                 .withSubject(subject2)
                 .withSubject(subject3);
         factory.getGroupRepository().createGroup(group1);
+
+        Group group = factory.getGroupRepository().getGroupByName("JEE-2021").get();
+        Person student = factory.getPersonRepository().getPersonByName("Иван", "Угловец", "Иванович").get();
+        Subject subject = factory.getSubjectRepository().getSubjectByName("Tomcat").get();
+//
+        Mark mark1 = new Mark()
+                .withMark(10)
+                .withDateOfMark(LocalDate.now())
+                .withGroupId(group.getId())
+                .withStudentId(student.getId())
+                .withSubjectId(subject.getId());
+        factory.getMarkRepository().createMark(mark1);
+
     }
 }

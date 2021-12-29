@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 public class Student extends Person {
     private final Role role = Role.STUDENT;
-    List<Mark> marks = new ArrayList<>();
+    private List<Mark> marks = new ArrayList<>();
 
     public Student withId(int id) {
         setId(id);
@@ -47,6 +47,16 @@ public class Student extends Person {
 
     public Student withMarks(List<Mark> marks) {
         setMarks(marks);
+        return this;
+    }
+
+    public Student addMark(Mark mark) {
+        this.marks.add(mark);
+        return this;
+    }
+
+    public Student removeMark(Mark mark) {
+        this.marks.remove(mark);
         return this;
     }
 }

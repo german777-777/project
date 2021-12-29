@@ -1,6 +1,8 @@
 package servlets;
 
 import credentials.Credentials;
+import lombok.extern.slf4j.Slf4j;
+import mark.MarkRepository;
 import person.PersonRepository;
 import users.Person;
 import users.Student;
@@ -15,10 +17,15 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @WebServlet("/StudentServlet")
+@Slf4j
 public class StudentServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doGet(req, resp);
+        int id = Integer.parseInt(req.getParameter("studentID"));
+        req.getSession().setAttribute("studentID", id);
+
+        log.info("Переход на страницу оценок");
+        req.getRequestDispatcher("admin_students_marks.jsp").forward(req, resp);
     }
 
     @Override
@@ -76,12 +83,19 @@ public class StudentServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (req.getParameter("method").equals("delete")) {
-            doDelete(req, resp);
-        } else if (req.getParameter("method").equals("put")) {
-            doPut(req, resp);
-        } else {
-            doPost(req, resp);
+        switch (req.getParameter("method")) {
+            case "delete":
+                doDelete(req, resp);
+                break;
+            case "put":
+                doPut(req, resp);
+                break;
+            case "post":
+                doPost(req, resp);
+                break;
+            case "get":
+                doGet(req, resp);
+                break;
         }
     }
 

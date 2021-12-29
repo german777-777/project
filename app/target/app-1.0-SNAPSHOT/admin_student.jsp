@@ -68,7 +68,11 @@
                     </form>
                 </td>
                 <td>
-                    <a href="">Оценки</a>
+                    <form action="<c:url value="/StudentServlet"/>" method="post">
+                        <input type="hidden" name="method" value="get">
+                        <input type="hidden" name="studentID" value="${person.id}">
+                        <button style="align-content: center" type="submit">Оценки</button>
+                    </form>
                 </td>
             </tr>
         </c:if>
