@@ -26,20 +26,23 @@ public class LoginServlet extends HttpServlet {
         if (person.isPresent()) {
             switch (Objects.requireNonNull(checkRoleOfPerson(person.get()))) {
                 case ADMIN:
+                    request.getSession().setAttribute("user", person.get());
                     dispatcher = request.getRequestDispatcher("/admin.jsp");
                     dispatcher.forward(request, response);
                     break;
                 case TEACHER:
+                    request.getSession().setAttribute("user", person.get());
                     dispatcher = request.getRequestDispatcher("/teacher.jsp");
                     dispatcher.forward(request, response);
                     break;
                 case STUDENT:
+                    request.getSession().setAttribute("user", person.get());
                     dispatcher = request.getRequestDispatcher("/student.jsp");
                     dispatcher.forward(request, response);
                     break;
                 default:
                     request.setAttribute("error", "Не существует такого типа пользователя...");
-                    dispatcher = request.getRequestDispatcher("/login.jsp");
+                    dispatcher = request.getRequestDispatcher("/index.jsp");
                     dispatcher.forward(request, response);
             }
         } else {

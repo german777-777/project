@@ -37,10 +37,12 @@ public class InitializeRepositoryFilter implements Filter {
 
         switch (typeOfRepository) {
             case ("postgres"):
+                log.info("Тип: Postgres");
                 loadRepositoryPostgres(filterConfig);
                 break;
             case ("memory"):
             default:
+                log.info("Тип: Memory");
                 loadRepositoryMemory(filterConfig);
                 break;
         }
@@ -70,7 +72,7 @@ public class InitializeRepositoryFilter implements Filter {
     }
 
     private void setRepositoriesToContext(FilterConfig config, RepositoryFactory factory) {
-        log.info("Загрузка репозиториев");
+        log.info("Загрузка репозиториев в Context");
         ServletContext context = config.getServletContext();
         context.setAttribute("credential_repository", factory.getCredentialRepository());
         context.setAttribute("group_repository", factory.getGroupRepository());
@@ -92,6 +94,7 @@ public class InitializeRepositoryFilter implements Filter {
     }
 
     private ComboPooledDataSource setPoolPropertiesAndReturn() throws PropertyVetoException {
+        log.info("Установка свойств pool-a соединений");
         ComboPooledDataSource pool = new ComboPooledDataSource();
         pool.setJdbcUrl(bundle.getString("url"));
         pool.setUser(bundle.getString("login"));
@@ -107,7 +110,6 @@ public class InitializeRepositoryFilter implements Filter {
     }
 
     private void setValuesToRepositories(RepositoryFactory factory) {
-
         log.info("Добавление админа");
         Person admin = new Admin()
                 .withFirstName("Someone")
@@ -168,8 +170,6 @@ public class InitializeRepositoryFilter implements Filter {
         factory.getPersonRepository().createPerson(student1);
         factory.getPersonRepository().createPerson(student2);
 
-
-
         log.info("Добавление зарплаты учителю {}", teacher3.getFirstName());
         Salary salary1 = new Salary()
                 .withSalary(1000)
@@ -177,17 +177,15 @@ public class InitializeRepositoryFilter implements Filter {
                 .withTeacher(teacher3);
         factory.getSalaryRepository().createSalary(salary1);
 
-        log.info("Добавление предмета");
+        log.info("Добавление предметов");
         Subject subject1 = new Subject()
                 .withName("GIT");
         factory.getSubjectRepository().createSubject(subject1);
 
-        log.info("Добавление предмета");
         Subject subject2 = new Subject()
                 .withName("Maven");
         factory.getSubjectRepository().createSubject(subject2);
 
-        log.info("Добавление предмета");
         Subject subject3 = new Subject()
                 .withName("Tomcat");
         factory.getSubjectRepository().createSubject(subject3);
@@ -202,18 +200,6 @@ public class InitializeRepositoryFilter implements Filter {
                 .withSubject(subject2)
                 .withSubject(subject3);
         factory.getGroupRepository().createGroup(group1);
-
-        Group group = factory.getGroupRepository().getGroupByName("JEE-2021").get();
-        Person student = factory.getPersonRepository().getPersonByName("Иван", "Угловец", "Иванович").get();
-        Subject subject = factory.getSubjectRepository().getSubjectByName("Tomcat").get();
-//
-        Mark mark1 = new Mark()
-                .withMark(10)
-                .withDateOfMark(LocalDate.now())
-                .withGroupId(group.getId())
-                .withStudentId(student.getId())
-                .withSubjectId(subject.getId());
-        factory.getMarkRepository().createMark(mark1);
 
     }
 }

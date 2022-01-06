@@ -60,6 +60,7 @@ public class GroupServlet extends HttpServlet {
         PersonRepository personRepository = (PersonRepository) getServletContext().getAttribute("person_repository");
         Optional<Person> newTeacherOptional = personRepository.getPersonByName(firstNameOfTeacher, lastNameOfTeacher, patronymicOfTeacher);
         newTeacherOptional.ifPresent(person -> groupRepository.updateGroupTeacherById(id, person));
+
         groupRepository.updateGroupNameById(id, newName);
 
         req.getRequestDispatcher("admin_groups.jsp").forward(req, resp);
@@ -78,7 +79,11 @@ public class GroupServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        int id = Integer.parseInt(req.getParameter("ID"));
 
+        req.setAttribute("groupID", id);
+
+        req.getRequestDispatcher("admin_subjects_students_in_group.jsp").forward(req, resp);
     }
 
     @Override

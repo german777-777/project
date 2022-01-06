@@ -78,19 +78,19 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                 stForInsertCred.setString(1, person.getCredentials().getLogin());
                 stForInsertCred.setString(2, person.getCredentials().getPassword());
                 if (stForInsertCred.executeUpdate() > 0) {
-                    log.debug("Учётные данные вставлены, продолжение создания");
+                    log.debug("Учётные данные созданы");
                     con.commit();
                     if (isInsertPerson(stForInsertPerson, person)) {
                         log.info("Пользователь успешно добавлен");
                         con.commit();
                         return person;
                     } else {
-                        log.error("Ошибка вставки пользователя");
+                        log.error("Ошибка создания пользователя");
                         con.rollback(save);
                         return null;
                     }
                 } else {
-                    log.error("Ошибка вставки учётных данных");
+                    log.error("Ошибка создания учётных данных");
                     con.rollback(save);
                     return null;
                 }
@@ -343,6 +343,7 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
             Optional<Person> optionalPerson = getPersonById(id);
             if (optionalPerson.isPresent()) {
                 Person person = optionalPerson.get();
+                log.info("Начинается удаление пользователя");
                 switch (person.getRole()) {
                     case TEACHER:
                         if (isTeacherHasSalaries(stForFindSalaries, person.getId())) {
@@ -371,13 +372,13 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                             log.info("Пользователь удалён");
                             con.commit();
                         } else {
-                            log.error("Пользовательне удалён, удаления не произошло");
+                            log.error("Пользователь не удалён, удаления не произошло");
                             con.rollback(save);
                             return false;
                         }
 
                         if (isCredentialsDeleted(stForDeleteCred, person)) {
-                            log.info("Учётные данные удалены, пользователь полновстью удалён");
+                            log.info("Учётные данные удалены, пользователь полностью удалён");
                             con.commit();
                             return true;
                         } else {
@@ -414,13 +415,13 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                             log.info("Пользователь удалён");
                             con.commit();
                         } else {
-                            log.error("Пользовательне удалён, удаления не произошло");
+                            log.error("Пользователь не удалён, удаления не произошло");
                             con.rollback(save);
                             return false;
                         }
 
                         if (isCredentialsDeleted(stForDeleteCred, person)) {
-                            log.info("Учётные данные удалены, пользователь полновстью удалён");
+                            log.info("Учётные данные удалены, пользователь полностью удалён");
                             con.commit();
                             return true;
                         } else {
@@ -494,6 +495,7 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
             Optional<Person> optionalPerson = getPersonByName(firstName, lastName, patronymic);
             if (optionalPerson.isPresent()) {
                 Person person = optionalPerson.get();
+                log.info("Начинается удаление пользователя");
                 switch (person.getRole()) {
                     case TEACHER:
                         if (isTeacherHasSalaries(stForFindSalaries, person.getId())) {
@@ -522,13 +524,13 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                             log.info("Пользователь удалён");
                             con.commit();
                         } else {
-                            log.error("Пользовательне удалён, удаления не произошло");
+                            log.error("Пользователь не удалён, удаления не произошло");
                             con.rollback(save);
                             return false;
                         }
 
                         if (isCredentialsDeleted(stForDeleteCred, person)) {
-                            log.info("Учётные данные удалены, пользователь полновстью удалён");
+                            log.info("Учётные данные удалены, пользователь полностью удалён");
                             con.commit();
                             return true;
                         } else {
@@ -565,13 +567,13 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                             log.info("Пользователь удалён");
                             con.commit();
                         } else {
-                            log.error("Пользовательне удалён, удаления не произошло");
+                            log.error("Пользователь не удалён, удаления не произошло");
                             con.rollback(save);
                             return false;
                         }
 
                         if (isCredentialsDeleted(stForDeleteCred, person)) {
-                            log.info("Учётные данные удалены, пользователь полновстью удалён");
+                            log.info("Учётные данные удалены, пользователь полностью удалён");
                             con.commit();
                             return true;
                         } else {
@@ -635,7 +637,7 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
     // метод для проверки есть ли у учителя зарплаты
 
     private boolean isTeacherHasSalaries(PreparedStatement stForFindSalaries, int teacherId) throws SQLException {
-        log.info("Проврека, есть ли у учителя зарплаты");
+        log.info("Проверка, есть ли у учителя зарплаты");
         stForFindSalaries.setInt(1, teacherId);
         return stForFindSalaries.executeQuery().next();
     }
@@ -643,7 +645,7 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
     // метод удаления Student из Group_Student
 
     private boolean isStudentDeletedFromGroup(PreparedStatement stForDeleteStudentFromGroup, int studentId) throws SQLException {
-        log.info("Поыптка удаления студента из группы");
+        log.info("Попытка удаления студента из группы");
         stForDeleteStudentFromGroup.setInt(1, studentId);
         return stForDeleteStudentFromGroup.executeUpdate() > 0;
     }
@@ -675,27 +677,16 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
     // метод по удалению самого Person
 
     private boolean isPersonDeleted(PreparedStatement stForDeletePerson, Person person) throws SQLException {
-        boolean result;
-
         log.info("Попытка удаления пользователя из репозитория");
         stForDeletePerson.setInt(1, person.getId());
-        result = stForDeletePerson.executeUpdate() > 0;
-        if (!result) {
-            log.error("Пользователь не удалён");
-        }
-        return result;
+        return stForDeletePerson.executeUpdate() > 0;
     }
 
     private boolean isCredentialsDeleted(PreparedStatement stForDeleteCred, Person person) throws SQLException {
-        boolean result;
         log.info("Попытка удаления учётных данных пользователя из репозитория");
         stForDeleteCred.setString(1, person.getCredentials().getLogin());
         stForDeleteCred.setString(2, person.getCredentials().getPassword());
-        result = stForDeleteCred.executeUpdate() > 0;
-        if (!result) {
-            log.error("Учётные данные не удалены");
-        }
-        return result;
+        return stForDeleteCred.executeUpdate() > 0;
     }
 
     // методы для возврата и поиска определённого пользователя

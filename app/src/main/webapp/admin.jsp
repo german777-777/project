@@ -13,7 +13,9 @@
         <a style="display: block" href="admin_subjects.jsp">На страницу с предметами</a>
     </h2>
     <h3>
-        <a style="display: block" href="index.jsp">Выход из аккаунта</a>
+        <form action="<c:url value="/LogoutServlet"/>" method="post">
+            <button type="submit" style="display: block">Выход из аккаунта</button>
+        </form>
     </h3>
 </body>
 </html>

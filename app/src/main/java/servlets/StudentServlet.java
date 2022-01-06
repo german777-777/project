@@ -2,7 +2,6 @@ package servlets;
 
 import credentials.Credentials;
 import lombok.extern.slf4j.Slf4j;
-import mark.MarkRepository;
 import person.PersonRepository;
 import users.Person;
 import users.Student;
@@ -21,7 +20,10 @@ import java.util.Optional;
 public class StudentServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        log.info("Получения ID пользователя (студента) для перехода к его оценкам");
         int id = Integer.parseInt(req.getParameter("studentID"));
+
+        log.info("Установка в сессию ID студента (необходимая область видимости ID студента)");
         req.getSession().setAttribute("studentID", id);
 
         log.info("Переход на страницу оценок");
@@ -31,6 +33,7 @@ public class StudentServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PersonRepository personRepository = (PersonRepository) getServletContext().getAttribute("person_repository");
+        log.info("Получение данных о пользователе (студенте) и его создание");
         Person newStudent = new Student()
                 .withLastName(req.getParameter("newLastName"))
                 .withFirstName(req.getParameter("newFirstName"))
@@ -43,7 +46,7 @@ public class StudentServlet extends HttpServlet {
         if (checkStudentInRepository(personRepository, newStudent)) {
             personRepository.createPerson(newStudent);
         } else {
-            String messageAboutNotCreating = "Не создан студент";
+            String messageAboutNotCreating = "Студент с введёнными учётными данными уже существует";
             req.setAttribute("message", messageAboutNotCreating);
             req.getRequestDispatcher("/admin_student.jsp").forward(req, resp);
         }
@@ -53,15 +56,18 @@ public class StudentServlet extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PersonRepository personRepository = (PersonRepository) getServletContext().getAttribute("person_repository");
-        int updatableStudentID = Integer.parseInt(req.getParameter("ID"));
-        Optional<Person> updatableStudentOptional = personRepository.getPersonById(updatableStudentID);
+
+        log.info("Получения ID пользователя (студента) для обновления");
+        int id = Integer.parseInt(req.getParameter("ID"));
+
+        Optional<Person> updatableStudentOptional = personRepository.getPersonById(id);
         if (updatableStudentOptional.isEmpty()) {
-            String messageAboutNotUpdating = "Не обновлён студент";
+            String messageAboutNotUpdating = "Студент не обновлён";
             req.setAttribute("message", messageAboutNotUpdating);
             req.getRequestDispatcher("/admin_student.jsp").forward(req, resp);
+        } else {
+            updateStudent(req, personRepository, id);
         }
-
-        updateStudent(req, personRepository, updatableStudentID);
 
         req.getRequestDispatcher("/admin_student.jsp").forward(req, resp);
     }
@@ -69,13 +75,15 @@ public class StudentServlet extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PersonRepository personRepository = (PersonRepository) getServletContext().getAttribute("person_repository");
-        int removableStudentID = Integer.parseInt(req.getParameter("ID"));
+        log.info("Получения ID пользователя (студента) для удаления");
+        int id = Integer.parseInt(req.getParameter("ID"));
+
         Optional<Person> removableStudent = personRepository
-                .getPersonById(removableStudentID);
+                .getPersonById(id);
         if (removableStudent.isPresent()) {
-            personRepository.deletePersonById(removableStudentID);
+            personRepository.deletePersonById(id);
         } else {
-            String messageAboutNotDeleting = "Не удалён студент";
+            String messageAboutNotDeleting = "Студент не удалён";
             req.setAttribute("message", messageAboutNotDeleting);
         }
         req.getRequestDispatcher("/admin_student.jsp").forward(req, resp);
@@ -100,26 +108,28 @@ public class StudentServlet extends HttpServlet {
     }
 
     private void updateStudent(HttpServletRequest req, PersonRepository personRepository, int updatableStudentID) {
+        log.info("Получение новых фамилии, имени и отчества пользователя (студента) для обновления");
         String newFirstName = req.getParameter("newFirstName");
         String newLastName = req.getParameter("newLastName");
         String newPatronymic = req.getParameter("newPatronymic");
         personRepository.updatePersonNameById(updatableStudentID, newFirstName, newLastName, newPatronymic);
 
+        log.info("Получение новых логина и пароля пользователя (студента) для обновления");
         String newLogin = req.getParameter("newLogin");
         String newPassword = req.getParameter("newPassword");
-        personRepository.updateCredentialByPersonId(updatableStudentID, new Credentials().withLogin(newLogin).withPassword(newPassword));
+        personRepository.updateCredentialByPersonId(updatableStudentID, new Credentials()
+                                                                        .withLogin(newLogin)
+                                                                        .withPassword(newPassword));
 
+        log.info("Получение новой даты рождения пользователя (студента) для обновления");
         String newDateOfBirthString = req.getParameter("newDateOfBirth");
         LocalDate newDateOfBirth = LocalDate.parse(newDateOfBirthString);
         personRepository.updateDateOfBirthById(updatableStudentID, newDateOfBirth);
     }
 
     private boolean checkStudentInRepository(PersonRepository personRepository, Person newStudent) {
-        Optional<Person> creatablePersonOptional = personRepository.getPersonByName(newStudent.getFirstName(), newStudent.getLastName(), newStudent.getPatronymic());
-        if (creatablePersonOptional.isEmpty()) {
-            creatablePersonOptional = personRepository.getPersonByCredentials(newStudent.getCredentials().getLogin(), newStudent.getCredentials().getPassword());
-            return creatablePersonOptional.isEmpty();
-        }
-        return false;
+        log.debug("Проверяется, что пользователя с введённым логином и паролем нет в системе");
+        Optional<Person> creatablePersonOptional =  personRepository.getPersonByCredentials(newStudent.getCredentials().getLogin(), newStudent.getCredentials().getPassword());
+        return creatablePersonOptional.isEmpty();
     }
 }

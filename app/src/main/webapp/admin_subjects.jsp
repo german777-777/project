@@ -50,5 +50,6 @@
     </label>
     <button style="align-content: center" type="submit">Создать</button>
 </form>
+ <a style="display: block" href="admin.jsp">Назад</a>
 </body>
 </html>

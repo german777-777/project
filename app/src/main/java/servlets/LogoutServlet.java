@@ -12,6 +12,7 @@ import java.io.IOException;
 public class LogoutServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.getSession().invalidate();
         log.info("Выход из аккаунта, переход на начальную страницу...");
         request.getRequestDispatcher("/index.jsp").forward(request, response);
     }
