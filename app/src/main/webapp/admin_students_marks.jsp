@@ -76,7 +76,7 @@
     </label>
     <label>
         Новая дата:
-        <input style="text-align: center; display: block" type="text" name="newDate">
+        <input style="text-align: center; display: block" type="date" name="newDate">
     </label>
     <label>
         Новый предмет: (ID)

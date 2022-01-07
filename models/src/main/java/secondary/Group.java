@@ -4,9 +4,6 @@ import entity.AbstractEntity;
 import lombok.*;
 import role.Role;
 import users.Person;
-import users.Student;
-import users.Teacher;
-import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,15 +49,25 @@ public class Group extends AbstractEntity {
         return this;
     }
 
-    public Group withStudents(Person student) {
+    public Group withStudent(Person student) {
         if (student.getRole() == Role.STUDENT) {
             this.students.add(student);
         }
         return this;
     }
 
+    public Group withStudents(List<Person> students) {
+        setStudents(students);
+        return this;
+    }
+
     public Group withSubject(Subject subject) {
         this.subjects.add(subject);
+        return this;
+    }
+
+    public Group withSubjects(List<Subject> subjects) {
+        setSubjects(subjects);
         return this;
     }
 }

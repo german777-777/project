@@ -38,7 +38,7 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
 
     @Override
     public Subject createSubject(Subject subject) {
-        log.info("Попытка найти предмет в репозитории");
+        log.info("Попытка найти предмет");
         Optional<Subject> optionalSubject = getSubjectByName(subject.getName());
         if (optionalSubject.isPresent()) {
             log.error("Ошибка добавления: такой предмет уже существует");
@@ -47,7 +47,6 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
             Connection con = null;
             PreparedStatement st = null;
             Savepoint save = null;
-            log.info("Такого предмета не существует, вносим в таблицу");
             try {
                 con = pool.getConnection();
                 con.setAutoCommit(false);
@@ -60,7 +59,7 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
                     con.commit();
                     return subject;
                 } else {
-                    log.error("Ошибка добавления");
+                    log.error("Предмет не добавлен");
                     con.rollback(save);
                     return null;
                 }
@@ -85,7 +84,7 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
             st.setInt(1, id);
             set = st.executeQuery();
             if (set.next()) {
-                log.info("Берём предмет");
+                log.info("Предмет найден");
                 return Optional.of(new Subject()
                         .withId(set.getInt(1))
                         .withName(set.getString(2)));
@@ -153,7 +152,6 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
 
     @Override
     public boolean updateSubjectNameById(int id, String newName) {
-        log.info("Попытка найти предмет по ID");
         Optional<Subject> optionalSubject = getSubjectById(id);
         if (optionalSubject.isPresent()) {
             Connection con = null;
@@ -236,6 +234,8 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
         if (optionalSubject.isPresent()) {
             Connection con = null;
             PreparedStatement stForDeleteSubject = null;
+            PreparedStatement stForFindSubjectInGroups = null;
+            PreparedStatement stForFindSubjectInMarks = null;
             PreparedStatement stForDeleteSubjectFromGroup = null;
             PreparedStatement stForDeleteSubjectFromMarks = null;
             Savepoint save = null;
@@ -243,37 +243,43 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
                 con = pool.getConnection();
                 con.setAutoCommit(false);
                 stForDeleteSubject = con.prepareStatement(deleteSubjectByID);
+                stForFindSubjectInGroups = con.prepareStatement(findSubjectsBySubjectID);
+                stForFindSubjectInMarks = con.prepareStatement(findMarksBySubjectID);
                 stForDeleteSubjectFromGroup = con.prepareStatement(deleteSubjectFromGroupByID);
                 stForDeleteSubjectFromMarks = con.prepareStatement(deleteMarksBySubjectID);
                 save = con.setSavepoint();
 
                 stForDeleteSubjectFromGroup.setInt(1, id);
-                if (stForDeleteSubjectFromGroup.executeUpdate() > 0) {
-                    log.info("Предмет удалён из группы");
-                    con.commit();
-                } else {
-                    log.error("Предмет не удалён из группы, удаление прервано");
-                    con.rollback(save);
-                    return false;
+                if (isGroupHasSubject(stForFindSubjectInGroups, id)) {
+                    if (stForDeleteSubjectFromGroup.executeUpdate() > 0) {
+                        log.info("Предмет удалён из группы");
+                        con.commit();
+                    } else {
+                        log.error("Предмет не удалён из группы, удаление прервано");
+                        con.rollback(save);
+                        return false;
+                    }
                 }
 
                 stForDeleteSubjectFromMarks.setInt(1, id);
-                if (stForDeleteSubjectFromMarks.executeUpdate() > 0) {
-                    log.info("Оценки удалены");
-                    con.commit();
-                } else {
-                    log.error("Оценки не удалены, удаление прервано");
-                    con.rollback(save);
-                    return false;
+                if (isMarksContainsSubject(stForFindSubjectInMarks, id)) {
+                    if (stForDeleteSubjectFromMarks.executeUpdate() > 0) {
+                        log.info("Оценки по предмету удалены");
+                        con.commit();
+                    } else {
+                        log.error("Оценки по предмету не удалены, удаление прервано");
+                        con.rollback(save);
+                        return false;
+                    }
                 }
 
                 stForDeleteSubject.setInt(1, id);
                 if (stForDeleteSubject.executeUpdate() > 0) {
-                    log.info("Удаление предмета в репозитории");
+                    log.info("Удаление предмета прошло успешно");
                     con.commit();
                     return true;
                 } else {
-                    log.error("Предмет не найден, удаления не произошло");
+                    log.error("Предмет не удалён");
                     con.rollback(save);
                     return false;
                 }
@@ -282,6 +288,8 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
                 myRollback(con, save);
                 return false;
             } finally {
+                closeResource(stForFindSubjectInGroups);
+                closeResource(stForFindSubjectInMarks);
                 closeResource(stForDeleteSubjectFromGroup);
                 closeResource(stForDeleteSubjectFromMarks);
                 closeResource(stForDeleteSubject);
@@ -356,6 +364,18 @@ public class SubjectRepositoryPostgresImpl implements SubjectRepository {
             log.error("Предмет не найден, удаления не произошло");
             return false;
         }
+    }
+
+    private boolean isMarksContainsSubject(PreparedStatement stForFindSubjectInMarks, int subjectId) throws SQLException {
+        log.debug("Проверка, имеются ли оценки с предметом");
+        stForFindSubjectInMarks.setInt(1, subjectId);
+        return stForFindSubjectInMarks.executeQuery().next();
+    }
+
+    private boolean isGroupHasSubject(PreparedStatement stForFindSubjectInGroups, int subjectId) throws SQLException {
+        log.debug("Проверка, имеет ли группа предмет");
+        stForFindSubjectInGroups.setInt(1, subjectId);
+        return stForFindSubjectInGroups.executeQuery().next();
     }
 
     private void myRollback(Connection connection, Savepoint firstSavePoint) {

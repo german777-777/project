@@ -42,7 +42,7 @@ public class LoginServlet extends HttpServlet {
                     break;
                 default:
                     request.setAttribute("error", "Не существует такого типа пользователя...");
-                    dispatcher = request.getRequestDispatcher("/index.jsp");
+                    dispatcher = request.getRequestDispatcher("/indexч.jsp");
                     dispatcher.forward(request, response);
             }
         } else {

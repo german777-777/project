@@ -21,12 +21,19 @@
         <tr style="text-align: center">
             <td><c:out value="${group.id}"/></td>
             <td><c:out value="${group.name}"/></td>
-            <td><c:out value="${group.teacher.firstName}
-                              ${group.teacher.lastName}
-                              ${group.teacher.patronymic}"/>
+            <td>
+                <c:if test="${group.teacher != null}">
+                     <c:out value= "${group.teacher.firstName}
+                                    ${group.teacher.lastName}
+                                    ${group.teacher.patronymic}"
+                     />
+                </c:if>
+
+                <c:if test="${group.teacher == null}">
+                    <c:out value="Нет учителя"/>
+                </c:if>
             </td>
             <td>
-                <%-- тут будет передаваться ID группы в requestScope (в сервлете) --%>
                 <form action="<c:url value="/GroupServlet"/>" method="get">
                     <input type="hidden" name="method" value="get">
                     <input type="hidden" name="ID" value="${group.id}">

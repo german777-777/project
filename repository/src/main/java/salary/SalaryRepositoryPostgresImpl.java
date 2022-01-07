@@ -186,16 +186,16 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
                 st.setInt(1, newSalary);
                 st.setInt(2, id);
                 if (st.executeUpdate() > 0) {
-                    log.info("Зарплата успешно обновлена");
+                    log.info("Зарплата успешно обновлена (обновлён размер зарплаты)");
                     con.commit();
                     return true;
                 } else {
-                    log.error("Зарплата не обновлена");
+                    log.error("Зарплата не обновлена (не обновлён размер зарплаты)");
                     con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
-                log.error("Зарплата не найдена, изменения не произошло");
+                log.error("Зарплата не найдена, изменения не произошло (не обновлён размер зарплаты)");
                 myRollback(con ,save);
                 return false;
             } finally {
@@ -207,7 +207,6 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
 
     @Override
     public boolean updateTeacherReceivedSalaryById(int id, Teacher teacher) {
-        log.debug("Попытка найти зарплату по ID");
         Optional<Salary> optionalSalary = getSalaryByID(id);
         if (optionalSalary.isEmpty()) {
             log.error("Зарплата не найдена, изменений не произошло");
@@ -229,21 +228,21 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
                     stForUpdateSalary.setInt(1, teacherId);
                     stForUpdateSalary.setInt(2, id);
                     if (stForUpdateSalary.executeUpdate() > 0) {
-                        log.info("Зарплата успешно обновлена");
+                        log.info("Зарплата успешно обновлена (обновлён учитель)");
                         con.commit();
                         return true;
                     } else {
-                        log.error("Зарплата не обновлена");
+                        log.error("Зарплата не обновлена (не обновлён учитель)");
                         con.rollback(save);
                         return false;
                     }
                 } else {
-                    log.error("Не найден Teacher");
+                    log.error("Не найден учитель");
                     con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
-                log.error("Зарплата не найдена, изменения не произошло");
+                log.error("Зарплата не найдена, изменения не произошло (не обновлён учитель)");
                 myRollback(con ,save);
                 return false;
             } finally {
@@ -256,7 +255,6 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
 
     @Override
     public boolean updateDateOfSalaryById(int id, LocalDate newDateOfSalary) {
-        log.debug("Попытка найти зарплату по ID");
         Optional<Salary> optionalSalary = getSalaryByID(id);
         if (optionalSalary.isEmpty()) {
             log.error("Зарплата не найдена, изменений не произошло");
@@ -274,16 +272,16 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
                 st.setDate(1, Date.valueOf(newDateOfSalary));
                 st.setInt(2, id);
                 if (st.executeUpdate() > 0) {
-                    log.info("Зарплата успешно обновлена");
+                    log.info("Зарплата успешно обновлена (обновлена дата получения)");
                     con.commit();
                     return true;
                 } else {
-                    log.error("Зарплата не обновлена");
+                    log.error("Зарплата не обновлена (не обновлена дата получения)");
                     con.rollback(save);
                     return false;
                 }
             } catch (SQLException e) {
-                log.error("Зарплата не найдена, изменения не произошло");
+                log.error("Зарплата не найдена, изменения не произошло (не обновлена дата получения)");
                 myRollback(con, save);
                 return false;
             } finally {
@@ -295,10 +293,9 @@ public class SalaryRepositoryPostgresImpl implements SalaryRepository {
 
     @Override
     public boolean deleteSalaryById(int id) {
-        log.debug("Попытка найти зарплату по ID");
         Optional<Salary> optionalSalary = getSalaryByID(id);
         if (optionalSalary.isEmpty()) {
-            log.error("Зарплата не найдена, изменений не произошло");
+            log.error("Зарплата не найдена, удаления не произошло");
             return false;
         } else {
             Connection con = null;

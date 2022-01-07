@@ -8,7 +8,6 @@ import fabric.RepositoryFactoryPostgresImpl;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import secondary.Group;
-import secondary.Mark;
 import secondary.Salary;
 import secondary.Subject;
 import users.Admin;
@@ -194,8 +193,8 @@ public class InitializeRepositoryFilter implements Filter {
         Group group1 = new Group()
                 .withName("JEE-2021")
                 .withTeacher(teacher3)
-                .withStudents(student1)
-                .withStudents(student2)
+                .withStudent(student1)
+                .withStudent(student2)
                 .withSubject(subject1)
                 .withSubject(subject2)
                 .withSubject(subject3);

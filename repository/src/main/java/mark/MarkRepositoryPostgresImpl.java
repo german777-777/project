@@ -73,7 +73,7 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
 
     @Override
     public Optional<Mark> getMarkByID(int id) {
-        log.debug("Попытка найти оценку по id");
+        log.debug("Попытка найти оценку по ID");
         ResultSet set = null;
         try (Connection con = pool.getConnection();
              PreparedStatement st = con.prepareStatement(findMarkByID)) {
@@ -129,10 +129,9 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
 
     @Override
     public boolean updateSubjectMarkById(int id, Subject newSubject) {
-        log.debug("Попытка найти оценку по ID");
         Optional<Mark> optionalMark = getMarkByID(id);
         if (optionalMark.isEmpty()) {
-            log.error("Оценка не найдена, обновления не произошло");
+            log.error("Оценка не найдена, обновления не произошло (не обновлён предмет)");
             return false;
         } else {
             Connection con = null;
@@ -147,11 +146,11 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
                 st.setInt(1, newSubject.getId());
                 st.setInt(2, id);
                 if (st.executeUpdate() > 0) {
-                    log.info("Оценка обновлена");
+                    log.info("Оценка обновлена (обновлён предмет)");
                     con.commit();
                     return true;
                 } else {
-                    log.error("Ошибка обновления");
+                    log.error("Оценка не обновлена (не обновлён предмет)");
                     con.rollback(save);
                     return false;
                 }
@@ -168,10 +167,9 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
 
     @Override
     public boolean updateDateOfMarkById(int id, LocalDate newDateOfMark) {
-        log.debug("Попытка найти оценку по ID");
         Optional<Mark> optionalMark = getMarkByID(id);
         if (optionalMark.isEmpty()) {
-            log.error("Оценка не найдена, обновления не произошло");
+            log.error("Оценка не найдена, обновления не произошло (не обновлена дата оценки)");
             return false;
         } else {
             Connection con = null;
@@ -186,11 +184,11 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
                 st.setDate(1, Date.valueOf(newDateOfMark));
                 st.setInt(2, id);
                 if (st.executeUpdate() > 0) {
-                    log.info("Оценка обновлена");
+                    log.info("Оценка обновлена (обновлена дата оценки)");
                     con.commit();
                     return true;
                 } else {
-                    log.error("Ошибка обновления");
+                    log.error("Ошибка обновления (не обновлена дата оценки)");
                     con.rollback(save);
                     return false;
                 }
@@ -207,10 +205,9 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
 
     @Override
     public boolean updateGroupWhereMarkWasGiven(int id, Group newGroup) {
-        log.debug("Попытка найти оценку по ID");
         Optional<Mark> optionalMark = getMarkByID(id);
         if (optionalMark.isEmpty()) {
-            log.error("Оценка не найдена, обновления не произошло");
+            log.error("Оценка не найдена, обновления не произошло (не обновлена группа)");
             return false;
         } else {
             Connection con = null;
@@ -225,11 +222,11 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
                 st.setInt(1, newGroup.getId());
                 st.setInt(2, id);
                 if (st.executeUpdate() > 0) {
-                    log.info("Оценка обновлена");
+                    log.info("Оценка обновлена (обновлена группа)");
                     con.commit();
                     return true;
                 } else {
-                    log.error("Ошибка обновления");
+                    log.error("Ошибка обновления (не обновлена группа)");
                     con.rollback(save);
                     return false;
                 }
@@ -246,10 +243,9 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
 
     @Override
     public boolean updateMarkById(int id, int newMark) {
-        log.debug("Попытка найти оценку по ID");
         Optional<Mark> optionalMark = getMarkByID(id);
         if (optionalMark.isEmpty()) {
-            log.error("Оценка не найдена, обновления не произошло");
+            log.error("Оценка не найдена, обновления не произошло (сама оценка не обновлена)");
             return false;
         } else {
             Connection con = null;
@@ -264,11 +260,11 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
                 st.setInt(1, newMark);
                 st.setInt(2, id);
                 if (st.executeUpdate() > 0) {
-                    log.info("Оценка обновлена");
+                    log.info("Оценка обновлена (сама оценка обновлена)");
                     con.commit();
                     return true;
                 } else {
-                    log.error("Ошибка обновления");
+                    log.error("Ошибка обновления (сама оценка не обновлена)");
                     con.rollback(save);
                     return false;
                 }
@@ -285,10 +281,9 @@ public class MarkRepositoryPostgresImpl implements MarkRepository {
 
     @Override
     public boolean deleteMarkById(int id) {
-        log.debug("Попытка найти оценку по ID");
         Optional<Mark> optionalMark = getMarkByID(id);
         if (optionalMark.isEmpty()) {
-            log.error("Оценка не найдена, уделания не произошло");
+            log.error("Оценка не найдена, удаления не произошло");
             return false;
         } else {
             Connection con = null;

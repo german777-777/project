@@ -20,24 +20,20 @@ import java.util.Optional;
 public class TeacherServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        PersonRepository personRepository = (PersonRepository) getServletContext().getAttribute("person_repository");
+        log.debug("Получения ID пользователя (учителя) для перехода на страницу зарплат");
         int teacherID = Integer.parseInt(req.getParameter("teacherID"));
 
-        Optional<Person> teacherOptional = personRepository.getPersonById(teacherID);
-        if (teacherOptional.isPresent()) {
-            log.info("Переход на страницу зарплат");
-            req.setAttribute("teacherID", teacherID);
-            req.getRequestDispatcher("/admin_salary.jsp").forward(req, resp);
-        } else {
-            String message = "Не найден учитель";
-            req.setAttribute("message", message);
-            req.getRequestDispatcher("/admin_teacher.jsp").forward(req, resp);
-        }
+        log.info("Установка в запрос ID учителя (необходимая область видимости ID учителя)");
+        req.getSession().setAttribute("teacherID", teacherID);
+
+        log.info("Переход на страницу зарплат");
+        req.getRequestDispatcher("/admin_salary.jsp").forward(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PersonRepository personRepository = (PersonRepository) getServletContext().getAttribute("person_repository");
+        log.info("Получение новых данных о пользователе (учителе) и его создание");
         Person newTeacher = new Teacher()
                 .withLastName(req.getParameter("newLastName"))
                 .withFirstName(req.getParameter("newFirstName"))
@@ -50,7 +46,7 @@ public class TeacherServlet extends HttpServlet {
         if (!checkTeacherInRepository(personRepository, newTeacher)) {
             personRepository.createPerson(newTeacher);
         } else {
-            String messageAboutNotCreating = "Такой учитель уже существует";
+            String messageAboutNotCreating = "Учитель с введёнными учётными данными уже существует";
             req.setAttribute("message", messageAboutNotCreating);
             req.getRequestDispatcher("/admin_teacher.jsp").forward(req, resp);
             return;
@@ -61,15 +57,17 @@ public class TeacherServlet extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PersonRepository personRepository = (PersonRepository) getServletContext().getAttribute("person_repository");
-        int updatableTeacherID = Integer.parseInt(req.getParameter("ID"));
-        Optional<Person> updatableTeacherOptional = personRepository.getPersonById(updatableTeacherID);
+        log.info("Получения ID пользователя (учителя) для обновления");
+        int id = Integer.parseInt(req.getParameter("ID"));
+
+        Optional<Person> updatableTeacherOptional = personRepository.getPersonById(id);
         if (updatableTeacherOptional.isEmpty()) {
-            String messageAboutNotUpdating = "Не обновлён учитель";
+            String messageAboutNotUpdating = "Учитель не обновлён";
             req.setAttribute("message", messageAboutNotUpdating);
             req.getRequestDispatcher("/admin_teacher.jsp").forward(req, resp);
         }
 
-        updateTeacher(req, personRepository, updatableTeacherID);
+        updateTeacher(req, personRepository, id);
 
         req.getRequestDispatcher("/admin_teacher.jsp").forward(req, resp);
     }
@@ -77,13 +75,15 @@ public class TeacherServlet extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PersonRepository personRepository = (PersonRepository) getServletContext().getAttribute("person_repository");
-        int removableTeacherID = Integer.parseInt(req.getParameter("ID"));
+
+        log.info("Получения ID пользователя (учителя) для удаления");
+        int id = Integer.parseInt(req.getParameter("ID"));
         Optional<Person> removableTeacher = personRepository
-                .getPersonById(removableTeacherID);
+                .getPersonById(id);
         if (removableTeacher.isPresent()) {
-            personRepository.deletePersonById(removableTeacherID);
+            personRepository.deletePersonById(id);
         } else {
-            String messageAboutNotDeleting = "Не удалён учитель";
+            String messageAboutNotDeleting = "Учитель не удалён";
             req.setAttribute("message", messageAboutNotDeleting);
         }
         req.getRequestDispatcher("/admin_teacher.jsp").forward(req, resp);
@@ -111,17 +111,21 @@ public class TeacherServlet extends HttpServlet {
     }
 
     private void updateTeacher(HttpServletRequest req, PersonRepository personRepository, int updatableTeacherID) {
+        log.info("Получение новых фамилии, имени и отчества пользователя (учителя) для обновления");
         String newFirstName = req.getParameter("newFirstName");
         String newLastName = req.getParameter("newLastName");
         String newPatronymic = req.getParameter("newPatronymic");
         personRepository.updatePersonNameById(updatableTeacherID, newFirstName, newLastName, newPatronymic);
 
+        log.info("Получение новых логина и пароля пользователя (учителя) для обновления");
         String newLogin = req.getParameter("newLogin");
         String newPassword = req.getParameter("newPassword");
         personRepository.updateCredentialByPersonId(updatableTeacherID, new Credentials().withLogin(newLogin).withPassword(newPassword));
 
+        log.info("Получение новой даты рождения пользователя (студента) для обновления");
         String newDateOfBirthString = req.getParameter("newDateOfBirth");
         LocalDate newDateOfBirth = LocalDate.parse(newDateOfBirthString);
+
         personRepository.updateDateOfBirthById(updatableTeacherID, newDateOfBirth);
     }
 

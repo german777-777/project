@@ -6,59 +6,6 @@
 </head>
 <body>
 <h1>Страница студентов и предметов в группе</h1>
-<h3>Таблица студентов группы</h3>
-<table border="1" width="100%">
-    <tr>
-        <th>ID</th>
-        <th>Логин</th>
-        <th>Пароль</th>
-        <th>Фамилия</th>
-        <th>Имя</th>
-        <th>Отчество</th>
-        <th>Дата рождения</th>
-        <th>Удалить</th>
-    </tr>
-
-    <c:forEach var="group" items="${applicationScope.group_repository.allGroups}">
-        <c:if test="${requestScope.groupID == group.id}">
-            <c:forEach var="student" items="${group.students}">
-                <tr style="text-align: center">
-                    <td><c:out value="${student.id}"/></td>
-                    <td><c:out value="${student.credentials.login}"/></td>
-                    <td><c:out value="${student.credentials.password}"/></td>
-                    <td><c:out value="${student.lastName}"/></td>
-                    <td><c:out value="${student.firstName}"/></td>
-                    <td><c:out value="${student.patronymic}"/></td>
-                    <td><c:out value="${student.dateOfBirth}"/></td>
-                    <td>
-                        <form action="<c:url value="/GroupStudentServlet"/>" method="post">
-                            <input type="hidden" name="method" value="delete">
-                            <input type="hidden" name="studentID" value="${student.id}">
-                            <button style="align-content: center" type="submit">Удалить студента</button>
-                        </form>
-                    </td>
-                </tr>
-            </c:forEach>
-        </c:if>
-    </c:forEach>
-</table>
-
-<h4>Добавить студента к группе</h4>
-<form action="<c:url value="/GroupStudentServlet"/>" method="post">
-    <input type="hidden" name="method" value="post">
-    <label>
-        Фамилия: <input style="text-align: center; display: block" type="text" name="newLastName">
-    </label>
-    <label>
-        Имя: <input style="text-align: center; display: block" type="text" name="newFirstName">
-    </label>
-    <label>
-        Отчество: <input style="text-align: center; display: block" type="text" name="newPatronymic">
-    </label>
-    <button style="align-content: center" type="submit">Добавить студента к группе</button>
-</form>
-
-<h1>Страница студентов и предметов в группе</h1>
 <h3>Таблица предметов группы</h3>
 <table border="1" width="100%">
     <tr>
@@ -109,7 +56,7 @@
     </tr>
 
     <c:forEach var="group" items="${applicationScope.group_repository.allGroups}">
-        <c:if test="${requestScope.groupID == group.id}">
+        <c:if test="${sessionScope.groupID == group.id}">
             <c:forEach var="student" items="${group.students}">
                 <tr style="text-align: center">
                     <td><c:out value="${student.id}"/></td>
@@ -148,5 +95,6 @@
 </form>
 
 <a style="display: block" href="admin_groups.jsp">Назад</a>
+
 </body>
 </html>

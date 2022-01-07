@@ -24,8 +24,7 @@
                     <input type="hidden" name="method" value="put">
                     <input type="hidden" name="ID" value="${subject.id}">
                     <label>
-                        Новое название:
-                        <input style="text-align: center; display: block" type="text" name="newName">
+                        <input style="text-align: center; display: block" type="text" name="newName" placeholder="Новое название">
                     </label>
                     <button style="align-content: center" type="submit">Изменить</button>
                 </form>
@@ -33,7 +32,7 @@
             <td>
                 <form action="<c:url value="/SubjectServlet"/>" method="post">
                     <input type="hidden" name="method" value="delete">
-                    <input type="hidden" name="method" value="${subject.id}">
+                    <input type="hidden" name="ID" value="${subject.id}">
                     <button style="align-content: center" type="submit">Удалить</button>
                 </form>
             </td>
@@ -50,6 +49,7 @@
     </label>
     <button style="align-content: center" type="submit">Создать</button>
 </form>
+
  <a style="display: block" href="admin.jsp">Назад</a>
 </body>
 </html>

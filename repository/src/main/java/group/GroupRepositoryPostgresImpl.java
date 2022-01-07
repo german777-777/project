@@ -27,11 +27,8 @@ import static constants.Queries.findGroupByName;
 import static constants.Queries.findGroupWithStudentsByID;
 import static constants.Queries.findMarksByGroupID;
 import static constants.Queries.findPersonByName;
-import static constants.Queries.findSubjectByName;
 import static constants.Queries.findSubjectsByGroupID;
 import static constants.Queries.putGroup;
-import static constants.Queries.putStudentAndGroupID;
-import static constants.Queries.putSubjectAndGroupID;
 import static constants.Queries.updateGroupNameByID;
 import static constants.Queries.updateGroupTeacherByID;
 
@@ -61,9 +58,6 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
         Connection con = null;
         PreparedStatement stForInsertGroup = null;
         PreparedStatement stForFindTeacherId = null;
-        PreparedStatement stForFindSubjectId = null;
-        PreparedStatement stForInsertStudents = null;
-        PreparedStatement stForInsertSubjects = null;
         Savepoint save = null;
 
         if (!isGroupFind(group)) {
@@ -72,82 +66,23 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
                 con.setAutoCommit(false);
                 stForInsertGroup = con.prepareStatement(putGroup);
                 stForFindTeacherId = con.prepareStatement(findPersonByName);
-                stForFindSubjectId = con.prepareStatement(findSubjectByName);
-                stForInsertStudents = con.prepareStatement(putStudentAndGroupID);
-                stForInsertSubjects = con.prepareStatement(putSubjectAndGroupID);
                 save = con.setSavepoint();
 
                 if (group.getTeacher() != null) {
                     int teacherId = findTeacherId(group, stForFindTeacherId);
-
-                    if (teacherId != 0) {
-                        stForInsertGroup.setInt(1, teacherId);
-                    }
+                    stForInsertGroup.setInt(1, teacherId);
+                } else {
+                    stForInsertGroup.setInt(1, 0);
                 }
 
                 stForInsertGroup.setString(2, group.getName());
                 if (stForInsertGroup.executeUpdate() > 0) {
-                    log.info("Группа добавлена, продолжение создания");
+                    log.info("Группа добавлена");
                     con.commit();
                 } else {
-                    log.error("Группа не добавлена, создание прекращено");
+                    log.error("Группа не добавлена");
                     con.rollback(save);
                     return null;
-                }
-
-                Optional<Group> optionalGroup = getGroupByName(group.getName());
-
-                if (!group.getStudents().isEmpty()) {
-                    List<Integer> studentsId = new ArrayList<>();
-                    for (Person student : group.getStudents()) {
-                        int studentId = findStudentId(student, stForFindTeacherId);
-                        if (studentId != 0) {
-                            studentsId.add(studentId);
-                        }
-                    }
-                    if (optionalGroup.isPresent()) {
-                        int groupId = optionalGroup.get().getId();
-
-                        for (Integer studentId : studentsId) {
-                            stForInsertStudents.setInt(1, studentId);
-                            stForInsertStudents.setInt(2, groupId);
-                            if (stForInsertStudents.executeUpdate() > 0) {
-                                log.info("Студент добавлен в группу, продолжение создания");
-                                con.commit();
-                            } else {
-                                log.error("Студент не добавлен в группу, создание прекращено");
-                                con.rollback(save);
-                                return null;
-                            }
-                        }
-                    }
-                }
-
-                if (!group.getSubjects().isEmpty()) {
-                    List<Integer> subjectsId = new ArrayList<>();
-                    for (Subject subject : group.getSubjects()) {
-                        int subjectId = findSubjectId(subject, stForFindSubjectId);
-                        if (subjectId != 0) {
-                            subjectsId.add(subjectId);
-                        }
-                    }
-
-                    if (optionalGroup.isPresent()) {
-                        int groupId = optionalGroup.get().getId();
-
-                        for (Integer subjectId : subjectsId) {
-                            stForInsertSubjects.setInt(1, subjectId);
-                            stForInsertSubjects.setInt(2, groupId);
-                            if (stForInsertSubjects.executeUpdate() > 0) {
-                                log.info("Предмет добавлен в группу, продолжение создания");
-                                con.commit();
-                            } else {
-                                log.error("Предмет не добавлен в группу, создание прекращено");
-                                con.rollback(save);
-                                return null;
-                            }
-                        }
-                    }
                 }
                 return group;
             } catch (SQLException e) {
@@ -157,9 +92,6 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
             } finally {
                 closeResource(stForInsertGroup);
                 closeResource(stForFindTeacherId);
-                closeResource(stForFindSubjectId);
-                closeResource(stForInsertStudents);
-                closeResource(stForInsertSubjects);
                 closeResource(con);
             }
         } else {
@@ -173,7 +105,7 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
         log.debug("Попытка найти группу по ID");
         ResultSet set = null;
         try (Connection con = pool.getConnection();
-            PreparedStatement st = con.prepareStatement(findGroupByID)) {
+             PreparedStatement st = con.prepareStatement(findGroupByID)) {
             st.setInt(1, id);
             set = st.executeQuery();
             if (set.next()) {
@@ -262,6 +194,7 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
                                         .withLogin(set.getString(9))
                                         .withPassword(set.getString(10)))));
             }
+            // сделать еще метод поиска всех студентов из group_student и group_subject
             return groups;
         } catch (SQLException e) {
             log.error("Ошибка получения: SQLException");
@@ -286,11 +219,11 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
             st.setString(1, newName);
             st.setInt(2, id);
             if (st.executeUpdate() > 0) {
-                log.info("Навзание группы обновлено");
+                log.info("Название группы обновлено");
                 con.commit();
                 return true;
             } else {
-                log.error("Группа не найдена, обновления не произошло");
+                log.error("Название не обновлено, обновления группы не произошло");
                 con.rollback(save);
                 return false;
             }
@@ -333,7 +266,7 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
                     con.commit();
                     return true;
                 } else {
-                    log.error("Группа не найдена, обновления не произошло");
+                    log.error("Учитель не обновлён, обновления группы не произошло");
                     con.rollback(save);
                     return false;
                 }
@@ -455,7 +388,7 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
     // метод для удаления предметов из этой группы
 
     private boolean isSubjectsHadDeleted(PreparedStatement stForDeleteSubjects, int groupId) throws SQLException {
-        log.info("Попытка удалиения прдметов из этой группы");
+        log.info("Попытка удаления предметов из этой группы");
         stForDeleteSubjects.setInt(1, groupId);
         return stForDeleteSubjects.executeUpdate() > 0;
     }

@@ -280,6 +280,10 @@ public final class Queries {
     //language=SQL
     public static final String findMarksByGroupID = "SELECT * FROM marks WHERE group_id = ?";
 
+    // "взятие" Marks по Subject ID
+    //language=SQL
+    public static final String findMarksBySubjectID = "SELECT * FROM marks WHERE subject_id = ?";
+
     // "взятие" всех Marks
     //language=SQL
     public static final String findAllMarks = "SELECT * FROM marks";
@@ -325,6 +329,10 @@ public final class Queries {
     // "взятие" Subjects по Group ID
     //language=SQL
     public static final String findSubjectsByGroupID = "SELECT * FROM group_subject WHERE group_id = ?";
+
+    // "взятие" Subjects по Subject ID
+    //language=SQL
+    public static final String findSubjectsBySubjectID = "SELECT * FROM group_subject WHERE subject_id = ?";
 
     // удаление Subject из Group_Subject по ID
     //language=SQL
