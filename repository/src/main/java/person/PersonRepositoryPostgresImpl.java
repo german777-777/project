@@ -32,7 +32,7 @@ import static constants.Queries.findPersonByCredentials;
 import static constants.Queries.findPersonByID;
 import static constants.Queries.findPersonByName;
 import static constants.Queries.findSalariesByTeacherID;
-import static constants.Queries.findStudentsByID;
+import static constants.Queries.findStudentInGroupByID;
 import static constants.Queries.putCredentials;
 import static constants.Queries.putPerson;
 import static constants.Queries.updatePersonCredentialsByID;
@@ -324,7 +324,7 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
             con = pool.getConnection();
             // Statements для проверки
             stForFindMarks = con.prepareStatement(findMarksByStudentID);
-            stForFindStudentInGroup = con.prepareStatement(findStudentsByID);
+            stForFindStudentInGroup = con.prepareStatement(findStudentInGroupByID);
             stForFindSalaries = con.prepareStatement(findSalariesByTeacherID);
             stForFindTeacherInGroup = con.prepareStatement(findGroupByTeacherID);
             // Statements для удаления пользователя и его учётных данных
@@ -476,7 +476,7 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
             con = pool.getConnection();
             // Statements для проверки
             stForFindMarks = con.prepareStatement(findMarksByStudentID);
-            stForFindStudentInGroup = con.prepareStatement(findStudentsByID);
+            stForFindStudentInGroup = con.prepareStatement(findStudentInGroupByID);
             stForFindSalaries = con.prepareStatement(findSalariesByTeacherID);
             stForFindTeacherInGroup = con.prepareStatement(findGroupByTeacherID);
             // Statements для удаления пользователя и его учётных данных

@@ -239,6 +239,7 @@ public final class Queries {
     //language=SQL
     public static final String deleteSalaryByTeacherID = "DELETE FROM salaries WHERE teacher_id = ?";
 
+
     // запросы к таблице Group-Student
 
     // вставка Group ID и Student ID в БД
@@ -247,7 +248,7 @@ public final class Queries {
 
     // "взятие" Student ID
     //language=SQL
-    public static final String findStudentsByID = "SELECT * FROM group_student WHERE student_id = ?";
+    public static final String findStudentInGroupByID = "SELECT * FROM group_student WHERE student_id = ?";
 
     // "взятие" Group ID
     //language=SQL

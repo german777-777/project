@@ -2,6 +2,7 @@ package group;
 
 import lombok.extern.slf4j.Slf4j;
 import secondary.Group;
+import secondary.Subject;
 import users.Person;
 
 import java.util.*;
@@ -114,6 +115,26 @@ public class GroupRepositoryLocalImpl implements GroupRepository {
             return groupMap.containsValue(groupFromOptional);
         }
         log.error("Группа не найдена, изменений не произошло");
+        return false;
+    }
+
+    @Override
+    public boolean updateStudentsAdd(int id, Person newStudent) {
+        return false;
+    }
+
+    @Override
+    public boolean updateStudentsRemove(int id, Person removableStudent) {
+        return false;
+    }
+
+    @Override
+    public boolean updateSubjectsAdd(int id, Subject newSubject) {
+        return false;
+    }
+
+    @Override
+    public boolean updateSubjectsRemove(int id, Subject removableSubject) {
         return false;
     }
 

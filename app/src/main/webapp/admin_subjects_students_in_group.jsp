@@ -14,8 +14,10 @@
         <th>Удалить</th>
     </tr>
 
+    <c:set var="groupID" value="${sessionScope.groupID}"/>
+
     <c:forEach var="group" items="${applicationScope.group_repository.allGroups}">
-        <c:if test="${requestScope.groupID == group.id}">
+        <c:if test="${groupID == group.id}">
             <c:forEach var="subject" items="${group.subjects}">
                 <tr style="text-align: center">
                     <td><c:out value="${subject.id}"/></td>
@@ -23,7 +25,8 @@
                     <td>
                         <form action="<c:url value="/GroupSubjectServlet"/>" method="post">
                             <input type="hidden" name="method" value="delete">
-                            <input type="hidden" name="studentID" value="${subject.id}">
+                            <input type="hidden" name="groupID" value="${group.id}">
+                            <input type="hidden" name="subjectID" value="${subject.id}">
                             <button style="align-content: center" type="submit">Удалить предмет</button>
                         </form>
                     </td>
@@ -35,9 +38,10 @@
 
 <h4>Добавить предмет к группе</h4>
 <form action="<c:url value="/GroupSubjectServlet"/>" method="post">
+    <input type="hidden" name="groupID" value="${groupID}">
     <input type="hidden" name="method" value="post">
     <label>
-        Название: <input style="text-align: center; display: block" type="text" name="newLastName">
+        Название: <input style="text-align: center; display: block" type="text" name="newName">
     </label>
     <button style="align-content: center" type="submit">Добавить предмет к группе</button>
 </form>
@@ -56,7 +60,7 @@
     </tr>
 
     <c:forEach var="group" items="${applicationScope.group_repository.allGroups}">
-        <c:if test="${sessionScope.groupID == group.id}">
+        <c:if test="${groupID == group.id}">
             <c:forEach var="student" items="${group.students}">
                 <tr style="text-align: center">
                     <td><c:out value="${student.id}"/></td>
@@ -69,6 +73,7 @@
                     <td>
                         <form action="<c:url value="/GroupStudentServlet"/>" method="post">
                             <input type="hidden" name="method" value="delete">
+                            <input type="hidden" name="groupID" value="${group.id}">
                             <input type="hidden" name="studentID" value="${student.id}">
                             <button style="align-content: center" type="submit">Удалить студента</button>
                         </form>
@@ -82,6 +87,7 @@
 <h4>Добавить студента к группе</h4>
 <form action="<c:url value="/GroupStudentServlet"/>" method="post">
     <input type="hidden" name="method" value="post">
+    <input type="hidden" name="groupID" value="${groupID}">
     <label>
         Фамилия: <input style="text-align: center; display: block" type="text" name="newLastName">
     </label>

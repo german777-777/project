@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import secondary.Group;
 import secondary.Subject;
 import users.Person;
+import users.Student;
 import users.Teacher;
 
 import java.sql.Connection;
@@ -21,16 +22,23 @@ import static constants.Queries.deleteGroupById;
 import static constants.Queries.deleteGroupWithStudentsByID;
 import static constants.Queries.deleteGroupWithSubjectsByID;
 import static constants.Queries.deleteMarksByGroupID;
+import static constants.Queries.deleteStudentFromGroupByID;
+import static constants.Queries.deleteSubjectFromGroupByID;
 import static constants.Queries.findAllGroups;
 import static constants.Queries.findGroupByID;
 import static constants.Queries.findGroupByName;
 import static constants.Queries.findGroupWithStudentsByID;
 import static constants.Queries.findMarksByGroupID;
+import static constants.Queries.findPersonByID;
 import static constants.Queries.findPersonByName;
+import static constants.Queries.findSubjectByID;
+import static constants.Queries.findSubjectByName;
 import static constants.Queries.findSubjectsByGroupID;
 import static constants.Queries.putGroup;
+import static constants.Queries.putStudentAndGroupID;
 import static constants.Queries.updateGroupNameByID;
 import static constants.Queries.updateGroupTeacherByID;
+import static constants.Queries.putSubjectAndGroupID;
 
 @Slf4j
 public class GroupRepositoryPostgresImpl implements GroupRepository {
@@ -54,10 +62,12 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
 
     @Override
     public Group createGroup(Group group) {
-        log.debug("Попытка найти группу в репозитории");
         Connection con = null;
         PreparedStatement stForInsertGroup = null;
         PreparedStatement stForFindTeacherId = null;
+        PreparedStatement stForFindSubjectId = null;
+        PreparedStatement stForInsertStudents = null;
+        PreparedStatement stForInsertSubjects = null;
         Savepoint save = null;
 
         if (!isGroupFind(group)) {
@@ -66,6 +76,9 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
                 con.setAutoCommit(false);
                 stForInsertGroup = con.prepareStatement(putGroup);
                 stForFindTeacherId = con.prepareStatement(findPersonByName);
+                stForFindSubjectId = con.prepareStatement(findSubjectByName);
+                stForInsertStudents = con.prepareStatement(putStudentAndGroupID);
+                stForInsertSubjects = con.prepareStatement(putSubjectAndGroupID);
                 save = con.setSavepoint();
 
                 if (group.getTeacher() != null) {
@@ -84,6 +97,62 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
                     con.rollback(save);
                     return null;
                 }
+
+                Optional<Group> optionalGroup = getGroupByName(group.getName());
+
+                if (!group.getStudents().isEmpty()) {
+                    List<Integer> studentsId = new ArrayList<>();
+                    for (Person student : group.getStudents()) {
+                        int studentId = findStudentId(student, stForFindTeacherId);
+                        if (studentId != 0) {
+                            studentsId.add(studentId);
+                        }
+                    }
+                    if (optionalGroup.isPresent()) {
+                        int groupId = optionalGroup.get().getId();
+
+                        for (Integer studentId : studentsId) {
+                            stForInsertStudents.setInt(1, studentId);
+                            stForInsertStudents.setInt(2, groupId);
+                            if (stForInsertStudents.executeUpdate() > 0) {
+                                log.info("Студент добавлен в группу, продолжение создания");
+                                con.commit();
+                            } else {
+                                log.error("Студент не добавлен в группу, создание прекращено");
+                                con.rollback(save);
+                                return null;
+                            }
+                        }
+                    }
+                }
+
+                if (!group.getSubjects().isEmpty()) {
+                    List<Integer> subjectsId = new ArrayList<>();
+                    for (Subject subject : group.getSubjects()) {
+                        int subjectId = findSubjectId(subject, stForFindSubjectId);
+                        if (subjectId != 0) {
+                            subjectsId.add(subjectId);
+                        }
+                    }
+
+                    if (optionalGroup.isPresent()) {
+                        int groupId = optionalGroup.get().getId();
+
+                        for (Integer subjectId : subjectsId) {
+                            stForInsertSubjects.setInt(1, subjectId);
+                            stForInsertSubjects.setInt(2, groupId);
+                            if (stForInsertSubjects.executeUpdate() > 0) {
+                                log.info("Предмет добавлен в группу, продолжение создания");
+                                con.commit();
+                            } else {
+                                log.error("Предмет не добавлен в группу, создание прекращено");
+                                con.rollback(save);
+                                return null;
+                            }
+                        }
+                    }
+                }
+
                 return group;
             } catch (SQLException e) {
                 log.error("Ошибка получения: SQLException");
@@ -92,10 +161,13 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
             } finally {
                 closeResource(stForInsertGroup);
                 closeResource(stForFindTeacherId);
+                closeResource(stForFindSubjectId);
+                closeResource(stForInsertStudents);
+                closeResource(stForInsertSubjects);
                 closeResource(con);
             }
         } else {
-            log.error("Группа с таким названием уже существует, создания не произошло");
+            log.error("Создания не произошло");
             return null;
         }
     }
@@ -176,7 +248,11 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
         List<Group> groups = new ArrayList<>();
         ResultSet set = null;
         try (Connection con = pool.getConnection();
-             PreparedStatement st = con.prepareStatement(findAllGroups)) {
+             PreparedStatement st = con.prepareStatement(findAllGroups);
+             PreparedStatement stForFindAllStudents = con.prepareStatement(findGroupWithStudentsByID);
+             PreparedStatement stForFindAllSubjects = con.prepareStatement(findSubjectsByGroupID);
+             PreparedStatement stForFindStudentById = con.prepareStatement(findPersonByID);
+             PreparedStatement stForFindSubjectById = con.prepareStatement(findSubjectByID)) {
             set = st.executeQuery();
             while (set.next()) {
                 log.info("Группа найдена");
@@ -192,9 +268,10 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
                                 .withCredentials(new Credentials()
                                         .withId(set.getInt(8))
                                         .withLogin(set.getString(9))
-                                        .withPassword(set.getString(10)))));
+                                        .withPassword(set.getString(10))))
+                        .withStudents(getAllStudents(stForFindAllStudents, set.getInt(1), stForFindStudentById))
+                        .withSubjects(getAllSubjects(stForFindAllSubjects, set.getInt(1), stForFindSubjectById)));
             }
-            // сделать еще метод поиска всех студентов из group_student и group_subject
             return groups;
         } catch (SQLException e) {
             log.error("Ошибка получения: SQLException");
@@ -202,6 +279,53 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
         } finally {
             closeResource(set);
         }
+    }
+
+    private List<Subject> getAllSubjects(PreparedStatement stForFindAllSubjectsInGroup, int groupId, PreparedStatement stForFindSubjectById) throws SQLException {
+        List<Subject> subjects = new ArrayList<>();
+
+        stForFindAllSubjectsInGroup.setInt(1, groupId);
+        ResultSet setForGroup = stForFindAllSubjectsInGroup.executeQuery();
+
+        while (setForGroup.next()) {
+            stForFindSubjectById.setInt(1, setForGroup.getInt(1));
+
+            ResultSet setForSubjects = stForFindSubjectById.executeQuery();
+            if (setForSubjects.next()) {
+                subjects.add(new Subject()
+                        .withId(setForSubjects.getInt(1))
+                        .withName(setForSubjects.getString(2)));
+            }
+        }
+        return subjects;
+    }
+
+    private List<Person> getAllStudents(PreparedStatement stForFindAllStudentsInGroup , int groupId, PreparedStatement stForFindStudentById) throws SQLException {
+        List<Person> students = new ArrayList<>();
+
+        stForFindAllStudentsInGroup.setInt(1, groupId);
+        ResultSet setForGroup = stForFindAllStudentsInGroup.executeQuery();
+        ResultSet setForStudents;
+
+        while (setForGroup.next()) {
+            stForFindStudentById.setInt(1, setForGroup.getInt(1));
+
+            setForStudents = stForFindStudentById.executeQuery();
+            if (setForStudents.next()) {
+                students.add(new Student()
+                        .withId(setForStudents.getInt(1))
+                        .withFirstName(setForStudents.getString(2))
+                        .withLastName(setForStudents.getString(3))
+                        .withPatronymic(setForStudents.getString(4))
+                        .withDateOfBirth(setForStudents.getDate(5).toLocalDate())
+                        .withCredentials(new Credentials()
+                                .withId(setForStudents.getInt(7))
+                                .withLogin(setForStudents.getString(8))
+                                .withPassword(setForStudents.getString(9))));
+            }
+
+        }
+        return students;
     }
 
     @Override
@@ -282,6 +406,194 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
         } finally {
             closeResource(setForTeacher);
             closeResource(stForFindTeacher);
+            closeResource(stForUpdate);
+            closeResource(con);
+        }
+    }
+
+    @Override
+    public boolean updateStudentsAdd(int id, Person newStudent) {
+        Connection con = null;
+        PreparedStatement stForFindStudent = null;
+        PreparedStatement stForUpdate = null;
+        Savepoint save = null;
+
+        try {
+            con = pool.getConnection();
+            con.setAutoCommit(false);
+            stForFindStudent = con.prepareStatement(findPersonByName);
+            stForUpdate = con.prepareStatement(putStudentAndGroupID);
+            save = con.setSavepoint();
+
+            stForFindStudent.setString(1, newStudent.getFirstName());
+            stForFindStudent.setString(2, newStudent.getLastName());
+            stForFindStudent.setString(3, newStudent.getPatronymic());
+
+            int studentId = findStudentId(newStudent, stForFindStudent);
+
+            if (studentId > 0) {
+                stForUpdate.setInt(1, studentId);
+                stForUpdate.setInt(2, id);
+
+                if (stForUpdate.executeUpdate() > 0) {
+                    log.info("Студент успешно добавлен к группе");
+                    con.commit();
+                    return true;
+                } else {
+                    log.error("Студент не добавлен к группе");
+                    con.rollback(save);
+                    return false;
+                }
+            } else {
+                log.error("Студент не найден, добавления не произошло");
+                con.rollback(save);
+                return false;
+            }
+        } catch (SQLException e) {
+            log.error("Ошибка получения: SQLException");
+            myRollback(con, save);
+            return false;
+        } finally {
+            closeResource(stForFindStudent);
+            closeResource(stForUpdate);
+            closeResource(con);
+        }
+    }
+
+    @Override
+    public boolean updateStudentsRemove(int id, Person removableStudent) {
+        Connection con = null;
+        PreparedStatement stForFindStudent = null;
+        PreparedStatement stForUpdate = null;
+        Savepoint save = null;
+
+        try {
+            con = pool.getConnection();
+            con.setAutoCommit(false);
+            stForFindStudent = con.prepareStatement(findPersonByName);
+            stForUpdate = con.prepareStatement(deleteStudentFromGroupByID);
+            save = con.setSavepoint();
+
+            stForFindStudent.setString(1, removableStudent.getFirstName());
+            stForFindStudent.setString(2, removableStudent.getLastName());
+            stForFindStudent.setString(3, removableStudent.getPatronymic());
+
+            int studentId = findStudentId(removableStudent, stForFindStudent);
+            if (studentId > 0) {
+                stForUpdate.setInt(1, studentId);
+                if (stForUpdate.executeUpdate() > 0) {
+                    log.info("Студент успешно удалён из группы");
+                    con.commit();
+                    return true;
+                } else {
+                    log.error("Студент не удалён из группы");
+                    con.rollback(save);
+                    return false;
+                }
+            } else {
+                log.error("Студент не найден, удаления не произошло");
+                con.rollback(save);
+                return false;
+            }
+
+        } catch (SQLException e) {
+            log.error("Ошибка получения: SQLException");
+            myRollback(con, save);
+            return false;
+        } finally {
+            closeResource(stForFindStudent);
+            closeResource(stForUpdate);
+            closeResource(con);
+        }
+    }
+
+    @Override
+    public boolean updateSubjectsAdd(int id, Subject newSubject) {
+        Connection con = null;
+        PreparedStatement stForFindSubject = null;
+        PreparedStatement stForUpdate = null;
+        Savepoint save = null;
+
+        try {
+            con = pool.getConnection();
+            con.setAutoCommit(false);
+            stForFindSubject = con.prepareStatement(findSubjectByName);
+            stForUpdate = con.prepareStatement(putSubjectAndGroupID);
+            save = con.setSavepoint();
+
+            stForFindSubject.setString(1, newSubject.getName());
+
+            int subjectId = findSubjectId(newSubject, stForFindSubject);
+
+            if (subjectId > 0) {
+                stForUpdate.setInt(1, subjectId);
+                stForUpdate.setInt(2, id);
+
+                if (stForUpdate.executeUpdate() > 0) {
+                    log.info("Предмет успешно добавлен к группе");
+                    con.commit();
+                    return true;
+                } else {
+                    log.error("Предмет не добавлен к группе");
+                    con.rollback(save);
+                    return false;
+                }
+            } else {
+                log.error("Предмет не найден, добавления не произошло");
+                con.rollback(save);
+                return false;
+            }
+        } catch (SQLException e) {
+            log.error("Ошибка получения: SQLException");
+            myRollback(con, save);
+            return false;
+        } finally {
+            closeResource(stForFindSubject);
+            closeResource(stForUpdate);
+            closeResource(con);
+        }
+    }
+
+    @Override
+    public boolean updateSubjectsRemove(int id, Subject removableSubject) {
+        Connection con = null;
+        PreparedStatement stForFindSubject = null;
+        PreparedStatement stForUpdate = null;
+        Savepoint save = null;
+
+        try {
+            con = pool.getConnection();
+            con.setAutoCommit(false);
+            stForFindSubject = con.prepareStatement(findSubjectByName);
+            stForUpdate = con.prepareStatement(deleteSubjectFromGroupByID);
+            save = con.setSavepoint();
+
+            stForFindSubject.setString(1, removableSubject.getName());
+
+            int subjectId = findSubjectId(removableSubject, stForFindSubject);
+            if (subjectId > 0) {
+                stForUpdate.setInt(1, subjectId);
+                if (stForUpdate.executeUpdate() > 0) {
+                    log.info("Предмет успешно удалён из группы");
+                    con.commit();
+                    return true;
+                } else {
+                    log.error("Предмет не удалён из группы");
+                    con.rollback(save);
+                    return false;
+                }
+            } else {
+                log.error("Предмет не найден, удаления не произошло");
+                con.rollback(save);
+                return false;
+            }
+
+        } catch (SQLException e) {
+            log.error("Ошибка получения: SQLException");
+            myRollback(con, save);
+            return false;
+        } finally {
+            closeResource(stForFindSubject);
             closeResource(stForUpdate);
             closeResource(con);
         }

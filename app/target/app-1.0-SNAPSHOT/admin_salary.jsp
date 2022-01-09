@@ -16,12 +16,12 @@
         <th>Удалить</th>
         <th>Изменить</th>
     </tr>
+
     <c:forEach var="salary" items="${applicationScope.salary_repository.allSalaries}">
-        <c:if test="${requestScope.teacherID == salary.teacher.id}">
+        <c:if test="${sessionScope.teacherID == salary.teacher.id}">
             <tr style="text-align: center">
                 <td><c:out value="${salary.id}"/></td>
-                <td><c:out
-                        value="
+                <td><c:out value="
                     ${salary.teacher.firstName}
                     ${salary.teacher.lastName}
                     ${salary.teacher.patronymic}"/>
@@ -32,20 +32,20 @@
                     <form action="<c:url value="/SalaryServlet"/>" method="post">
                         <input type="hidden" name="method" value="delete">
                         <input type="hidden" name="ID" value="${salary.id}">
-                        <input type="hidden" name="teacher" value="${salary.teacher}">
                         <button style="align-content: center" type="submit">Удалить</button>
                     </form>
                 </td>
                 <td>
-                    <form action="<c:url value="/SalaryServlet"/>">
+                    <form action="<c:url value="/SalaryServlet"/>" method="post">
                         <input type="hidden" name="method" value="put">
                         <input type="hidden" name="ID" value="${salary.id}">
                         <label>
-                            <input style="text-align: center; display: block" type="text" placeholder="Новая зарплата">
+                            <input style="text-align: center; display: block" type="text"
+                                   name="newSalary" placeholder="Новая зарплата">
                         </label>
                         <label>
                             <input style="text-align: center; display: block" type="date"
-                                   placeholder="Новая дата выдачи">
+                                   name="newDateOfSalary" placeholder="Новая дата выдачи">
                         </label>
                         <button style="align-content: center" type="submit">Изменить</button>
                     </form>
@@ -58,12 +58,12 @@
 <h4>Добавить зарплату</h4>
 <form action="<c:url value="/SalaryServlet"/>" method="post">
     <input type="hidden" name="method" value="post">
-    <input type="hidden" name="teacherID" value="${requestScope.teacherID}">
+    <input type="hidden" name="teacherID" value="${sessionScope.teacherID}">
     <label>
-        Дата выдачи: <input type="date" name="newDateOfSalary">
+        Дата выдачи: <input style="display: block; text-align: center" type="date" name="newDateOfSalary">
     </label>
     <label>
-        Зарплата в размере: <input style="text-align: center" type="text" name="newCount">
+        Зарплата в размере: <input style="display: block; text-align: center" type="text" name="newCount">
     </label>
     <button style="display: block; align-content: center" type="submit">Добавить зарплату</button>
 </form>

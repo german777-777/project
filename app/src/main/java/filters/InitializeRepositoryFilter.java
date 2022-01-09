@@ -151,8 +151,8 @@ public class InitializeRepositoryFilter implements Filter {
 
         log.info("Добавление студентов");
         Person student1 = new Student()
-                .withFirstName("Писарев")
-                .withLastName("Герман")
+                .withFirstName("Герман")
+                .withLastName("Писарев")
                 .withPatronymic("Дмитриевич")
                 .withCredentials(new Credentials()
                         .withLogin("Mongol")
@@ -189,15 +189,19 @@ public class InitializeRepositoryFilter implements Filter {
                 .withName("Tomcat");
         factory.getSubjectRepository().createSubject(subject3);
 
+        Subject subject4 = new Subject()
+                .withName("Hibernate");
+        factory.getSubjectRepository().createSubject(subject4);
+
         log.info("Добавление группы");
         Group group1 = new Group()
                 .withName("JEE-2021")
                 .withTeacher(teacher3)
-                .withStudent(student1)
-                .withStudent(student2)
-                .withSubject(subject1)
-                .withSubject(subject2)
-                .withSubject(subject3);
+                .addStudent(student1)
+                .addStudent(student2)
+                .addSubject(subject1)
+                .addSubject(subject2)
+                .addSubject(subject3);
         factory.getGroupRepository().createGroup(group1);
 
     }
