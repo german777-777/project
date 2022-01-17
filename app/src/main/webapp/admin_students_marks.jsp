@@ -10,9 +10,9 @@
         <tr>
             <th>ID</th>
             <th>Оценка</th>
-            <th>Группа (ID)</th>
+            <th>Группа</th>
             <th>Дата</th>
-            <th>Предмет (ID)</th>
+            <th>Предмет</th>
             <th>Изменить</th>
             <th>Удалить</th>
         </tr>
@@ -20,20 +20,20 @@
         <c:set var="studentID" value="${sessionScope.studentID}"/>
 
         <c:forEach var="mark" items="${applicationScope.mark_repository.allMarks}">
-            <c:if test="${mark.studentId == studentID}">
+            <c:if test="${mark.student.id == studentID}">
                 <tr style="text-align: center">
                     <td><c:out value="${mark.id}"/></td>
                     <td><c:out value="${mark.mark}"/></td>
-                    <td><c:out value="${mark.groupId}"/></td>
+                    <td><c:out value="${mark.group.name}"/></td>
                     <td><c:out value="${mark.dateOfMark}"/></td>
-                    <td><c:out value="${mark.subjectId}"/></td>
+                    <td><c:out value="${mark.subject.name}"/></td>
                     <td>
                         <form action="<c:url value="/MarksServlet"/>" method="post">
                             <input type="hidden" name="method" value="put">
                             <input type="hidden" name="ID" value="${mark.id}">
                             <label>
-                                Новая группа (ID; если не изменяется - ввести прошлый):
-                                <input style="text-align: center; display: block" type="text" name="newGroupID">
+                                Новая группа (если не изменяется - ввести прошлую):
+                                <input style="text-align: center; display: block" type="text" name="newGroupName">
                             </label>
                             <label>
                                 Новая оценка (если не изменяется - ввести прошлую):
@@ -44,8 +44,8 @@
                                 <input style="text-align: center; display: block" type="date" name="newDate">
                             </label>
                             <label>
-                                Новый предмет: (ID; если не изменяется - ввести прошлый)
-                                <input style="text-align: center; display: block" type="text" name="newSubjectID">
+                                Новый предмет: (если не изменяется - ввести прошлый)
+                                <input style="text-align: center; display: block" type="text" name="newSubjectName">
                             </label>
                             <button style="align-content: center" type="submit">Изменить</button>
                         </form>
@@ -67,8 +67,8 @@
     <input type="hidden" name="studentID" value="${studentID}">
     <input type="hidden" name="method" value="post">
     <label>
-        Новая группа (ID):
-        <input style="text-align: center; display: block" type="text" name="newGroupID">
+        Новая группа:
+        <input style="text-align: center; display: block" type="text" name="newGroupName">
     </label>
     <label>
         Новая оценка:
@@ -79,8 +79,8 @@
         <input style="text-align: center; display: block" type="date" name="newDate">
     </label>
     <label>
-        Новый предмет: (ID)
-        <input style="text-align: center; display: block" type="text" name="newSubjectID">
+        Новый предмет:
+        <input style="text-align: center; display: block" type="text" name="newSubjectName">
     </label>
     <button style="align-content: center" type="submit">Создать</button>
 </form>

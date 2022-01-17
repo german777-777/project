@@ -2,6 +2,7 @@ package secondary;
 
 import entity.AbstractEntity;
 import lombok.*;
+import users.Person;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -11,16 +12,16 @@ import java.util.Objects;
 @Data
 public class Mark extends AbstractEntity {
     //какому студенту выставлена оценка
-    private int studentId;
+    private Person student;
 
     // по какому предмету оценка
-    private int subjectId;
+    private Subject subject;
 
     // дата выставления оценки
     private LocalDate dateOfMark;
 
     // из какой группы, так сказать, идёт оценка
-    private int groupId;
+    private Group group;
 
     // сама оценка
     private int mark;
@@ -31,12 +32,12 @@ public class Mark extends AbstractEntity {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Mark mark1 = (Mark) o;
-        return studentId == mark1.studentId && mark == mark1.mark && subjectId == mark1.subjectId && groupId == mark1.groupId;
+        return mark == mark1.mark && student.equals(mark1.student) && subject.equals(mark1.subject) && dateOfMark.equals(mark1.dateOfMark) && group.equals(mark1.group);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), studentId, subjectId, groupId, mark);
+        return Objects.hash(super.hashCode(), student, subject, dateOfMark, group, mark);
     }
 
     public Mark withId(int id) {
@@ -44,13 +45,13 @@ public class Mark extends AbstractEntity {
         return this;
     }
 
-    public Mark withStudentId(int studentId) {
-        setStudentId(studentId);
+    public Mark withStudent(Person student) {
+        setStudent(student);
         return this;
     }
 
-    public Mark withSubjectId(int subjectId) {
-        setSubjectId(subjectId);
+    public Mark withSubject(Subject subject) {
+        setSubject(subject);
         return this;
     }
 
@@ -59,8 +60,8 @@ public class Mark extends AbstractEntity {
         return this;
     }
 
-    public Mark withGroupId(int groupId) {
-        setGroupId(groupId);
+    public Mark withGroup(Group group) {
+        setGroup(group);
         return this;
     }
 

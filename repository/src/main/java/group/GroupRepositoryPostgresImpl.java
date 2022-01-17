@@ -177,7 +177,11 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
         log.debug("Попытка найти группу по ID");
         ResultSet set = null;
         try (Connection con = pool.getConnection();
-             PreparedStatement st = con.prepareStatement(findGroupByID)) {
+             PreparedStatement st = con.prepareStatement(findGroupByID);
+             PreparedStatement stForFindAllStudents = con.prepareStatement(findGroupWithStudentsByID);
+             PreparedStatement stForFindAllSubjects = con.prepareStatement(findSubjectsByGroupID);
+             PreparedStatement stForFindStudentById = con.prepareStatement(findPersonByID);
+             PreparedStatement stForFindSubjectById = con.prepareStatement(findSubjectByID)) {
             st.setInt(1, id);
             set = st.executeQuery();
             if (set.next()) {
@@ -194,7 +198,9 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
                                 .withCredentials(new Credentials()
                                         .withId(set.getInt(8))
                                         .withLogin(set.getString(9))
-                                        .withPassword(set.getString(10)))));
+                                        .withPassword(set.getString(10))))
+                        .withStudents(getAllStudents(stForFindAllStudents, set.getInt(1), stForFindStudentById))
+                        .withSubjects(getAllSubjects(stForFindAllSubjects, set.getInt(1), stForFindSubjectById)));
             } else {
                 log.error("Группа не найдена");
                 return Optional.empty();
@@ -212,7 +218,11 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
         log.debug("Попытка найти группу по названию");
         ResultSet set = null;
         try (Connection con = pool.getConnection();
-             PreparedStatement st = con.prepareStatement(findGroupByName)) {
+             PreparedStatement st = con.prepareStatement(findGroupByName);
+             PreparedStatement stForFindAllStudents = con.prepareStatement(findGroupWithStudentsByID);
+             PreparedStatement stForFindAllSubjects = con.prepareStatement(findSubjectsByGroupID);
+             PreparedStatement stForFindStudentById = con.prepareStatement(findPersonByID);
+             PreparedStatement stForFindSubjectById = con.prepareStatement(findSubjectByID)) {
             st.setString(1, name);
             set = st.executeQuery();
             if (set.next()) {
@@ -229,7 +239,9 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
                                 .withCredentials(new Credentials()
                                         .withId(set.getInt(8))
                                         .withLogin(set.getString(9))
-                                        .withPassword(set.getString(10)))));
+                                        .withPassword(set.getString(10))))
+                        .withStudents(getAllStudents(stForFindAllStudents, set.getInt(1), stForFindStudentById))
+                        .withSubjects(getAllSubjects(stForFindAllSubjects, set.getInt(1), stForFindSubjectById)));
             } else {
                 log.error("Группа не найдена");
                 return Optional.empty();
@@ -300,7 +312,7 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
         return subjects;
     }
 
-    private List<Person> getAllStudents(PreparedStatement stForFindAllStudentsInGroup , int groupId, PreparedStatement stForFindStudentById) throws SQLException {
+    private List<Person> getAllStudents(PreparedStatement stForFindAllStudentsInGroup, int groupId, PreparedStatement stForFindStudentById) throws SQLException {
         List<Person> students = new ArrayList<>();
 
         stForFindAllStudentsInGroup.setInt(1, groupId);

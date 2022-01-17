@@ -34,7 +34,7 @@ public class MarkRepositoryLocalImpl implements MarkRepository {
         Optional<Mark> optionalMark = markMap.values()
                 .stream()
                 .filter(mk -> mk.getId() == ID)
-                .filter(mk -> mk.getSubjectId() == mark.getSubjectId())
+                .filter(mk -> mk.getSubject().getId() == mark.getSubject().getId())
                 .findAny();
         if (optionalMark.isEmpty()) {
             ID++;
@@ -78,7 +78,7 @@ public class MarkRepositoryLocalImpl implements MarkRepository {
         if (optionalMark.isPresent()) {
             log.info("Изменение оценки в репозитории");
             Mark markFromOptional = optionalMark.get();
-            markFromOptional.setSubjectId(newSubject.getId());
+            markFromOptional.setSubject(newSubject);
             markMap.put(id, markFromOptional);
             return markMap.containsValue(markFromOptional);
         }
@@ -114,7 +114,7 @@ public class MarkRepositoryLocalImpl implements MarkRepository {
         if (optionalMark.isPresent()) {
             log.info("Измнений оценки в репозитории");
             Mark markFromOptional = optionalMark.get();
-            markFromOptional.setGroupId(newGroup.getId());
+            markFromOptional.setGroup(newGroup);
             markMap.put(id, markFromOptional);
             return markMap.containsValue(markFromOptional);
         }

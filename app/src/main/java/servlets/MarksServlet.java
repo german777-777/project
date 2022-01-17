@@ -3,10 +3,12 @@ package servlets;
 import group.GroupRepository;
 import lombok.extern.slf4j.Slf4j;
 import mark.MarkRepository;
+import person.PersonRepository;
 import secondary.Group;
 import secondary.Mark;
 import secondary.Subject;
 import subject.SubjectRepository;
+import users.Person;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -23,20 +25,45 @@ public class MarksServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         MarkRepository markRepository = (MarkRepository) getServletContext().getAttribute("mark_repository");
+        GroupRepository groupRepository = (GroupRepository) getServletContext().getAttribute("group_repository");
+        SubjectRepository subjectRepository = (SubjectRepository) getServletContext().getAttribute("subject_repository");
+        PersonRepository personRepository = (PersonRepository) getServletContext().getAttribute("person_repository");
 
         log.debug("Получение данных для создания оценки");
         int studentID = Integer.parseInt(req.getParameter("studentID"));
-        int groupID = Integer.parseInt(req.getParameter("newGroupID"));
+        String groupName = req.getParameter("newGroupName");
         int count = Integer.parseInt(req.getParameter("newMark"));
         LocalDate date = LocalDate.parse(req.getParameter("newDate"));
-        int subjectID = Integer.parseInt(req.getParameter("newSubjectID"));
+        String subjectName = req.getParameter("newSubjectName");
+
+        log.info("Проверяется, есть ли студент");
+        Optional<Person> optionalStudent = personRepository.getPersonById(studentID);
+        Person student = null;
+        if (optionalStudent.isPresent()) {
+            student = optionalStudent.get();
+        }
+
+        log.info("Проверяется, есть ли введённая группа");
+        Optional<Group> optionalGroup = groupRepository.getGroupByName(groupName);
+        Group group = null;
+        if (optionalGroup.isPresent()) {
+            group = optionalGroup.get();
+        }
+
+        log.info("Проверяется, есть ли введённый предмет");
+        Optional<Subject> optionalSubject = subjectRepository.getSubjectByName(subjectName);
+        Subject subject = null;
+        if (optionalSubject.isPresent()) {
+            subject = optionalSubject.get();
+        }
 
         markRepository.createMark(new Mark()
-                .withGroupId(groupID)
+                .withGroup(group)
                 .withMark(count)
                 .withDateOfMark(date)
-                .withSubjectId(subjectID)
-                .withStudentId(studentID));
+                .withSubject(subject)
+                .withStudent(student));
+
         req.getRequestDispatcher("admin_students_marks.jsp").forward(req, resp);
     }
 
@@ -48,21 +75,21 @@ public class MarksServlet extends HttpServlet {
 
         log.debug("Получение новых данных об оценке");
         int markID = Integer.parseInt(req.getParameter("ID"));
-        int groupID = Integer.parseInt(req.getParameter("newGroupID"));
+        String groupName = req.getParameter("newGroupName");
         int count = Integer.parseInt(req.getParameter("newMark"));
         LocalDate date = LocalDate.parse(req.getParameter("newDate"));
-        int subjectID = Integer.parseInt(req.getParameter("newSubjectID"));
+        String subjectName = req.getParameter("newSubjectName");
 
         markRepository.updateDateOfMarkById(markID, date);
 
         log.info("Проверяется, есть ли введённая группа");
-        Optional<Group> optionalGroup = groupRepository.getGroupById(groupID);
+        Optional<Group> optionalGroup = groupRepository.getGroupByName(groupName);
         optionalGroup.ifPresent(group -> markRepository.updateGroupWhereMarkWasGiven(markID, group));
 
         markRepository.updateMarkById(markID, count);
 
         log.info("Проверяется, есть ли введённый предмет");
-        Optional<Subject> subjectOptional = subjectRepository.getSubjectById(subjectID);
+        Optional<Subject> subjectOptional = subjectRepository.getSubjectByName(subjectName);
         subjectOptional.ifPresent(subject -> markRepository.updateSubjectMarkById(markID, subject));
 
         req.getRequestDispatcher("admin_students_marks.jsp").forward(req, resp);
