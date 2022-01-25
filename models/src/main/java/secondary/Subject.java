@@ -1,14 +1,34 @@
 package secondary;
 
 import entity.AbstractEntity;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 import java.util.Objects;
 
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Table(name = "subjects")
+@Entity
+@NamedQueries({
+        @NamedQuery(name = "getSubjectByID", query = "from Subject s where s.id = :id"),
+        @NamedQuery(name = "getSubjectByName", query = "from Subject s where s.name = :name")
+})
 public class Subject extends AbstractEntity {
+    @Column(name = "name")
     private String name;
 
     @Override

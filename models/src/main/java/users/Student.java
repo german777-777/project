@@ -1,19 +1,38 @@
 package users;
 
 import credentials.Credentials;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import role.Role;
 import secondary.Mark;
 
+import javax.persistence.CascadeType;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
+@ToString(callSuper = true)
+@NoArgsConstructor
+@DiscriminatorValue("Студент")
+@Entity
 public class Student extends Person {
+
+    @Transient
     private final Role role = Role.STUDENT;
-    private List<Mark> marks = new ArrayList<>();
+
+    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE}, orphanRemoval = true, mappedBy = "student", fetch = FetchType.EAGER)
+    @ToString.Exclude
+    private Set<Mark> marks = new HashSet<>();
 
     public Student withId(int id) {
         setId(id);
@@ -45,18 +64,30 @@ public class Student extends Person {
         return this;
     }
 
-    public Student withMarks(List<Mark> marks) {
+    public Student withMarks(Set<Mark> marks) {
         setMarks(marks);
         return this;
     }
 
-    public Student addMark(Mark mark) {
+    public void addMark(Mark mark) {
         this.marks.add(mark);
-        return this;
     }
 
-    public Student removeMark(Mark mark) {
+    public void removeMark(Mark mark) {
         this.marks.remove(mark);
-        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Student student = (Student) o;
+        return role == student.role && marks.equals(student.marks);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), role, marks);
     }
 }

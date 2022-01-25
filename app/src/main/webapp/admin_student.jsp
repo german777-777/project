@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
-    <title>Страница студетов для Администратора</title>
+    <title>Страница студентов для Администратора</title>
 </head>
 <body>
 <h1>Страница студентов</h1>

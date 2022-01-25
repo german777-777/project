@@ -9,6 +9,7 @@ import secondary.Mark;
 import secondary.Subject;
 import subject.SubjectRepository;
 import users.Person;
+import users.Student;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -62,7 +63,7 @@ public class MarksServlet extends HttpServlet {
                 .withMark(count)
                 .withDateOfMark(date)
                 .withSubject(subject)
-                .withStudent(student));
+                .withStudent((Student) student));
 
         req.getRequestDispatcher("admin_students_marks.jsp").forward(req, resp);
     }

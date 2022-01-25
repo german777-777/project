@@ -2,14 +2,15 @@ package servlets;
 
 import lombok.extern.slf4j.Slf4j;
 import person.PersonRepository;
-import role.Role;
 import users.Person;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.annotation.*;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -24,25 +25,25 @@ public class LoginServlet extends HttpServlet {
         RequestDispatcher dispatcher;
         Optional<Person> person = checkRightLoginAndPassword(login, password);
         if (person.isPresent()) {
-            switch (Objects.requireNonNull(checkRoleOfPerson(person.get()))) {
-                case ADMIN:
+            switch (person.get().getClass().getName()) {
+                case "users.Admin":
                     request.getSession().setAttribute("user", person.get());
                     dispatcher = request.getRequestDispatcher("/admin.jsp");
                     dispatcher.forward(request, response);
                     break;
-                case TEACHER:
+                case "users.Teacher":
                     request.getSession().setAttribute("user", person.get());
                     dispatcher = request.getRequestDispatcher("/teacher.jsp");
                     dispatcher.forward(request, response);
                     break;
-                case STUDENT:
+                case "users.Student":
                     request.getSession().setAttribute("user", person.get());
                     dispatcher = request.getRequestDispatcher("/student.jsp");
                     dispatcher.forward(request, response);
                     break;
                 default:
                     request.setAttribute("error", "Не существует такого типа пользователя...");
-                    dispatcher = request.getRequestDispatcher("/indexч.jsp");
+                    dispatcher = request.getRequestDispatcher("/index.jsp");
                     dispatcher.forward(request, response);
             }
         } else {
@@ -62,16 +63,4 @@ public class LoginServlet extends HttpServlet {
         return Optional.empty();
     }
 
-    private Role checkRoleOfPerson(Person person) {
-        switch (person.getRole()) {
-            case ADMIN:
-                return Role.ADMIN;
-            case TEACHER:
-                return Role.TEACHER;
-            case STUDENT:
-                return Role.STUDENT;
-            default:
-                return null;
-        }
-    }
 }

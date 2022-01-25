@@ -1,24 +1,46 @@
 package secondary;
 
 import entity.AbstractEntity;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import users.Person;
 import users.Teacher;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 import java.time.LocalDate;
 import java.util.Objects;
 
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Table(name = "salaries")
+@Entity
+@NamedQueries({
+        @NamedQuery(name = "getSalaryByID", query = "from Salary s where s.id = :id"),
+        @NamedQuery(name = "getSalariesByTeacherID", query = "from Salary s where s.teacher.id = :teacherID"),
+        @NamedQuery(name = "getSalariesByDate", query = "from Salary s where s.dateOfSalary = :dateOfSalary")
+})
 public class Salary extends AbstractEntity {
-    // для Teacher-a: кому конкретно принадлежит зарплата
-    private Person teacher;
 
-    // дата выдачи зарплаты
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+    private Teacher teacher;
+
+    @Column(name = "date_of_salary")
     private LocalDate dateOfSalary;
 
-    // сама зарплата
+    @Column(name = "count")
     private int salary;
 
     @Override
@@ -40,11 +62,6 @@ public class Salary extends AbstractEntity {
         return this;
     }
 
-    public Salary withTeacher(Person teacher) {
-        setTeacher(teacher);
-        return this;
-    }
-
     public Salary withDateOfSalary(LocalDate dateOfSalary) {
         setDateOfSalary(dateOfSalary);
         return this;
@@ -54,4 +71,11 @@ public class Salary extends AbstractEntity {
         setSalary(salary);
         return this;
     }
+
+    public Salary withTeacher(Teacher teacher) {
+        setTeacher(teacher);
+        return this;
+    }
+
+
 }

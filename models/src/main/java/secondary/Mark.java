@@ -1,29 +1,53 @@
 package secondary;
 
 import entity.AbstractEntity;
-import lombok.*;
-import users.Person;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import users.Student;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.time.LocalDate;
 import java.util.Objects;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
+@ToString
+@Table(name = "marks")
+@Entity
+@NamedQueries({
+        @NamedQuery(name = "getMarkByID", query = "from Mark m where m.id = :id")
+})
 public class Mark extends AbstractEntity {
-    //какому студенту выставлена оценка
-    private Person student;
 
-    // по какому предмету оценка
-    private Subject subject;
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, optional = false)
+    @JoinColumn(name = "student_id")
+    private Student student;
 
-    // дата выставления оценки
-    private LocalDate dateOfMark;
-
-    // из какой группы, так сказать, идёт оценка
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, optional = false)
+    @JoinColumn(name = "group_id")
     private Group group;
 
-    // сама оценка
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, optional = false)
+    @JoinColumn(name = "subject_id")
+    private Subject subject;
+
+    @Column(name = "date_of_mark")
+    private LocalDate dateOfMark;
+
+    @Column(name = "point")
     private int mark;
 
     @Override
@@ -32,12 +56,12 @@ public class Mark extends AbstractEntity {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Mark mark1 = (Mark) o;
-        return mark == mark1.mark && student.equals(mark1.student) && subject.equals(mark1.subject) && dateOfMark.equals(mark1.dateOfMark) && group.equals(mark1.group);
+        return mark == mark1.mark && subject.equals(mark1.subject) && dateOfMark.equals(mark1.dateOfMark);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), student, subject, dateOfMark, group, mark);
+        return Objects.hash(super.hashCode(), subject, dateOfMark, mark);
     }
 
     public Mark withId(int id) {
@@ -45,7 +69,7 @@ public class Mark extends AbstractEntity {
         return this;
     }
 
-    public Mark withStudent(Person student) {
+    public Mark withStudent(Student student) {
         setStudent(student);
         return this;
     }

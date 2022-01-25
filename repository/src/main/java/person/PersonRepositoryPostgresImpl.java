@@ -74,7 +74,6 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                 stForInsertPerson = con.prepareStatement(putPerson);
                 con.setAutoCommit(false);
                 save = con.setSavepoint();
-
                 stForInsertCred.setString(1, person.getCredentials().getLogin());
                 stForInsertCred.setString(2, person.getCredentials().getPassword());
                 if (stForInsertCred.executeUpdate() > 0) {
@@ -488,10 +487,8 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
             // Statements для удаления данных об студенте
             stForDeleteMarks = con.prepareStatement(deleteMarksByStudentID);
             stForDeleteStudentFromGroup = con.prepareStatement(deleteStudentFromGroupByID);
-
             con.setAutoCommit(false);
             save = con.setSavepoint();
-
             Optional<Person> optionalPerson = getPersonByName(firstName, lastName, patronymic);
             if (optionalPerson.isPresent()) {
                 Person person = optionalPerson.get();
@@ -508,7 +505,6 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                                 return false;
                             }
                         }
-
                         if (isTeacherHasGroup(stForFindTeacherInGroup, person.getId())) {
                             if (isTeacherDeleteFromGroup(stForSetTeacherNull, person.getId())) {
                                 log.info("Учитель удалён из группы");
@@ -519,7 +515,6 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                                 return false;
                             }
                         }
-
                         if (isPersonDeleted(stForDeletePerson, person)) {
                             log.info("Пользователь удалён");
                             con.commit();
@@ -528,7 +523,6 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                             con.rollback(save);
                             return false;
                         }
-
                         if (isCredentialsDeleted(stForDeleteCred, person)) {
                             log.info("Учётные данные удалены, пользователь полностью удалён");
                             con.commit();
@@ -538,7 +532,6 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                             con.rollback(save);
                             return false;
                         }
-
 
                     case STUDENT:
                         if (isStudentHasMarks(stForFindMarks, person.getId())) {
@@ -551,7 +544,6 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                                 return false;
                             }
                         }
-
                         if (isStudentInGroup(stForFindStudentInGroup, person.getId())) {
                             if (isStudentDeletedFromGroup(stForDeleteStudentFromGroup, person.getId())) {
                                 log.info("Студент удалён из группы");
@@ -562,7 +554,6 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                                 return false;
                             }
                         }
-
                         if (isPersonDeleted(stForDeletePerson, person)) {
                             log.info("Пользователь удалён");
                             con.commit();
@@ -571,7 +562,6 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                             con.rollback(save);
                             return false;
                         }
-
                         if (isCredentialsDeleted(stForDeleteCred, person)) {
                             log.info("Учётные данные удалены, пользователь полностью удалён");
                             con.commit();
@@ -581,7 +571,6 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
                             con.rollback(save);
                             return false;
                         }
-
                     default:
                         log.error("Пользователь не найден, не удалён");
                         return false;
@@ -747,25 +736,23 @@ public class PersonRepositoryPostgresImpl implements PersonRepository {
 
     // метод для вставки пользователя
 
-    private boolean isInsertPerson(PreparedStatement st, Person person) throws SQLException {
-        st.setString(1, person.getFirstName());
-        st.setString(2, person.getLastName());
-        st.setString(3, person.getPatronymic());
-        st.setDate(4, Date.valueOf(person.getDateOfBirth()));
+   private boolean isInsertPerson(PreparedStatement st, Person person) throws SQLException {
+       st.setString(1, person.getFirstName());
+       st.setString(2, person.getLastName());
+       st.setString(3, person.getPatronymic());
+       st.setDate(4, Date.valueOf(person.getDateOfBirth()));
+       int credId = getCredentialID(person.getCredentials().getLogin(), person.getCredentials().getPassword());
+       if (credId != 0) {
+           st.setInt(5, credId);
+       } else {
+           log.error("Учётные данные не найдены");
+           return false;
+       }
+       st.setString(6, person.getRole().getRoleString());
+       return st.executeUpdate() > 0;
+   }
 
-        int credId = getCredentialID(person.getCredentials().getLogin(), person.getCredentials().getPassword());
-        if (credId != 0) {
-            st.setInt(5, credId);
-        } else {
-            log.error("Учётные данные не найдены");
-            return false;
-        }
-
-        st.setString(6, person.getRole().getRoleString());
-        return st.executeUpdate() > 0;
-    }
-
-    // метод для поиска пользователя
+   // метод для поиска пользователя
 
     private boolean isPersonFind(Person person) {
         Optional<Person> optionalPerson = getPersonByName(person.getFirstName(), person.getLastName(), person.getPatronymic());

@@ -15,8 +15,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static constants.Queries.deleteGroupById;
 import static constants.Queries.deleteGroupWithStudentsByID;
@@ -293,8 +295,8 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
         }
     }
 
-    private List<Subject> getAllSubjects(PreparedStatement stForFindAllSubjectsInGroup, int groupId, PreparedStatement stForFindSubjectById) throws SQLException {
-        List<Subject> subjects = new ArrayList<>();
+    private Set<Subject> getAllSubjects(PreparedStatement stForFindAllSubjectsInGroup, int groupId, PreparedStatement stForFindSubjectById) throws SQLException {
+        Set<Subject> subjects = new HashSet<>();
 
         stForFindAllSubjectsInGroup.setInt(1, groupId);
         ResultSet setForGroup = stForFindAllSubjectsInGroup.executeQuery();
@@ -312,8 +314,8 @@ public class GroupRepositoryPostgresImpl implements GroupRepository {
         return subjects;
     }
 
-    private List<Person> getAllStudents(PreparedStatement stForFindAllStudentsInGroup, int groupId, PreparedStatement stForFindStudentById) throws SQLException {
-        List<Person> students = new ArrayList<>();
+    private Set<Person> getAllStudents(PreparedStatement stForFindAllStudentsInGroup, int groupId, PreparedStatement stForFindStudentById) throws SQLException {
+        Set<Person> students = new HashSet<>();
 
         stForFindAllStudentsInGroup.setInt(1, groupId);
         ResultSet setForGroup = stForFindAllStudentsInGroup.executeQuery();

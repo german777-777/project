@@ -1,22 +1,61 @@
 package secondary;
 
 import entity.AbstractEntity;
-import lombok.*;
-import role.Role;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import users.Person;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Table(name = "groups")
+@Entity
+@NamedQueries({
+        @NamedQuery(name = "getGroupByID", query = "from Group g where g.id = :id"),
+        @NamedQuery(name = "getGroupByName", query = "from Group g where g.name = :name")
+})
 public class Group extends AbstractEntity {
-    private String name;
+
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+    @JoinColumn(name = "teacher_id")
     private Person teacher;
-    private List<Person> students = new ArrayList<>();
-    private List<Subject> subjects = new ArrayList<>();
+
+    @Column(name = "name")
+    private String name;
+
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    @JoinTable(name = "group_student",
+               joinColumns = {@JoinColumn(name = "group_id")},
+               inverseJoinColumns = {@JoinColumn(name = "student_id")})
+    @ToString.Exclude
+    private Set<Person> students = new HashSet<>();
+
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    @JoinTable(name = "group_subject",
+            joinColumns = {@JoinColumn(name = "group_id")},
+            inverseJoinColumns = {@JoinColumn(name = "subject_id")})
+    @ToString.Exclude
+    private Set<Subject> subjects = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
@@ -43,43 +82,33 @@ public class Group extends AbstractEntity {
     }
 
     public Group withTeacher(Person teacher) {
-        if (teacher.getRole() == Role.TEACHER) {
-            setTeacher(teacher);
-        }
+        setTeacher(teacher);
         return this;
     }
 
-    public Group withStudents(List<Person> students) {
+    public Group withStudents(Set<Person> students) {
         setStudents(students);
         return this;
     }
 
-    public Group withSubjects(List<Subject> subjects) {
+    public Group withSubjects(Set<Subject> subjects) {
         setSubjects(subjects);
         return this;
     }
 
-    public Group addSubject(Subject subject) {
+    public void addSubject(Subject subject) {
         this.subjects.add(subject);
-        return this;
     }
 
-    public Group addStudent(Person student) {
-        if (student.getRole() == Role.STUDENT) {
-            this.students.add(student);
-        }
-        return this;
+    public void addStudent(Person student) {
+        this.students.add(student);
     }
 
-    public Group removeSubject(Subject subject) {
+    public void removeSubject(Subject subject) {
         this.subjects.remove(subject);
-        return this;
     }
 
-    public Group removeStudent(Person student) {
-        if (student.getRole() == Role.STUDENT) {
-            this.students.remove(student);
-        }
-        return this;
+    public void removeStudent(Person student) {
+        this.students.remove(student);
     }
 }

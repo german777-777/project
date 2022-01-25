@@ -2,9 +2,11 @@ package servlets;
 
 import lombok.extern.slf4j.Slf4j;
 import person.PersonRepository;
+import role.Role;
 import salary.SalaryRepository;
 import secondary.Salary;
 import users.Person;
+import users.Teacher;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -32,13 +34,12 @@ public class SalaryServlet extends HttpServlet {
 
         log.debug("Поиск учителя по ID для присвоения зарплаты");
         Optional<Person> optionalTeacher = personRepository.getPersonById(teacherID);
-
         optionalTeacher.ifPresent(teacher -> {
             log.info("Создание зарплаты");
             salaryRepository.createSalary(new Salary()
                     .withSalary(newSalary)
                     .withDateOfSalary(newDateOfSalary)
-                    .withTeacher(teacher));
+                    .withTeacher((Teacher) teacher));
         });
 
         req.getRequestDispatcher("/admin_salary.jsp").forward(req, resp);

@@ -25,16 +25,16 @@ public class SessionFilter implements Filter {
             log.debug("Сессия существует и в сессии есть пользователь");
             Person person = (Person) session.getAttribute("user");
 
-            switch (person.getRole().getRoleString()) {
-                case "Студент":
+            switch (person.getClass().getName()) {
+                case "Student":
                     log.info("Пользователь - студент");
                     req.getRequestDispatcher("/student.jsp").forward(req, resp);
                     break;
-                case "Учитель":
+                case "Teacher":
                     log.info("Пользователь - учитель");
                     req.getRequestDispatcher("/teacher.jsp").forward(req, resp);
                     break;
-                case "Админ":
+                case "Admin":
                     log.info("Пользователь - админ");
                     req.getRequestDispatcher("/admin.jsp").forward(req, resp);
                     break;

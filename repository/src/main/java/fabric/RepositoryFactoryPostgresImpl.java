@@ -5,7 +5,6 @@ import credential.CredentialRepository;
 import credential.CredentialRepositoryPostgresImpl;
 import group.GroupRepository;
 import group.GroupRepositoryPostgresImpl;
-import lombok.Getter;
 import mark.MarkRepository;
 import mark.MarkRepositoryPostgresImpl;
 import person.PersonRepository;
