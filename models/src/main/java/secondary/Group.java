@@ -6,7 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import users.Person;
+import users.Student;
+import users.Teacher;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -36,21 +37,24 @@ import java.util.Set;
 })
 public class Group extends AbstractEntity {
 
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH},
+               fetch = FetchType.EAGER)
     @JoinColumn(name = "teacher_id")
-    private Person teacher;
+    private Teacher teacher;
 
     @Column(name = "name")
     private String name;
 
-    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH},
+                fetch = FetchType.EAGER)
     @JoinTable(name = "group_student",
                joinColumns = {@JoinColumn(name = "group_id")},
                inverseJoinColumns = {@JoinColumn(name = "student_id")})
     @ToString.Exclude
-    private Set<Person> students = new HashSet<>();
+    private Set<Student> students = new HashSet<>();
 
-    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH},
+                fetch = FetchType.EAGER)
     @JoinTable(name = "group_subject",
             joinColumns = {@JoinColumn(name = "group_id")},
             inverseJoinColumns = {@JoinColumn(name = "subject_id")})
@@ -81,18 +85,8 @@ public class Group extends AbstractEntity {
         return this;
     }
 
-    public Group withTeacher(Person teacher) {
+    public Group withTeacher(Teacher teacher) {
         setTeacher(teacher);
-        return this;
-    }
-
-    public Group withStudents(Set<Person> students) {
-        setStudents(students);
-        return this;
-    }
-
-    public Group withSubjects(Set<Subject> subjects) {
-        setSubjects(subjects);
         return this;
     }
 
@@ -100,7 +94,7 @@ public class Group extends AbstractEntity {
         this.subjects.add(subject);
     }
 
-    public void addStudent(Person student) {
+    public void addStudent(Student student) {
         this.students.add(student);
     }
 
@@ -108,7 +102,8 @@ public class Group extends AbstractEntity {
         this.subjects.remove(subject);
     }
 
-    public void removeStudent(Person student) {
+    public void removeStudent(Student student) {
         this.students.remove(student);
     }
+
 }

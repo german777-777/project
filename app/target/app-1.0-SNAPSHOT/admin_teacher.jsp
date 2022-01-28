@@ -20,31 +20,30 @@
         <th>Изменить</th>
         <th>Заплаты</th>
     </tr>
-    <c:forEach var="person" items="${applicationScope.person_repository.allPersons}">
-        <%--@elvariable id="Role" type="role.Role"--%>
-        <c:if test="${person.role.roleString.equals('Учитель')}">
+    <c:forEach var="teacher" items="${requestScope.teachers}">
             <tr style="text-align: center">
-                <td><c:out value="${person.id}"/></td>
-                <td><c:out value="${person.credentials.login}"/></td>
-                <td><c:out value="${person.credentials.password}"/></td>
-                <td><c:out value="${person.lastName}"/></td>
-                <td><c:out value="${person.firstName}"/></td>
-                <td><c:out value="${person.patronymic}"/></td>
-                <td><c:out value="${person.dateOfBirth}"/></td>
+                <td><c:out value="${teacher.id}"/></td>
+                <td><c:out value="${teacher.credentials.login}"/></td>
+                <td><c:out value="${teacher.credentials.password}"/></td>
+                <td><c:out value="${teacher.lastName}"/></td>
+                <td><c:out value="${teacher.firstName}"/></td>
+                <td><c:out value="${teacher.patronymic}"/></td>
+                <td><c:out value="${teacher.dateOfBirth}"/></td>
                 <td>
                     <form action="<c:url value="/TeacherServlet"/>" method="post">
                         <input type="hidden" name="method" value="delete">
-                        <input type="hidden" name="ID" value="${person.id}">
-                        <input type="hidden" name="firstName" value="${person.firstName}">
-                        <input type="hidden" name="lastName" value="${person.lastName}">
-                        <input type="hidden" name="patronymic" value="${person.patronymic}">
+                        <input type="hidden" name="ID" value="${teacher.id}">
+                        <input type="hidden" name="firstName" value="${teacher.firstName}">
+                        <input type="hidden" name="lastName" value="${teacher.lastName}">
+                        <input type="hidden" name="patronymic" value="${teacher.patronymic}">
                         <button style="align-content: center" type="submit">Удалить</button>
                     </form>
                 </td>
                 <td>
                     <form action="<c:url value="/TeacherServlet"/>" method="post">
                         <input type="hidden" name="method" value="put">
-                        <input type="hidden" name="ID" value="${person.id}">
+                        <input type="hidden" name="ID" value="${teacher.id}">
+                        <input type="hidden" name="credentialID" value="${teacher.credentials.id}">
                         <label>
                             <input style="text-align: center; display: block" type="text" name="newLastName"
                                    placeholder="Новая фамилия">
@@ -73,14 +72,13 @@
                     </form>
                 </td>
                 <td>
-                    <form action="<c:url value="/TeacherServlet"/>" method="get">
+                    <form action="<c:url value="/SalaryServlet"/>" method="post">
                         <input type="hidden" name="method" value="get">
-                        <input type="hidden" name="teacherID" value="${person.id}">
-                        <button style="align-content: center; display: block" type="submit">Зарплаты</button>
+                        <input type="hidden" name="teacherID" value="${teacher.id}">
+                        <button style="align-content: center" type="submit">Зарплаты</button>
                     </form>
                 </td>
             </tr>
-        </c:if>
     </c:forEach>
 </table>
 <h3 style="color: crimson">

@@ -31,8 +31,10 @@ public class Teacher extends Person {
     @Transient
     private final Role role = Role.TEACHER;
 
-    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE}, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "teacher_id")
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}
+            , orphanRemoval = true
+            , fetch = FetchType.EAGER)
+    @JoinColumn(name = "teacher_id", nullable = false)
     @ToString.Exclude
     private Set<Salary> salaries = new HashSet<>();
 
@@ -66,17 +68,8 @@ public class Teacher extends Person {
         return this;
     }
 
-    public Teacher withSalaries(Set<Salary> salaries) {
-        setSalaries(salaries);
-        return this;
-    }
-
     public void addSalary(Salary salary) {
         this.salaries.add(salary);
-    }
-
-    public void removeSalary(Salary salary) {
-        this.salaries.remove(salary);
     }
 
     @Override

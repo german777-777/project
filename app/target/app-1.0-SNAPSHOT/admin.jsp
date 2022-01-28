@@ -7,10 +7,22 @@
 <body>
     <h1>Авторизация прошла успешно!</h1>
     <h2>
-        <a style="display: block" href="admin_student.jsp">На страницу со студентами</a>
-        <a style="display: block" href="admin_teacher.jsp">На страницу с учителями</a>
-        <a style="display: block" href="admin_groups.jsp">На страницу с группами</a>
-        <a style="display: block" href="admin_subjects.jsp">На страницу с предметами</a>
+        <form action="<c:url value="/StudentServlet"/>" method="get">
+            <input type="hidden" name="method" value="get">
+            <button type="submit" style="align-content: center">На страницу со всеми студентами</button>
+        </form>
+        <form action="<c:url value="/TeacherServlet"/>" method="get">
+            <input type="hidden" name="method" value="get">
+            <button type="submit" style="align-content: center">На страницу со всеми учителями</button>
+        </form>
+        <form action="<c:url value="/GroupServlet"/>" method="get">
+            <input type="hidden" name="method" value="get">
+            <button type="submit" style="align-content: center">На страницу со всеми группами</button>
+        </form>
+        <form action="<c:url value="/SubjectServlet"/>" method="get">
+            <input type="hidden" name="method" value="get">
+            <button type="submit" style="align-content: center">На страницу со всеми предметами</button>
+        </form>
     </h2>
     <h3>
         <form action="<c:url value="/LogoutServlet"/>" method="post">

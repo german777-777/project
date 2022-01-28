@@ -6,13 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import users.Student;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
@@ -31,16 +28,7 @@ import java.util.Objects;
         @NamedQuery(name = "getMarkByID", query = "from Mark m where m.id = :id")
 })
 public class Mark extends AbstractEntity {
-
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, optional = false)
-    @JoinColumn(name = "student_id")
-    private Student student;
-
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, optional = false)
-    @JoinColumn(name = "group_id")
-    private Group group;
-
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, optional = false)
+    @OneToOne(optional = false)
     @JoinColumn(name = "subject_id")
     private Subject subject;
 
@@ -69,11 +57,6 @@ public class Mark extends AbstractEntity {
         return this;
     }
 
-    public Mark withStudent(Student student) {
-        setStudent(student);
-        return this;
-    }
-
     public Mark withSubject(Subject subject) {
         setSubject(subject);
         return this;
@@ -81,11 +64,6 @@ public class Mark extends AbstractEntity {
 
     public Mark withDateOfMark(LocalDate dateOfMark) {
         setDateOfMark(dateOfMark);
-        return this;
-    }
-
-    public Mark withGroup(Group group) {
-        setGroup(group);
         return this;
     }
 

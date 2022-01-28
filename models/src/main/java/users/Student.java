@@ -12,6 +12,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import java.time.LocalDate;
@@ -30,7 +31,11 @@ public class Student extends Person {
     @Transient
     private final Role role = Role.STUDENT;
 
-    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE}, orphanRemoval = true, mappedBy = "student", fetch = FetchType.EAGER)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}
+            , orphanRemoval = true
+            , fetch = FetchType.EAGER
+    )
+    @JoinColumn(name = "student_id", nullable = false)
     @ToString.Exclude
     private Set<Mark> marks = new HashSet<>();
 
@@ -64,17 +69,8 @@ public class Student extends Person {
         return this;
     }
 
-    public Student withMarks(Set<Mark> marks) {
-        setMarks(marks);
-        return this;
-    }
-
     public void addMark(Mark mark) {
         this.marks.add(mark);
-    }
-
-    public void removeMark(Mark mark) {
-        this.marks.remove(mark);
     }
 
     @Override

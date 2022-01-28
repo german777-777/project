@@ -16,6 +16,7 @@ import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
@@ -44,7 +45,7 @@ import java.util.Objects;
 public abstract class Person extends AbstractEntity {
 
     @Transient
-    private Role role;
+    protected Role role;
 
     @Column(name = "first_name")
     protected String firstName;
@@ -58,7 +59,7 @@ public abstract class Person extends AbstractEntity {
     @Column(name = "date_of_birth")
     protected LocalDate dateOfBirth;
 
-    @OneToOne(targetEntity = Credentials.class, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(targetEntity = Credentials.class, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "credential_id")
     protected Credentials credentials;
 

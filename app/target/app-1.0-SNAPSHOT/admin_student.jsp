@@ -20,31 +20,30 @@
         <th>Изменить</th>
         <th>Оценки</th>
     </tr>
-    <c:forEach var="person" items="${applicationScope.person_repository.allPersons}">
-        <%--@elvariable id="Role" type="role.Role"--%>
-        <c:if test="${person.role.roleString.equals('Студент')}">
+    <c:forEach var="student" items="${requestScope.students}">
             <tr style="text-align: center">
-                <td><c:out value="${person.id}"/></td>
-                <td><c:out value="${person.credentials.login}"/></td>
-                <td><c:out value="${person.credentials.password}"/></td>
-                <td><c:out value="${person.lastName}"/></td>
-                <td><c:out value="${person.firstName}"/></td>
-                <td><c:out value="${person.patronymic}"/></td>
-                <td><c:out value="${person.dateOfBirth}"/></td>
+                <td><c:out value="${student.id}"/></td>
+                <td><c:out value="${student.credentials.login}"/></td>
+                <td><c:out value="${student.credentials.password}"/></td>
+                <td><c:out value="${student.lastName}"/></td>
+                <td><c:out value="${student.firstName}"/></td>
+                <td><c:out value="${student.patronymic}"/></td>
+                <td><c:out value="${student.dateOfBirth}"/></td>
                 <td>
                     <form action="<c:url value="/StudentServlet"/>" method="post">
                         <input type="hidden" name="method" value="delete">
-                        <input type="hidden" name="ID" value="${person.id}">
-                        <input type="hidden" name="firstName" value="${person.firstName}">
-                        <input type="hidden" name="lastName" value="${person.lastName}">
-                        <input type="hidden" name="patronymic" value="${person.patronymic}">
+                        <input type="hidden" name="ID" value="${student.id}">
+                        <input type="hidden" name="firstName" value="${student.firstName}">
+                        <input type="hidden" name="lastName" value="${student.lastName}">
+                        <input type="hidden" name="patronymic" value="${student.patronymic}">
                         <button style="align-content: center" type="submit">Удалить</button>
                     </form>
                 </td>
                 <td>
                     <form action="<c:url value="/StudentServlet"/>" method="post">
                         <input type="hidden" name="method" value="put">
-                        <input type="hidden" name="ID" value="${person.id}">
+                        <input type="hidden" name="ID" value="${student.id}">
+                        <input type="hidden" name="credentialID" value="${student.credentials.id}">
                         <label>
                             <input style="text-align: center; display: block" type="text" name="newLastName" placeholder="Новая фамилия">
                         </label>
@@ -68,14 +67,13 @@
                     </form>
                 </td>
                 <td>
-                    <form action="<c:url value="/StudentServlet"/>" method="post">
+                    <form action="<c:url value="/MarksServlet"/>" method="post">
                         <input type="hidden" name="method" value="get">
-                        <input type="hidden" name="studentID" value="${person.id}">
+                        <input type="hidden" name="studentID" value="${student.id}">
                         <button style="align-content: center" type="submit">Оценки</button>
                     </form>
                 </td>
             </tr>
-        </c:if>
     </c:forEach>
 </table>
 <h3 style="color: crimson">

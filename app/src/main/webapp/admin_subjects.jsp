@@ -15,7 +15,7 @@
         <th>Удалить</th>
     </tr>
 
-    <c:forEach var="subject" items="${applicationScope.subject_repository.allSubjects}">
+    <c:forEach var="subject" items="${requestScope.subjects}">
         <tr style="text-align: center">
             <td><c:out value="${subject.id}"/></td>
             <td><c:out value="${subject.name}"/></td>
