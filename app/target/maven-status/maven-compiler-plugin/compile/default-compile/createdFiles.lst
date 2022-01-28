@@ -1,0 +1,4 @@
+servlets\LoginServlet$1.class
+filters\EncodingFilter.class
+servlets\LoginServlet.class
+filters\InitializeRepositoryFilter.class
