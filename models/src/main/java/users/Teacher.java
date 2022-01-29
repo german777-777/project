@@ -31,7 +31,7 @@ public class Teacher extends Person {
     @Transient
     private final Role role = Role.TEACHER;
 
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}
+    @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.MERGE, CascadeType.REFRESH}
             , orphanRemoval = true
             , fetch = FetchType.EAGER)
     @JoinColumn(name = "teacher_id", nullable = false)

@@ -92,13 +92,21 @@ public class GroupRepositoryJpaImpl extends AbstractRepoJpa<Group> implements Gr
 
     @Override
     public boolean updateStudentsRemove(Group group, Student removableStudent) {
-        if (removableStudent.getRole() == Role.STUDENT) {
-            group.removeStudent(removableStudent);
-            return update(group);
-        } else {
-            log.error("{} не является студентом", removableStudent);
-            return false;
+        boolean result = false;
+        EntityManager manager = getEntityManager();
+        try {
+            manager.getTransaction().begin();
+            result = manager.createNativeQuery("delete from group_student where group_id = ? and student_id = ?")
+                    .setParameter(1, group.getId())
+                    .setParameter(2, removableStudent.getId())
+                    .executeUpdate() > 0;
+            manager.getTransaction().commit();
+        } catch (Exception e) {
+            log.error("Ошибка обновления {} : {}", group.getClass().getName(), e.getMessage());
+        } finally {
+            manager.close();
         }
+        return result;
     }
 
     @Override
@@ -109,8 +117,22 @@ public class GroupRepositoryJpaImpl extends AbstractRepoJpa<Group> implements Gr
 
     @Override
     public boolean updateSubjectsRemove(Group group, Subject removableSubject) {
-        group.removeSubject(removableSubject);
-        return update(group);
+        boolean result = false;
+        EntityManager manager = getEntityManager();
+        try {
+            manager.getTransaction().begin();
+            result = manager.createNativeQuery("delete from group_subject where group_id = ? and subject_id = ?")
+                    .setParameter(1, group.getId())
+                    .setParameter(2, removableSubject.getId())
+                    .executeUpdate() > 0;
+            manager.getTransaction().commit();
+        } catch (Exception e) {
+            log.error("Ошибка обновления {} : {}", group.getClass().getName(), e);
+        } finally {
+            manager.close();
+        }
+
+        return result;
     }
 
     @Override

@@ -31,7 +31,7 @@ public class Student extends Person {
     @Transient
     private final Role role = Role.STUDENT;
 
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}
+    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE}
             , orphanRemoval = true
             , fetch = FetchType.EAGER
     )

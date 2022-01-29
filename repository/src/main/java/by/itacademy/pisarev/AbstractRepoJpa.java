@@ -74,7 +74,7 @@ public abstract class AbstractRepoJpa <T extends AbstractEntity> {
         boolean isCreated = false;
         try {
             manager.getTransaction().begin();
-            manager.merge(entity);
+            manager.persist(entity);
             isCreated = manager.contains(entity);
             if (isCreated) {
                 log.info("{} был добавлен в базу данных", entityClass.getName());
@@ -99,7 +99,7 @@ public abstract class AbstractRepoJpa <T extends AbstractEntity> {
         boolean isUpdated = false;
         try {
             manager.getTransaction().begin();
-            manager.merge(entity);
+            entity = manager.merge(entity);
             isUpdated = manager.contains(entity);
             if (isUpdated) {
                 log.info("{} был обновлен", entityClass.getName());

@@ -128,7 +128,7 @@ public class GroupStudentServlet extends AbstractServlet {
                 if (groupRepository.updateStudentsRemove(group, student)) {
                     log.info("Студент удален из группы");
                 } else {
-                    log.error("Студент удален из группы");
+                    log.error("Студент не удален из группы");
                 }
             } else {
                 log.error("Студент не найден");
