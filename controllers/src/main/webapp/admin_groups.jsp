@@ -6,7 +6,11 @@
 </head>
 <body>
 <h1>Страница групп</h1>
-<h3>Все группы</h3>
+
+<c:if test="${not empty messageFromGroups}">
+    <c:out value="${messageFromGroups}"/>
+</c:if>
+
 <table border="1" width="100%">
     <tr>
         <th>ID</th>
@@ -18,7 +22,7 @@
         <th>Удалить</th>
     </tr>
 
-    <c:forEach var="group" items="${requestScope.groups}">
+    <c:forEach var="group" items="${allGroups}">
         <tr style="text-align: center">
             <td><c:out value="${group.id}"/></td>
             <td><c:out value="${group.name}"/></td>
@@ -35,27 +39,17 @@
                 </c:if>
             </td>
             <td>
-                <form action="<c:url value="/GroupSubjectServlet"/>" method="get">
-                    <input type="hidden" name="method" value="get">
-                    <input type="hidden" name="groupID" value="${group.id}">
-                    <button style="align-content: center; display: block"
-                            type="submit">Предметы
-                    </button>
+                <form action="<c:url value="/groups/${group.id}/subjects"/>" method="get">
+                    <button style="align-content: center; display: block" type="submit">Предметы</button>
                 </form>
             </td>
             <td>
-                <form action="<c:url value="/GroupStudentServlet"/>" method="get">
-                    <input type="hidden" name="method" value="get">
-                    <input type="hidden" name="groupID" value="${group.id}">
-                    <button style="align-content: center; display: block"
-                            type="submit">Студенты
-                    </button>
+                <form action="<c:url value="/groups/${group.id}/students"/>" method="get">
+                    <button style="align-content: center; display: block" type="submit">Студенты</button>
                 </form>
             </td>
             <td>
-                <form action="<c:url value="/GroupServlet"/>" method="get">
-                    <input type="hidden" name="method" value="put">
-                    <input type="hidden" name="ID" value="${group.id}">
+                <form action="<c:url value="/groups/put/${group.id}"/>" method="post">
                     <label style="display: block; text-align: center; align-content: center">
                         Новый учитель ('фамилия' 'имя' 'отчество'):
                         <input style="display: block; text-align: center; align-content: center"
@@ -73,25 +67,17 @@
                 </form>
             </td>
             <td>
-                <form action="<c:url value="/GroupServlet"/>" method="post">
-                    <input type="hidden" name="method" value="delete">
-                    <input type="hidden" name="ID" value="${group.id}">
+                <form action="<c:url value="/groups/delete/${group.id}"/>" method="post">
                     <button style="align-content: center; display: block" type="submit">Удалить</button>
                 </form>
             </td>
         </tr>
     </c:forEach>
 </table>
-<h3 style="color: crimson">
-    <c:if test="${not empty requestScope.message}">
-        <c:out value="${requestScope.message}"/>
-    </c:if>
-</h3>
 <h4>
     Добавление новой группы
 </h4>
-<form action="<c:url value="/GroupServlet"/>" method="post">
-    <input type="hidden" name="method" value="post">
+<form action="<c:url value="/groups/post"/>" method="post">
     <label>
         Название: <input style="text-align: center; display: block" type="text" name="newName">
     </label>
@@ -101,6 +87,6 @@
     </label>
     <button style="align-content: center; display: block" type="submit">Создать</button>
 </form>
-<a style="display: block" href="admin.jsp">Назад</a>
+<a style="display: block" href="${pageContext.request.contextPath}/admin.jsp">Назад</a>
 </body>
 </html>

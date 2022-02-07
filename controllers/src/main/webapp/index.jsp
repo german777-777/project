@@ -8,14 +8,13 @@
 <body>
 <h1>Добро пожаловать!</h1>
 <h2>Пожалуйста, авторизуйтесь для входа в систему</h2>
-
-<form action="<c:url value="/LogInServlet"/>" method="post">
+<form action="<c:url value="/login"/>" method="post">
+    Логин:
     <label>
-        Логин:
         <input style="display: block" type="text" name="login">
     </label>
+    Пароль:
     <label>
-        Пароль:
         <input style="display: block" type="text" name="password">
     </label>
     <input style="display: block" type="submit" title="Войти">
@@ -23,13 +22,14 @@
 </form>
 
 <h3>
-    <c:if test="${not empty requestScope.error}">
-        <c:out value="${requestScope.error}"/>
+    <c:if test="${not empty errorMessage}">
+        <c:out value="${errorMessage}"/>
     </c:if>
-    <c:if test="${not empty requestScope.create}">
-        <c:out value="${requestScope.create}"/>
+    <c:if test="${not empty messageAboutCreate}">
+        <c:out value="${messageAboutCreate}"/>
     </c:if>
-    <a style="display: block" href="registration.jsp">Регистрация</a>
+
+    <a style="display: block" href="${pageContext.request.contextPath}/registration.jsp">Регистрация</a>
 </h3>
 </body>
 </html>

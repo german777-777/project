@@ -1,0 +1,130 @@
+package by.itacademy.gpisarev.servlets.group;
+
+import by.itacademy.gpisarev.group.GroupRepository;
+import by.itacademy.gpisarev.person.PersonRepository;
+import by.itacademy.gpisarev.role.Role;
+import by.itacademy.gpisarev.secondary.Group;
+import by.itacademy.gpisarev.users.Person;
+import by.itacademy.gpisarev.users.Teacher;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+
+import java.util.Set;
+
+@Slf4j
+@Controller
+@RequestMapping("groups")
+public class GroupServlet  {
+
+    private final GroupRepository groupRepository;
+    private final PersonRepository personRepository;
+
+    @Autowired
+    public GroupServlet(GroupRepository groupRepository, PersonRepository personRepository) {
+        this.groupRepository = groupRepository;
+        this.personRepository = personRepository;
+    }
+
+    private ModelAndView getAllGroups(String message) {
+        ModelAndView modelAndView = new ModelAndView("/admin_groups");
+        Set<Group> groups = groupRepository.getAllGroups();
+        modelAndView.getModel().put("allGroups", groups);
+        modelAndView.getModel().put("messageFromGroups", message);
+        return modelAndView;
+    }
+
+    @PostMapping("/post")
+    public ModelAndView post(@RequestParam("lastFirstPatronymic") String lastFirstPatronymic,
+                               @RequestParam("newName") String newName)
+    {
+        Group group;
+
+        String lastNameOfTeacher = lastFirstPatronymic.split(" ")[0];
+        String firstNameOfTeacher = lastFirstPatronymic.split(" ")[1];
+        String patronymicOfTeacher = lastFirstPatronymic.split(" ")[2];
+
+        log.debug("Проверка, есть ли такой учитель");
+        Person teacher = personRepository.getPersonByName(firstNameOfTeacher, lastNameOfTeacher, patronymicOfTeacher);
+
+        if (teacher != null) {
+            if (teacher.getRole() == Role.TEACHER) {
+                group = new Group()
+                        .withName(newName)
+                        .withTeacher((Teacher) teacher);
+            } else {
+                group = new Group()
+                        .withName(newName);
+            }
+        } else {
+            group = new Group()
+                    .withName(newName);
+        }
+
+        log.info("Создание группы");
+        if (groupRepository.createGroup(group)) {
+            log.info("Группа создана");
+            return getAllGroups("Группа добавлена");
+        } else {
+            return getAllGroups("Группа не добавлена");
+        }
+    }
+
+    @PostMapping("/put/{id}")
+    public ModelAndView put(@PathVariable("id") int id,
+                         @RequestParam("newLastFirstPatronymic") String newLastFirstPatronymic,
+                         @RequestParam("newName") String newName) {
+        Group group = groupRepository.getGroupById(id);
+        if (group == null) {
+            log.info("Группа не найдена. Обновления не произошло");
+            return getAllGroups("Группа не найдена. Обновления не произошло");
+        } else {
+            String lastNameOfTeacher = newLastFirstPatronymic.split(" ")[0];
+            String firstNameOfTeacher = newLastFirstPatronymic.split(" ")[1];
+            String patronymicOfTeacher = newLastFirstPatronymic.split(" ")[2];
+
+            log.debug("Проверка, есть ли учитель, который будет вести эту группу");
+            Person newTeacher = personRepository.getPersonByName(firstNameOfTeacher, lastNameOfTeacher, patronymicOfTeacher);
+            if (newTeacher != null && newTeacher.getRole() == Role.TEACHER) {
+                group.setName(newName);
+                group.setTeacher((Teacher) newTeacher);
+                if (groupRepository.updateGroup(group)) {
+                    log.info("Группа обновлена");
+                } else {
+                    log.error("Группа не обновлена");
+                }
+            } else {
+                log.error("Учитель не найден или пользователь - не учитель");
+                return getAllGroups("Учитель не найден или пользователь - не учитель");
+            }
+        }
+        return getAllGroups("Группа изменена");
+    }
+
+    @PostMapping("/delete/{id}")
+    public ModelAndView delete(@PathVariable("id") int id) {
+        Group group = groupRepository.getGroupById(id);
+        if (group != null) {
+            log.debug("Удаление группы");
+            if (groupRepository.deleteGroupById(id)) {
+                log.info("Группа удалена");
+            } else {
+                log.error("Группа не удалена");
+            }
+        } else {
+            return getAllGroups("Группа не найдена. Удаления не произошло");
+        }
+        return getAllGroups("Группа удалена");
+    }
+
+    @GetMapping("/get")
+    public ModelAndView get(){
+        return getAllGroups("Все группы");
+    }
+}

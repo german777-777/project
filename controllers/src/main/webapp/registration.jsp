@@ -8,7 +8,7 @@
     <h1>Вы перешли на страницу регистрации</h1>
     <h2>Введите свои данные:</h2>
 
-    <form action="<c:url value="/RegistrationServlet"/>" method="post">
+    <form action="<c:url value="/registration"/>" method="post">
         <label>
             Имя:
             <input style="display: block" type="text" name="firstName">
@@ -30,7 +30,7 @@
         </label>
         <label>
             <select name="role" style="display: block">
-                <option value="-">-</option>
+                <option value=""></option>
                 <option value="Учитель">Учитель</option>
                 <option value="Студент">Студент</option>
             </select>

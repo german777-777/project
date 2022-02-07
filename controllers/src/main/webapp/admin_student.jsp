@@ -6,7 +6,11 @@
 </head>
 <body>
 <h1>Страница студентов</h1>
-<h3>Все студенты</h3>
+
+<c:if test="${not empty messageFromStudents}">
+    <c:out value="${messageFromStudents}"/>
+</c:if>
+
 <table border="1" width="100%">
     <tr>
         <th>ID</th>
@@ -20,7 +24,7 @@
         <th>Изменить</th>
         <th>Оценки</th>
     </tr>
-    <c:forEach var="student" items="${requestScope.students}">
+    <c:forEach var="student" items="${allStudents}">
             <tr style="text-align: center">
                 <td><c:out value="${student.id}"/></td>
                 <td><c:out value="${student.credentials.login}"/></td>
@@ -30,19 +34,12 @@
                 <td><c:out value="${student.patronymic}"/></td>
                 <td><c:out value="${student.dateOfBirth}"/></td>
                 <td>
-                    <form action="<c:url value="/StudentServlet"/>" method="post">
-                        <input type="hidden" name="method" value="delete">
-                        <input type="hidden" name="ID" value="${student.id}">
-                        <input type="hidden" name="firstName" value="${student.firstName}">
-                        <input type="hidden" name="lastName" value="${student.lastName}">
-                        <input type="hidden" name="patronymic" value="${student.patronymic}">
+                    <form action="<c:url value="/students/delete/${student.id}"/>" method="post">
                         <button style="align-content: center" type="submit">Удалить</button>
                     </form>
                 </td>
                 <td>
-                    <form action="<c:url value="/StudentServlet"/>" method="post">
-                        <input type="hidden" name="method" value="put">
-                        <input type="hidden" name="ID" value="${student.id}">
+                    <form action="<c:url value="/students/put/${student.id}"/>" method="post">
                         <input type="hidden" name="credentialID" value="${student.credentials.id}">
                         <label>
                             <input style="text-align: center; display: block" type="text" name="newLastName" placeholder="Новая фамилия">
@@ -67,25 +64,17 @@
                     </form>
                 </td>
                 <td>
-                    <form action="<c:url value="/MarksServlet"/>" method="post">
-                        <input type="hidden" name="method" value="get">
-                        <input type="hidden" name="studentID" value="${student.id}">
+                    <form action="<c:url value="/students/${student.id}/marks"/>" method="get">
                         <button style="align-content: center" type="submit">Оценки</button>
                     </form>
                 </td>
             </tr>
     </c:forEach>
 </table>
-<h3 style="color: crimson">
-    <c:if test="${not empty requestScope.message}">
-        <c:out value="${requestScope.message}"/>
-    </c:if>
-</h3>
 <h4>
     Добавление нового студента
 </h4>
-<form action="<c:url value="/StudentServlet"/>">
-    <input type="hidden" name="method" value="post">
+<form action="<c:url value="/students/post"/>" method="post">
     <label>
         Фамилия: <input style="text-align: center; display: block" type="text" name="newLastName">
     </label>
@@ -107,6 +96,6 @@
     <button style="align-content: center; display: block" type="submit">Создать</button>
 </form>
 
-<a style="display: block" href="admin.jsp">Назад</a>
+<a style="display: block" href="${pageContext.request.contextPath}/admin.jsp">Назад</a>
 </body>
 </html>
