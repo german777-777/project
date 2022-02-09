@@ -1,4 +1,4 @@
-package by.itacademy.gpisarev.servlets.subject;
+package by.itacademy.gpisarev.controllers.subject;
 
 import by.itacademy.gpisarev.secondary.Subject;
 import by.itacademy.gpisarev.subject.SubjectRepository;
@@ -17,12 +17,12 @@ import java.util.Set;
 @Slf4j
 @Controller
 @RequestMapping("subjects")
-public class SubjectServlet {
+public class SubjectController {
 
     private final SubjectRepository subjectRepository;
 
     @Autowired
-    public SubjectServlet(SubjectRepository subjectRepository) {
+    public SubjectController(SubjectRepository subjectRepository) {
         this.subjectRepository = subjectRepository;
     }
 

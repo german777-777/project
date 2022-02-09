@@ -1,4 +1,4 @@
-package by.itacademy.gpisarev.servlets.mark;
+package by.itacademy.gpisarev.controllers.mark;
 
 import by.itacademy.gpisarev.mark.MarkRepository;
 import by.itacademy.gpisarev.person.PersonRepository;
@@ -24,14 +24,14 @@ import java.util.Set;
 @Slf4j
 @Controller
 @RequestMapping("/students/{studentID}/marks")
-public class MarksServlet {
+public class MarksController {
 
     private final MarkRepository markRepository;
     private final PersonRepository personRepository;
     private final SubjectRepository subjectRepository;
 
     @Autowired
-    public MarksServlet(MarkRepository markRepository, PersonRepository personRepository, SubjectRepository subjectRepository) {
+    public MarksController(MarkRepository markRepository, PersonRepository personRepository, SubjectRepository subjectRepository) {
         this.markRepository = markRepository;
         this.personRepository = personRepository;
         this.subjectRepository = subjectRepository;

@@ -7,7 +7,7 @@ import java.util.Set;
 
 public interface SalaryRepository {
     //Create
-    boolean createSalary(Salary salary, int teacher);
+    boolean createSalary(Salary salary, int teacherID);
 
     //Read
     Salary getSalaryByID(int salaryID);

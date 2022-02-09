@@ -1,6 +1,8 @@
 package by.itacademy.gpisarev.users;
 
 import by.itacademy.gpisarev.credentials.Credentials;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,6 +15,7 @@ import javax.persistence.Transient;
 import java.time.LocalDate;
 import java.util.Objects;
 
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Getter
 @Setter
 @ToString(callSuper = true)

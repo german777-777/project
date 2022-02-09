@@ -1,4 +1,4 @@
-package by.itacademy.gpisarev.servlets.person;
+package by.itacademy.gpisarev.controllers.person;
 
 import by.itacademy.gpisarev.credentials.Credentials;
 import by.itacademy.gpisarev.person.PersonRepository;
@@ -22,11 +22,11 @@ import java.util.stream.Collectors;
 @Slf4j
 @Controller
 @RequestMapping("teachers")
-public class TeacherServlet {
+public class TeacherController {
     private final PersonRepository personRepository;
 
     @Autowired
-    public TeacherServlet(PersonRepository personRepository) {
+    public TeacherController(PersonRepository personRepository) {
         this.personRepository = personRepository;
     }
 

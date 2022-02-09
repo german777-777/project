@@ -1,4 +1,4 @@
-package by.itacademy.gpisarev.servlets.system;
+package by.itacademy.gpisarev.controllers.system;
 
 import by.itacademy.gpisarev.person.PersonRepository;
 import by.itacademy.gpisarev.users.Person;
@@ -15,12 +15,12 @@ import javax.servlet.http.HttpSession;
 @Slf4j
 @Controller
 @RequestMapping("login")
-public class LoginServlet {
+public class LoginController {
 
     private final PersonRepository personRepository;
 
     @Autowired
-    public LoginServlet(PersonRepository personRepository) {
+    public LoginController(PersonRepository personRepository) {
         this.personRepository = personRepository;
     }
 

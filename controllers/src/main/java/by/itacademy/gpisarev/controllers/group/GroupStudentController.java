@@ -1,4 +1,4 @@
-package by.itacademy.gpisarev.servlets.group;
+package by.itacademy.gpisarev.controllers.group;
 
 import by.itacademy.gpisarev.group.GroupRepository;
 import by.itacademy.gpisarev.person.PersonRepository;
@@ -21,13 +21,13 @@ import java.util.Set;
 @Slf4j
 @Controller
 @RequestMapping("groups/{groupID}/students")
-public class GroupStudentServlet {
+public class GroupStudentController {
 
     private final GroupRepository groupRepository;
     private final PersonRepository personRepository;
 
     @Autowired
-    public GroupStudentServlet(GroupRepository groupRepository, PersonRepository personRepository) {
+    public GroupStudentController(GroupRepository groupRepository, PersonRepository personRepository) {
         this.groupRepository = groupRepository;
         this.personRepository = personRepository;
     }

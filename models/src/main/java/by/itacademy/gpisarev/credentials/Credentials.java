@@ -1,6 +1,8 @@
 package by.itacademy.gpisarev.credentials;
 
 import by.itacademy.gpisarev.entity.AbstractEntity;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import java.util.Objects;
 
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Getter
 @Setter
 @ToString

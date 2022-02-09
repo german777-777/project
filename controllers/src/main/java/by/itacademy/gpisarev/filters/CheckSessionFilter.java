@@ -14,14 +14,10 @@ import java.io.IOException;
 
 @Slf4j
 @WebFilter(urlPatterns = {
-        "/GroupServlet",
-        "/GroupStudentServlet",
-        "/GroupSubjectServlet",
-        "/MarksServlet",
-        "/SalaryServlet",
-        "/StudentServlet",
-        "/SubjectServlet",
-        "/TeacherServlet",
+        "/groups/*",
+        "/students/*",
+        "/subjects/*",
+        "/teachers/*",
         "/admin.jsp",
         "/admin_groups.jsp",
         "/admin_teachers_salaries.jsp",

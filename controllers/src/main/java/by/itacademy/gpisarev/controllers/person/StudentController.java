@@ -1,12 +1,11 @@
-package by.itacademy.gpisarev.servlets.person;
+package by.itacademy.gpisarev.controllers.person;
 
-import by.itacademy.gpisarev.person.PersonRepository;
 import by.itacademy.gpisarev.credentials.Credentials;
-import by.itacademy.gpisarev.users.Teacher;
-import lombok.extern.slf4j.Slf4j;
+import by.itacademy.gpisarev.person.PersonRepository;
 import by.itacademy.gpisarev.role.Role;
 import by.itacademy.gpisarev.users.Person;
 import by.itacademy.gpisarev.users.Student;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,12 +22,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @Controller
 @RequestMapping("students")
-public class StudentServlet {
+public class StudentController {
 
     private final PersonRepository personRepository;
 
     @Autowired
-    public StudentServlet(PersonRepository personRepository) {
+    public StudentController(PersonRepository personRepository) {
         this.personRepository = personRepository;
     }
 

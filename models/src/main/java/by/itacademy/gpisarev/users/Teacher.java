@@ -2,6 +2,8 @@ package by.itacademy.gpisarev.users;
 
 import by.itacademy.gpisarev.secondary.Salary;
 import by.itacademy.gpisarev.credentials.Credentials;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,6 +22,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Getter
 @Setter
 @ToString

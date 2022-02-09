@@ -1,4 +1,4 @@
-package by.itacademy.gpisarev.servlets.system;
+package by.itacademy.gpisarev.controllers.system;
 
 import by.itacademy.gpisarev.credentials.Credentials;
 import by.itacademy.gpisarev.person.PersonRepository;
@@ -17,12 +17,12 @@ import java.time.LocalDate;
 @Slf4j
 @Controller
 @RequestMapping("registration")
-public class RegistrationServlet {
+public class RegistrationController {
 
     private final PersonRepository personRepository;
 
     @Autowired
-    public RegistrationServlet(PersonRepository personRepository) {
+    public RegistrationController(PersonRepository personRepository) {
         this.personRepository = personRepository;
     }
 

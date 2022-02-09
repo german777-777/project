@@ -1,7 +1,11 @@
 package by.itacademy.gpisarev.users;
 
 import by.itacademy.gpisarev.credentials.Credentials;
+import by.itacademy.gpisarev.deserializer.LocalDateDeserializer;
 import by.itacademy.gpisarev.entity.AbstractEntity;
+import by.itacademy.gpisarev.serializer.LocalDateSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -54,6 +58,8 @@ public abstract class Person extends AbstractEntity {
     @Column(name = "patronymic")
     protected String patronymic;
 
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     @Column(name = "date_of_birth")
     protected LocalDate dateOfBirth;
 

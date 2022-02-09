@@ -1,6 +1,12 @@
 package by.itacademy.gpisarev.secondary;
 
+import by.itacademy.gpisarev.deserializer.LocalDateDeserializer;
 import by.itacademy.gpisarev.entity.AbstractEntity;
+import by.itacademy.gpisarev.serializer.LocalDateSerializer;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +21,7 @@ import javax.persistence.Table;
 import java.time.LocalDate;
 import java.util.Objects;
 
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Getter
 @Setter
 @ToString
@@ -28,6 +35,8 @@ import java.util.Objects;
 })
 public class Salary extends AbstractEntity {
 
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     @Column(name = "date_of_salary")
     private LocalDate dateOfSalary;
 

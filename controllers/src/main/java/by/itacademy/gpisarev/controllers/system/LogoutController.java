@@ -1,4 +1,4 @@
-package by.itacademy.gpisarev.servlets.system;
+package by.itacademy.gpisarev.controllers.system;
 
 import by.itacademy.gpisarev.users.Person;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import javax.servlet.http.HttpSession;
 @Slf4j
 @Controller
 @RequestMapping("logout")
-public class LogoutServlet {
+public class LogoutController {
 
     @GetMapping
     public ModelAndView get(HttpSession session) {

@@ -1,4 +1,4 @@
-package by.itacademy.gpisarev.servlets.salary;
+package by.itacademy.gpisarev.controllers.salary;
 
 import by.itacademy.gpisarev.person.PersonRepository;
 import by.itacademy.gpisarev.role.Role;
@@ -22,13 +22,13 @@ import java.util.Set;
 @Slf4j
 @Controller
 @RequestMapping("teachers/{teacherID}/salaries")
-public class SalaryServlet {
+public class SalaryController {
 
     private final SalaryRepository salaryRepository;
     private final PersonRepository personRepository;
 
     @Autowired
-    public SalaryServlet(SalaryRepository salaryRepository, PersonRepository personRepository) {
+    public SalaryController(SalaryRepository salaryRepository, PersonRepository personRepository) {
         this.salaryRepository = salaryRepository;
         this.personRepository = personRepository;
     }
