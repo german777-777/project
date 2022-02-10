@@ -10,6 +10,7 @@ import by.itacademy.gpisarev.secondary.Mark;
 import by.itacademy.gpisarev.secondary.Salary;
 import by.itacademy.gpisarev.users.Person;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 import by.itacademy.gpisarev.users.Student;
 import by.itacademy.gpisarev.users.Teacher;
@@ -26,7 +27,8 @@ public class PersonRepositoryJpaImpl extends AbstractRepoJpa<Person> implements 
     private static volatile GroupRepository groupRepository;
 
     @Autowired
-    public PersonRepositoryJpaImpl(SessionFactory factory, GroupRepository groupRepo) {
+    public PersonRepositoryJpaImpl(SessionFactory factory,
+                                   @Qualifier("groupRepositoryJpaImpl") GroupRepository groupRepo) {
         super(factory, Person.class);
         groupRepository = groupRepo;
     }

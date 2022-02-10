@@ -8,6 +8,7 @@ import by.itacademy.gpisarev.secondary.Mark;
 import by.itacademy.gpisarev.users.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,20 +19,35 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
 @RequestMapping("/rest/students/{studentID}/marks")
-public class MarkRestController {
-    private final MarkRepository markRepository;
-    private final PersonRepository personRepository;
+public class MarkRestController extends AbstractRestController {
+    private static final String MARK_REPO_PREFIX = "markRepository";
+    private static final String PERSON_REPO_PREFIX = "personRepository";
+
+    private final Map<String, MarkRepository> markRepositoryMap;
+    private final Map<String, PersonRepository> personRepositoryMap;
+
+    private volatile MarkRepository markRepository;
+    private volatile PersonRepository personRepository;
 
     @Autowired
-    public MarkRestController(MarkRepository markRepository, PersonRepository personRepository) {
-        this.markRepository = markRepository;
-        this.personRepository = personRepository;
+    public MarkRestController(Map<String, MarkRepository> markRepositoryMap,
+                               Map<String, PersonRepository> personRepositoryMap) {
+        this.markRepositoryMap = markRepositoryMap;
+        this.personRepositoryMap = personRepositoryMap;
+    }
+
+    @PostConstruct
+    public void init() {
+        markRepository = markRepositoryMap.get(MARK_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
+        personRepository = personRepositoryMap.get(PERSON_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
     }
 
     @GetMapping
@@ -51,7 +67,7 @@ public class MarkRestController {
     }
 
     @PostMapping
-    public Mark addSalary(@PathVariable("studentID") int studentID, @RequestBody Mark newMark) {
+    public Mark addMark(@PathVariable("studentID") int studentID, @RequestBody Mark newMark) {
         if (markRepository.createMark(newMark, studentID)) {
             return Collections.max(markRepository.getAllMarks(), Comparator.comparing(AbstractEntity::getId));
         } else {

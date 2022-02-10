@@ -1,10 +1,12 @@
 package by.itacademy.gpisarev.controllers.subject;
 
+import by.itacademy.gpisarev.controllers.AbstractController;
 import by.itacademy.gpisarev.secondary.Subject;
 import by.itacademy.gpisarev.subject.SubjectRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,18 +14,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.annotation.PostConstruct;
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
 @Controller
 @RequestMapping("subjects")
-public class SubjectController {
+public class SubjectController extends AbstractController {
 
-    private final SubjectRepository subjectRepository;
+    private static final String SUBJECT_REPO_PREFIX = "subjectRepository";
+
+    private final Map<String, SubjectRepository> subjectRepositoryMap;
+
+    private volatile SubjectRepository subjectRepository;
 
     @Autowired
-    public SubjectController(SubjectRepository subjectRepository) {
-        this.subjectRepository = subjectRepository;
+    public SubjectController(Map<String, SubjectRepository> subjectRepositoryMap) {
+        this.subjectRepositoryMap = subjectRepositoryMap;
+    }
+
+    @PostConstruct
+    public void init() {
+        subjectRepository = subjectRepositoryMap.get(SUBJECT_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
     }
 
     private ModelAndView getAllSubjects(String message) {

@@ -90,6 +90,16 @@ public class Group extends AbstractEntity {
         return this;
     }
 
+    public Group withStudents(Set<Student> students) {
+        setStudents(students);
+        return this;
+    }
+
+    public Group withSubjects(Set<Subject> subjects) {
+        setSubjects(subjects);
+        return this;
+    }
+
     public void addSubject(Subject subject) {
         this.subjects.add(subject);
     }

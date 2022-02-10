@@ -7,6 +7,7 @@ import by.itacademy.gpisarev.users.Person;
 import by.itacademy.gpisarev.users.Teacher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,19 +18,31 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/rest/teachers")
-public class TeacherRestController {
-    private final PersonRepository personRepository;
+public class TeacherRestController extends AbstractRestController {
+
+    private static final String PERSON_REPO_PREFIX = "personRepository";
+
+    private final Map<String, PersonRepository> personRepositoryMap;
+
+    private volatile PersonRepository personRepository;
 
     @Autowired
-    public TeacherRestController(PersonRepository personRepository) {
-        this.personRepository = personRepository;
+    public TeacherRestController(Map<String, PersonRepository> personRepositoryMap) {
+        this.personRepositoryMap = personRepositoryMap;
+    }
+
+    @PostConstruct
+    public void init() {
+        personRepository = personRepositoryMap.get(PERSON_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
     }
 
     @GetMapping

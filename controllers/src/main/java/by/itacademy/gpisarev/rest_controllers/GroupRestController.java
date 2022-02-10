@@ -11,6 +11,7 @@ import by.itacademy.gpisarev.users.Person;
 import by.itacademy.gpisarev.users.Student;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,22 +22,41 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
 @RequestMapping("/rest/groups")
-public class GroupRestController {
-    private final GroupRepository groupRepository;
-    private final PersonRepository personRepository;
-    private final SubjectRepository subjectRepository;
+public class GroupRestController extends AbstractRestController {
+    private static final String GROUP_REPO_PREFIX = "groupRepository";
+    private static final String PERSON_REPO_PREFIX = "personRepository";
+    private static final String SUBJECT_REPO_PREFIX = "subjectRepository";
+
+    private final Map<String, GroupRepository> groupRepositoryMap;
+    private final Map<String, PersonRepository> personRepositoryMap;
+    private final Map<String, SubjectRepository> subjectRepositoryMap;
+
+    private volatile GroupRepository groupRepository;
+    private volatile PersonRepository personRepository;
+    private volatile SubjectRepository subjectRepository;
 
     @Autowired
-    public GroupRestController(GroupRepository groupRepository, PersonRepository personRepository, SubjectRepository subjectRepository) {
-        this.groupRepository = groupRepository;
-        this.personRepository = personRepository;
-        this.subjectRepository = subjectRepository;
+    public GroupRestController(Map<String, GroupRepository> groupRepositoryMap,
+                               Map<String, PersonRepository> personRepositoryMap,
+                               Map<String, SubjectRepository> subjectRepositoryMap) {
+        this.groupRepositoryMap = groupRepositoryMap;
+        this.personRepositoryMap = personRepositoryMap;
+        this.subjectRepositoryMap = subjectRepositoryMap;
+    }
+
+    @PostConstruct
+    public void init() {
+        groupRepository = groupRepositoryMap.get(GROUP_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
+        personRepository = personRepositoryMap.get(PERSON_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
+        subjectRepository = subjectRepositoryMap.get(SUBJECT_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
     }
 
     @GetMapping

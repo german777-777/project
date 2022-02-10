@@ -21,7 +21,7 @@ public final class Queries {
 
     // обновление логина и пароля у Credentials
     //language=SQL
-    public static final String updateCredentials = "UPDATE credentials SET login = ? AND password = ? WHERE id = ?";
+    public static final String updateCredentials = "UPDATE credentials SET login = ? AND password = ?";
 
     // удаление Credentials по ID
     //language=SQL
@@ -30,7 +30,6 @@ public final class Queries {
     // удаление Credentials по логину и паролю
     //language=SQL
     public static final String deleteCredentialsByLoginAndPassword = "DELETE FROM credentials WHERE login = ? AND password = ?";
-
 
 
     // запросы к таблице Person
@@ -80,11 +79,6 @@ public final class Queries {
     //language=SQL
     public static final String deletePersonByID = "DELETE FROM persons WHERE id = ?";
 
-    // удаление Person по ФИО
-    //language=SQL
-    //public static final String deletePersonByName = "DELETE FROM persons WHERE first_name = ? AND last_name = ? AND patronymic = ?";
-
-
 
     // запросы к таблице Group
 
@@ -110,14 +104,6 @@ public final class Queries {
             "LEFT JOIN credentials c on p.credential_id = c.id " +
             "WHERE g.name = ?";
 
-    // поиск Group по Teacher ID
-    //language=SQL
-    public static final String findGroupByTeacherID = "SELECT g.id, g.name, p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, c.id, c.login, c.password " +
-            "FROM groups g " +
-            "LEFT JOIN persons p on p.id = g.teacher_ID " +
-            "LEFT JOIN credentials c on p.credential_id = c.id " +
-            "WHERE g.teacher_ID = ?";
-
     // поиск всех Group
     //language=SQL
     public static final String findAllGroups = "SELECT g.id, g.name, p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, c.id, c.login, c.password " +
@@ -133,14 +119,9 @@ public final class Queries {
     //language=SQL
     public static final String updateGroupTeacherByID = "UPDATE groups SET teacher_ID = ? WHERE id = ?";
 
-    // выставление id Teacher на null
-    //language=SQL
-    public static final String updateTeacherIdAsNull = "UPDATE groups SET teacher_ID = null WHERE teacher_ID = ?";
-
     // удаление Group по ID
     //language=SQL
     public static final String deleteGroupById = "DELETE FROM groups WHERE id = ?";
-
 
 
     // запросы к таблице Subjects
@@ -165,17 +146,10 @@ public final class Queries {
     //language=SQL
     public static final String updateSubjectNameByID = "UPDATE subjects SET name = ? WHERE id = ?";
 
-    // обновление названия Subject по имени
-    //language=SQL
-    public static final String updateSubjectNameByName = "UPDATE subjects SET name = ? WHERE name = ?";
 
     // удаление Subject по ID
     //language=SQL
     public static final String deleteSubjectByID = "DELETE FROM subjects WHERE id = ?";
-
-    // удаление Subject по названию
-    //language=SQL
-    //public static final String deleteSubjectByName = "DELETE FROM subjects WHERE name = ?";
 
 
     // запросы к таблице Salaries
@@ -187,28 +161,22 @@ public final class Queries {
     // "взятие" Salaries по ID учителя
     //language=SQL
     public static final String findSalaryByID = "SELECT " +
-            "s.id, p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, c.id ,c.login, c.password, s.date_of_salary, s.count" +
-            " FROM salaries s " +
-            "LEFT OUTER JOIN persons p on p.id = s.teacher_id" +
-            " LEFT OUTER JOIN credentials c on p.credential_id = c.id " +
+            "s.id, s.date_of_salary, s.count " +
+            "FROM salaries s " +
             "WHERE s.id = ?";
 
     // "взятие" Salaries по ID учителя
     //language=SQL
     public static final String findSalariesByTeacherID = "SELECT " +
-            "s.id, p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, c.id ,c.login, c.password, s.date_of_salary, s.count" +
+            "s.id, s.date_of_salary, s.count" +
             " FROM salaries s " +
-            "LEFT OUTER JOIN persons p on p.id = s.teacher_id" +
-            " LEFT OUTER JOIN credentials c on p.credential_id = c.id " +
             "WHERE s.teacher_id = ?";
 
     // "взятие" Salaries по дате
     //language=SQL
     public static final String findSalariesByDate = "SELECT " +
-            "s.id, p.id, p.first_name, p.last_name, p.patronymic, p.date_of_birth, c.id ,c.login, c.password, s.date_of_salary, s.count" +
+            "s.id, s.date_of_salary, s.count" +
             " FROM salaries s " +
-            "LEFT OUTER JOIN persons p on p.id = s.teacher_id" +
-            " LEFT OUTER JOIN credentials c on p.credential_id = c.id " +
             "WHERE s.date_of_salary = ?";
 
     // "взятие" всех Salaries
@@ -223,9 +191,6 @@ public final class Queries {
     //language=SQL
     public static final String updateSalaryByID = "UPDATE salaries SET count = ? WHERE id = ?";
 
-    // обновление Teacher, имеющего Salary по ID
-    //language=SQL
-    public static final String updateTeacherReceivedBySalaryID = "UPDATE salaries SET teacher_id = ? WHERE id = ?";
 
     // обновление даты Salary по ID
     //language=SQL
@@ -235,10 +200,6 @@ public final class Queries {
     //language=SQL
     public static final String deleteSalaryByID = "DELETE FROM salaries WHERE id = ?";
 
-    // удаление Salary по teacher_ID
-    //language=SQL
-    public static final String deleteSalaryByTeacherID = "DELETE FROM salaries WHERE teacher_id = ?";
-
 
     // запросы к таблице Group-Student
 
@@ -246,28 +207,21 @@ public final class Queries {
     //language=SQL
     public static final String putStudentAndGroupID = "INSERT INTO group_student (student_ID, group_ID) VALUES (?, ?)";
 
-    // "взятие" Student ID
-    //language=SQL
-    public static final String findStudentInGroupByID = "SELECT * FROM group_student WHERE student_ID = ?";
 
     // "взятие" Group ID
     //language=SQL
-    public static final String findGroupWithStudentsByID = "SELECT * FROM group_student WHERE group_ID = ?";
+    public static final String findGroupWithStudentsByID = "SELECT student_id FROM group_student WHERE group_ID = ?";
 
     // удаление Student из Group по ID
     //language=SQL
     public static final String deleteStudentFromGroupByID = "DELETE FROM group_student WHERE student_ID = ?";
-
-    // удаление Group по ID
-    //language=SQL
-    public static final String deleteGroupWithStudentsByID = "DELETE FROM group_student WHERE group_ID = ?";
 
 
     // запросы к таблице Marks
 
     // вставка Mark в БД
     //language=SQL
-    public static final String putMark = "INSERT INTO marks (student_id, group_id, subject_id, date_of_mark, point) VALUES (?, ?, ?, ?, ?)";
+    public static final String putMark = "INSERT INTO marks (student_id, subject_id, date_of_mark, point) VALUES (?, ?, ?, ?)";
 
     // "взятие" Mark по ID
     //language=SQL
@@ -277,13 +231,6 @@ public final class Queries {
     //language=SQL
     public static final String findMarksByStudentID = "SELECT * FROM marks WHERE student_id = ?";
 
-    // "взятие" Marks по Group ID
-    //language=SQL
-    public static final String findMarksByGroupID = "SELECT * FROM marks WHERE group_id = ?";
-
-    // "взятие" Marks по Subject ID
-    //language=SQL
-    public static final String findMarksBySubjectID = "SELECT * FROM marks WHERE subject_id = ?";
 
     // "взятие" всех Marks
     //language=SQL
@@ -297,10 +244,6 @@ public final class Queries {
     //language=SQL
     public static final String updateDateOfMarkByID = "UPDATE marks SET date_of_mark = ? WHERE id = ?";
 
-    // обновление Group у Mark по ID
-    //language=SQL
-    public static final String updateGroupOfMarkByID = "UPDATE marks SET group_id = ? WHERE id = ?";
-
     // обновление значения Mark по ID
     //language=SQL
     public static final String updateCountOfMarkByID = "UPDATE marks SET point = ? WHERE id = ?";
@@ -309,17 +252,6 @@ public final class Queries {
     //language=SQL
     public static final String deleteMarkByID = "DELETE FROM marks WHERE id = ?";
 
-    // удаление Marks по ID Student
-    //language=SQL
-    public static final String deleteMarksByStudentID = "DELETE FROM marks WHERE student_id = ?";
-
-    // удаление Marks по ID Subject
-    //language=SQL
-    public static final String deleteMarksBySubjectID = "DELETE FROM marks WHERE subject_id = ?";
-
-    // удаление Marks по ID Group
-    //language=SQL
-    public static final String deleteMarksByGroupID = "DELETE FROM marks WHERE group_id = ?";
 
     // запросы к таблице Group-Subject
 
@@ -329,17 +261,10 @@ public final class Queries {
 
     // "взятие" Subjects по Group ID
     //language=SQL
-    public static final String findSubjectsByGroupID = "SELECT * FROM group_subject WHERE group_ID = ?";
-
-    // "взятие" Subjects по Subject ID
-    //language=SQL
-    public static final String findSubjectsBySubjectID = "SELECT * FROM group_subject WHERE subject_ID = ?";
+    public static final String findSubjectsByGroupID = "SELECT gs.subject_id, s.name FROM group_subject gs LEFT OUTER JOIN subjects s ON gs.subject_id = s.id WHERE group_ID = ?";
 
     // удаление Subject из Group_Subject по ID
     //language=SQL
     public static final String deleteSubjectFromGroupByID = "DELETE FROM group_subject WHERE subject_ID = ?";
 
-    // удаление Group из Group_Subject по ID
-    //language=SQL
-    public static final String deleteGroupWithSubjectsByID = "DELETE FROM group_subject WHERE group_ID = ?";
 }

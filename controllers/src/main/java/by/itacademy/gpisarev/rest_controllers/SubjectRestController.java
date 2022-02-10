@@ -5,6 +5,7 @@ import by.itacademy.gpisarev.secondary.Subject;
 import by.itacademy.gpisarev.subject.SubjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,18 +16,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
 @RequestMapping("/rest/subjects")
-public class SubjectRestController {
-    private final SubjectRepository subjectRepository;
+public class SubjectRestController extends AbstractRestController {
+    private static final String SUBJECT_REPO_PREFIX = "subjectRepository";
+
+    private final Map<String, SubjectRepository> subjectRepositoryMap;
+
+    private volatile SubjectRepository subjectRepository;
 
     @Autowired
-    public SubjectRestController(SubjectRepository subjectRepository) {
-        this.subjectRepository = subjectRepository;
+    public SubjectRestController(Map<String, SubjectRepository> subjectRepositoryMap) {
+        this.subjectRepositoryMap = subjectRepositoryMap;
+    }
+
+    @PostConstruct
+    public void init() {
+        subjectRepository = subjectRepositoryMap.get(SUBJECT_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
     }
 
     @GetMapping

@@ -9,6 +9,7 @@ import by.itacademy.gpisarev.secondary.Salary;
 import by.itacademy.gpisarev.users.Person;
 import by.itacademy.gpisarev.users.Teacher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -25,7 +26,8 @@ public class SalaryRepositoryJpaImpl extends AbstractRepoJpa<Salary> implements 
     private static volatile PersonRepository personRepository;
 
     @Autowired
-    public SalaryRepositoryJpaImpl(SessionFactory factory, PersonRepository personRepo) {
+    public SalaryRepositoryJpaImpl(SessionFactory factory,
+                                   @Qualifier("personRepositoryJpaImpl") PersonRepository personRepo) {
         super(factory, Salary.class);
         personRepository = personRepo;
     }

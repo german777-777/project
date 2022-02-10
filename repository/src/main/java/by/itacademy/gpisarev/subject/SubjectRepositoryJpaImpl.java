@@ -7,6 +7,7 @@ import org.hibernate.SessionFactory;
 import by.itacademy.gpisarev.secondary.Group;
 import by.itacademy.gpisarev.secondary.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -21,7 +22,8 @@ public class SubjectRepositoryJpaImpl extends AbstractRepoJpa<Subject> implement
     private static GroupRepository groupRepository;
 
     @Autowired
-    private SubjectRepositoryJpaImpl(SessionFactory factory, GroupRepository groupRepo) {
+    private SubjectRepositoryJpaImpl(SessionFactory factory,
+                                     @Qualifier("groupRepositoryJpaImpl") GroupRepository groupRepo) {
         super(factory, Subject.class);
         groupRepository = groupRepo;
     }

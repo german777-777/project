@@ -1,5 +1,6 @@
 package by.itacademy.gpisarev.controllers.salary;
 
+import by.itacademy.gpisarev.controllers.AbstractController;
 import by.itacademy.gpisarev.person.PersonRepository;
 import by.itacademy.gpisarev.role.Role;
 import by.itacademy.gpisarev.salary.SalaryRepository;
@@ -9,6 +10,7 @@ import by.itacademy.gpisarev.users.Teacher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,21 +18,36 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
 @Controller
 @RequestMapping("teachers/{teacherID}/salaries")
-public class SalaryController {
+public class SalaryController extends AbstractController {
 
-    private final SalaryRepository salaryRepository;
-    private final PersonRepository personRepository;
+    private static final String PERSON_REPO_PREFIX = "personRepository";
+    private static final String SALARY_REPO_PREFIX = "salaryRepository";
+
+    private final Map<String, PersonRepository> personRepositoryMap;
+    private final Map<String, SalaryRepository> salaryRepositoryMap;
+
+    private volatile PersonRepository personRepository;
+    private volatile SalaryRepository salaryRepository;
 
     @Autowired
-    public SalaryController(SalaryRepository salaryRepository, PersonRepository personRepository) {
-        this.salaryRepository = salaryRepository;
-        this.personRepository = personRepository;
+    public SalaryController(Map<String, PersonRepository> personRepositoryMap,
+                            Map<String, SalaryRepository> salaryRepositoryMap) {
+        this.personRepositoryMap = personRepositoryMap;
+        this.salaryRepositoryMap = salaryRepositoryMap;
+    }
+
+    @PostConstruct
+    public void init() {
+        personRepository = personRepositoryMap.get(PERSON_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
+        salaryRepository = salaryRepositoryMap.get(SALARY_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
     }
 
     private ModelAndView getAllTeacherSalaries(int teacherID, String message) {

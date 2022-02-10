@@ -1,5 +1,6 @@
 package by.itacademy.gpisarev.controllers.group;
 
+import by.itacademy.gpisarev.controllers.AbstractController;
 import by.itacademy.gpisarev.group.GroupRepository;
 import by.itacademy.gpisarev.person.PersonRepository;
 import by.itacademy.gpisarev.role.Role;
@@ -9,6 +10,7 @@ import by.itacademy.gpisarev.users.Teacher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,20 +18,34 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.annotation.PostConstruct;
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
 @Controller
 @RequestMapping("groups")
-public class GroupController {
+public class GroupController extends AbstractController {
+    private static final String GROUP_REPO_PREFIX = "groupRepository";
+    private static final String PERSON_REPO_PREFIX = "personRepository";
 
-    private final GroupRepository groupRepository;
-    private final PersonRepository personRepository;
+    private final Map<String, GroupRepository> groupRepositoryMap;
+    private final Map<String, PersonRepository> personRepositoryMap;
+
+    private volatile GroupRepository groupRepository;
+    private volatile PersonRepository personRepository;
 
     @Autowired
-    public GroupController(GroupRepository groupRepository, PersonRepository personRepository) {
-        this.groupRepository = groupRepository;
-        this.personRepository = personRepository;
+    public GroupController(Map<String, GroupRepository> groupRepositoryMap,
+                           Map<String, PersonRepository> personRepositoryMap) {
+        this.groupRepositoryMap = groupRepositoryMap;
+        this.personRepositoryMap = personRepositoryMap;
+    }
+
+    @PostConstruct
+    public void init() {
+        groupRepository = groupRepositoryMap.get(GROUP_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
+        personRepository = personRepositoryMap.get(PERSON_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
     }
 
     private ModelAndView getAllGroups(String message) {

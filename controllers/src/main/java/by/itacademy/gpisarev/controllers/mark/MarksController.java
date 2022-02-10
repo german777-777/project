@@ -1,5 +1,6 @@
 package by.itacademy.gpisarev.controllers.mark;
 
+import by.itacademy.gpisarev.controllers.AbstractController;
 import by.itacademy.gpisarev.mark.MarkRepository;
 import by.itacademy.gpisarev.person.PersonRepository;
 import by.itacademy.gpisarev.role.Role;
@@ -9,8 +10,8 @@ import by.itacademy.gpisarev.subject.SubjectRepository;
 import by.itacademy.gpisarev.users.Person;
 import by.itacademy.gpisarev.users.Student;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,23 +19,41 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
 @Controller
 @RequestMapping("/students/{studentID}/marks")
-public class MarksController {
+public class MarksController extends AbstractController {
 
-    private final MarkRepository markRepository;
-    private final PersonRepository personRepository;
-    private final SubjectRepository subjectRepository;
+    private static final String MARK_REPO_PREFIX = "markRepository";
+    private static final String PERSON_REPO_PREFIX = "personRepository";
+    private static final String SUBJECT_REPO_PREFIX = "subjectRepository";
 
-    @Autowired
-    public MarksController(MarkRepository markRepository, PersonRepository personRepository, SubjectRepository subjectRepository) {
-        this.markRepository = markRepository;
-        this.personRepository = personRepository;
-        this.subjectRepository = subjectRepository;
+    private final Map<String, MarkRepository> markRepositoryMap;
+    private final Map<String, PersonRepository> personRepositoryMap;
+    private final Map<String, SubjectRepository> subjectRepositoryMap;
+
+    private volatile MarkRepository markRepository;
+    private volatile PersonRepository personRepository;
+    private volatile SubjectRepository subjectRepository;
+
+    public MarksController(Map<String, MarkRepository> markRepositoryMap,
+                           Map<String, PersonRepository> personRepositoryMap,
+                           Map<String, SubjectRepository> subjectRepositoryMap) {
+        this.markRepositoryMap = markRepositoryMap;
+        this.personRepositoryMap = personRepositoryMap;
+        this.subjectRepositoryMap = subjectRepositoryMap;
+    }
+
+    @PostConstruct
+    public void init() {
+        markRepository = markRepositoryMap.get(MARK_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
+        personRepository = personRepositoryMap.get(PERSON_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
+        subjectRepository = subjectRepositoryMap.get(SUBJECT_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
     }
 
     private ModelAndView getAllStudentMarks(int studentID, String message) {
@@ -103,7 +122,7 @@ public class MarksController {
             }
         } else {
             log.error("Предмет не найден");
-            return getAllStudentMarks(studentID,"Предмет не найден. Обновления не произошло");
+            return getAllStudentMarks(studentID,"Предмет не найден. Создания не произошло");
         }
         return getAllStudentMarks(studentID, "Оценка добавлена");
     }

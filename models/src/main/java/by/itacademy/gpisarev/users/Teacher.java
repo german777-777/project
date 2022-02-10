@@ -71,6 +71,11 @@ public class Teacher extends Person {
         return this;
     }
 
+    public Teacher withSalaries(Set<Salary> salaries) {
+        setSalaries(salaries);
+        return this;
+    }
+
     public void addSalary(Salary salary) {
         this.salaries.add(salary);
     }
@@ -88,4 +93,6 @@ public class Teacher extends Person {
     public int hashCode() {
         return Objects.hash(super.hashCode(), role, salaries);
     }
+
+
 }

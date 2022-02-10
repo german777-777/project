@@ -72,6 +72,11 @@ public class Student extends Person {
         return this;
     }
 
+    public Student withMarks(Set<Mark> marks) {
+        setMarks(marks);
+        return this;
+    }
+
     public void addMark(Mark mark) {
         this.marks.add(mark);
     }
