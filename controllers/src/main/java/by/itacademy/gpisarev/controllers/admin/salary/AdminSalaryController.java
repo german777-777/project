@@ -1,4 +1,4 @@
-package by.itacademy.gpisarev.controllers.salary;
+package by.itacademy.gpisarev.controllers.admin.salary;
 
 import by.itacademy.gpisarev.controllers.AbstractController;
 import by.itacademy.gpisarev.person.PersonRepository;
@@ -25,8 +25,8 @@ import java.util.Set;
 
 @Slf4j
 @Controller
-@RequestMapping("teachers/{teacherID}/salaries")
-public class SalaryController extends AbstractController {
+@RequestMapping("admin/teachers/{teacherID}/salaries")
+public class AdminSalaryController extends AbstractController {
 
     private static final String PERSON_REPO_PREFIX = "personRepository";
     private static final String SALARY_REPO_PREFIX = "salaryRepository";
@@ -38,8 +38,8 @@ public class SalaryController extends AbstractController {
     private volatile SalaryRepository salaryRepository;
 
     @Autowired
-    public SalaryController(Map<String, PersonRepository> personRepositoryMap,
-                            Map<String, SalaryRepository> salaryRepositoryMap) {
+    public AdminSalaryController(Map<String, PersonRepository> personRepositoryMap,
+                                 Map<String, SalaryRepository> salaryRepositoryMap) {
         this.personRepositoryMap = personRepositoryMap;
         this.salaryRepositoryMap = salaryRepositoryMap;
     }

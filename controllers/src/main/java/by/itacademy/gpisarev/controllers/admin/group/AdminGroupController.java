@@ -1,4 +1,4 @@
-package by.itacademy.gpisarev.controllers.group;
+package by.itacademy.gpisarev.controllers.admin.group;
 
 import by.itacademy.gpisarev.controllers.AbstractController;
 import by.itacademy.gpisarev.group.GroupRepository;
@@ -24,8 +24,8 @@ import java.util.Set;
 
 @Slf4j
 @Controller
-@RequestMapping("groups")
-public class GroupController extends AbstractController {
+@RequestMapping("admin/groups")
+public class AdminGroupController extends AbstractController {
     private static final String GROUP_REPO_PREFIX = "groupRepository";
     private static final String PERSON_REPO_PREFIX = "personRepository";
 
@@ -36,8 +36,8 @@ public class GroupController extends AbstractController {
     private volatile PersonRepository personRepository;
 
     @Autowired
-    public GroupController(Map<String, GroupRepository> groupRepositoryMap,
-                           Map<String, PersonRepository> personRepositoryMap) {
+    public AdminGroupController(Map<String, GroupRepository> groupRepositoryMap,
+                                Map<String, PersonRepository> personRepositoryMap) {
         this.groupRepositoryMap = groupRepositoryMap;
         this.personRepositoryMap = personRepositoryMap;
     }
@@ -139,7 +139,7 @@ public class GroupController extends AbstractController {
         return getAllGroups("Группа удалена");
     }
 
-    @GetMapping("/get")
+    @GetMapping
     public ModelAndView get(){
         return getAllGroups("Все группы");
     }

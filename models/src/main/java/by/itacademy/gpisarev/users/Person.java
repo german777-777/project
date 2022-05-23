@@ -42,7 +42,7 @@ import java.util.Objects;
 @NamedQueries({
         @NamedQuery(name = "getPersonByID", query = "from Person p where p.id = :id"),
         @NamedQuery(name = "getPersonByNames", query = "from Person p where p.firstName = :firstName and p.lastName = :lastName and p.patronymic = :patronymic"),
-        @NamedQuery(name = "getPersonByCredentials", query = "from Person p where p.credentials.login = :login and p.credentials.password = :password"),
+        @NamedQuery(name = "getPersonByCredentials", query = "from Person p where p.credentials.login = :login and p.credentials.password = :password")
 })
 public abstract class Person extends AbstractEntity {
 

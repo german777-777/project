@@ -1,4 +1,4 @@
-package by.itacademy.gpisarev.controllers.mark;
+package by.itacademy.gpisarev.controllers.admin.mark;
 
 import by.itacademy.gpisarev.controllers.AbstractController;
 import by.itacademy.gpisarev.mark.MarkRepository;
@@ -26,8 +26,8 @@ import java.util.Set;
 
 @Slf4j
 @Controller
-@RequestMapping("/students/{studentID}/marks")
-public class MarksController extends AbstractController {
+@RequestMapping("admin/students/{studentID}/marks")
+public class AdminMarksController extends AbstractController {
 
     private static final String MARK_REPO_PREFIX = "markRepository";
     private static final String PERSON_REPO_PREFIX = "personRepository";
@@ -41,9 +41,9 @@ public class MarksController extends AbstractController {
     private volatile PersonRepository personRepository;
     private volatile SubjectRepository subjectRepository;
 
-    public MarksController(Map<String, MarkRepository> markRepositoryMap,
-                           Map<String, PersonRepository> personRepositoryMap,
-                           Map<String, SubjectRepository> subjectRepositoryMap) {
+    public AdminMarksController(Map<String, MarkRepository> markRepositoryMap,
+                                Map<String, PersonRepository> personRepositoryMap,
+                                Map<String, SubjectRepository> subjectRepositoryMap) {
         this.markRepositoryMap = markRepositoryMap;
         this.personRepositoryMap = personRepositoryMap;
         this.subjectRepositoryMap = subjectRepositoryMap;

@@ -34,12 +34,12 @@
                 <td><c:out value="${student.patronymic}"/></td>
                 <td><c:out value="${student.dateOfBirth}"/></td>
                 <td>
-                    <form action="<c:url value="/students/delete/${student.id}"/>" method="post">
+                    <form action="<c:url value="admin/students/delete/${student.id}"/>" method="post">
                         <button style="align-content: center" type="submit">Удалить</button>
                     </form>
                 </td>
                 <td>
-                    <form action="<c:url value="/students/put/${student.id}"/>" method="post">
+                    <form action="<c:url value="admin/students/put/${student.id}"/>" method="post">
                         <input type="hidden" name="credentialID" value="${student.credentials.id}">
                         <label>
                             <input style="text-align: center; display: block" type="text" name="newLastName" placeholder="Новая фамилия">
@@ -64,7 +64,7 @@
                     </form>
                 </td>
                 <td>
-                    <form action="<c:url value="/students/${student.id}/marks"/>" method="get">
+                    <form action="<c:url value="admin/students/${student.id}/marks"/>" method="get">
                         <button style="align-content: center" type="submit">Оценки</button>
                     </form>
                 </td>
@@ -74,7 +74,7 @@
 <h4>
     Добавление нового студента
 </h4>
-<form action="<c:url value="/students/post"/>" method="post">
+<form action="<c:url value="admin/students/post"/>" method="post">
     <label>
         Фамилия: <input style="text-align: center; display: block" type="text" name="newLastName">
     </label>

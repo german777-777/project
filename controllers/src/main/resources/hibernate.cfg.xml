@@ -5,7 +5,7 @@
 <hibernate-configuration>
     <session-factory>
         <property name="connection.driver_class">org.postgresql.Driver</property>
-        <property name="connection.url">jdbc:postgresql://localhost:5432/project_database</property>
+        <property name="connection.url">jdbc:postgresql://localhost:5432/project_it-academy_db</property>
         <property name="connection.username">mongol</property>
         <property name="connection.password">Gurmanidze01</property>
         <property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property>
@@ -18,16 +18,6 @@
         <property name="hibernate.c3p0.max_size">15</property>
         <property name="hibernate.c3p0.min_size">2</property>
         <property name="hibernate.c3p0.max_statements">100</property>
-
-        <mapping class="by.itacademy.gpisarev.users.Student"/>
-        <mapping class="by.itacademy.gpisarev.users.Admin"/>
-        <mapping class="by.itacademy.gpisarev.users.Teacher"/>
-        <mapping class="by.itacademy.gpisarev.secondary.Group"/>
-        <mapping class="by.itacademy.gpisarev.secondary.Salary"/>
-        <mapping class="by.itacademy.gpisarev.secondary.Mark"/>
-        <mapping class="by.itacademy.gpisarev.secondary.Subject"/>
-        <mapping class="by.itacademy.gpisarev.credentials.Credentials"/>
-        <mapping class="by.itacademy.gpisarev.users.Person"/>
 
     </session-factory>
 </hibernate-configuration>

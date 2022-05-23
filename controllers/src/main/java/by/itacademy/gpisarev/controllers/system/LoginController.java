@@ -25,7 +25,7 @@ public class LoginController extends AbstractController {
 
     private final Map<String, PersonRepository> personRepositoryMap;
 
-    private volatile PersonRepository personRepository;
+    private PersonRepository personRepository;
 
     @Autowired
     public LoginController(Map<String, PersonRepository> personRepositoryMap) {
@@ -48,10 +48,10 @@ public class LoginController extends AbstractController {
             modelAndView.getModel().put("messageToPerson", "Здравствуйте, " + person.getLastName() + " " + person.getFirstName() + " " + person.getPatronymic());
             switch (person.getRole()) {
                 case STUDENT:
-                    modelAndView.setViewName("admin_student");
+                    modelAndView.setViewName("student");
                     break;
                 case TEACHER:
-                    modelAndView.setViewName("admin_teacher");
+                    modelAndView.setViewName("teacher");
                     break;
                 case ADMIN:
                     modelAndView.setViewName("admin");

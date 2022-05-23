@@ -1,11 +1,11 @@
-package by.itacademy.gpisarev.controllers.person;
+package by.itacademy.gpisarev.controllers.admin.person;
 
 import by.itacademy.gpisarev.controllers.AbstractController;
 import by.itacademy.gpisarev.credentials.Credentials;
 import by.itacademy.gpisarev.person.PersonRepository;
 import by.itacademy.gpisarev.role.Role;
 import by.itacademy.gpisarev.users.Person;
-import by.itacademy.gpisarev.users.Teacher;
+import by.itacademy.gpisarev.users.Student;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
-@RequestMapping("teachers")
-public class TeacherController extends AbstractController {
+@RequestMapping("admin/students")
+public class AdminStudentController extends AbstractController {
 
     private static final String PERSON_REPO_PREFIX = "personRepository";
 
@@ -35,7 +35,7 @@ public class TeacherController extends AbstractController {
     private volatile PersonRepository personRepository;
 
     @Autowired
-    public TeacherController(Map<String, PersonRepository> personRepositoryMap) {
+    public AdminStudentController(Map<String, PersonRepository> personRepositoryMap) {
         this.personRepositoryMap = personRepositoryMap;
     }
 
@@ -44,20 +44,20 @@ public class TeacherController extends AbstractController {
         personRepository = personRepositoryMap.get(PERSON_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
     }
 
-    private ModelAndView getAllTeachers(String message) {
-        ModelAndView modelAndView = new ModelAndView("/admin_teacher");
-        Set<Person> teachers = personRepository.getAllPersons()
+    private ModelAndView getAllStudents(String message) {
+        ModelAndView modelAndView = new ModelAndView("/admin_student");
+        Set<Person> students = personRepository.getAllPersons()
                 .stream()
-                .filter(person -> person.getRole() == Role.TEACHER)
+                .filter(person -> person.getRole() == Role.STUDENT)
                 .collect(Collectors.toSet());
-        modelAndView.getModel().put("allTeachers", teachers);
-        modelAndView.getModel().put("messageFromTeachers", message);
+        modelAndView.getModel().put("allStudents", students);
+        modelAndView.getModel().put("messageFromStudents", message);
         return modelAndView;
     }
 
     @GetMapping("/get")
-    public ModelAndView get() {
-        return getAllTeachers("Все учителя");
+    public ModelAndView get(){
+        return getAllStudents("Все студенты");
     }
 
     @PostMapping("/post")
@@ -67,7 +67,7 @@ public class TeacherController extends AbstractController {
                              @RequestParam("newDateOfBirth") String newDateOfBirth,
                              @RequestParam("newLogin") String newLogin,
                              @RequestParam("newPassword") String newPassword) {
-        Person newTeacher = new Teacher()
+        Person newStudent = new Student()
                 .withLastName(newLastName)
                 .withFirstName(newFirstName)
                 .withPatronymic(newPatronymic)
@@ -76,22 +76,22 @@ public class TeacherController extends AbstractController {
                         .withPassword(newPassword))
                 .withDateOfBirth(LocalDate.parse(newDateOfBirth));
 
-        if (!checkTeacherInRepository(personRepository, newTeacher)) {
-            log.info("Создание учителя");
-            if (personRepository.createPerson(newTeacher)) {
-                log.info("Учитель создан");
+        if (!checkStudentInRepository(personRepository, newStudent)) {
+            log.info("Создание студента");
+            if (personRepository.createPerson(newStudent)) {
+                log.info("Студент создан");
             } else {
-                log.error("Учитель не создан");
+                log.error("Студент не создан");
             }
         } else {
-            log.error("Учитель с введёнными учётными данными уже существует");
-            return getAllTeachers("Учитель с введёнными учётными данными уже существует");
+            log.error("Студент с введёнными учётными данными уже существует");
+            return getAllStudents("Студент с введёнными учётными данными уже существует");
         }
-        return getAllTeachers("Учитель добавлен");
+        return getAllStudents("Студент добавлен");
     }
 
-    @PostMapping("/put/{teacherID}")
-    public ModelAndView put(@PathVariable("teacherID") int teacherID,
+    @PostMapping("/put/{id}")
+    public ModelAndView put(@PathVariable("id") int studentID,
                             @RequestParam("credentialID") int credentialID,
                             @RequestParam("newLastName") String newLastName,
                             @RequestParam("newFirstName") String newFirstName,
@@ -100,45 +100,45 @@ public class TeacherController extends AbstractController {
                             @RequestParam("newPassword") String newPassword,
                             @RequestParam("newDateOfBirth") String newDateOfBirth)
     {
-        Person person = personRepository.getPersonById(teacherID);
+        Person person = personRepository.getPersonById(studentID);
         if (person == null) {
-            log.info("Учитель не найден. Обновления не произошло");
-            return getAllTeachers("Учитель не найден. Обновления не произошло");
+            log.info("Студент не найден. Обновления не произошло");
+            return getAllStudents("Учитель не найден. Обновления не произошло");
         } else {
-            if (person.getRole() == Role.TEACHER) {
-                log.info("Обновление учителя");
-                updateTeacher(personRepository, teacherID, credentialID,
+            if (person.getRole() == Role.STUDENT) {
+                log.info("Обновление студента");
+                updateStudent(personRepository, studentID, credentialID,
                         newLastName, newFirstName, newPatronymic, newDateOfBirth,
                         newLogin, newPassword);
             } else {
-                log.error("Пользователь {} {} {} не является учителем", person.getLastName(), person.getFirstName(), person.getPatronymic());
-                return getAllTeachers("Пользователь не является учителем");
+                log.error("Пользователь {} {} {} не является студентом", person.getLastName(), person.getFirstName(), person.getPatronymic());
+                return getAllStudents("Пользователь не является студентом");
             }
         }
-        return getAllTeachers("Учитель изменён");
+        return getAllStudents("Студент изменён");
     }
 
     @PostMapping("/delete/{id}")
-    public ModelAndView delete(@PathVariable("id") int id) {
+    public ModelAndView delete(@PathVariable("id") int id){
         Person person = personRepository
                 .getPersonById(id);
         if (person != null) {
-            log.info("Удаление учителя");
+            log.info("Удаление студента");
             if (personRepository.deletePersonById(id)) {
-                log.info("Учитель удален");
+                log.info("Студент не удалён");
             } else {
-                log.error("Учитель не удален");
+                log.error("Студент не удален");
             }
         } else {
-            return getAllTeachers("Учитель не найден. Удаления не произошло");
+            return getAllStudents("Студент не найден. Удаления не произошло");
         }
-        return getAllTeachers("Учитель удалён");
+        return getAllStudents("Студент удалён");
     }
 
-    private void updateTeacher(PersonRepository personRepository, int teacherID, int credentialID,
+    private void updateStudent(PersonRepository personRepository, int teacherID, int credentialID,
                                String newLastName, String newFirstName, String newPatronymic, String newDateOfBirth,
                                String newLogin, String newPassword) {
-        Teacher newTeacher = new Teacher()
+        Student newStudent = new Student()
                 .withFirstName(newFirstName)
                 .withLastName(newLastName)
                 .withPatronymic(newPatronymic)
@@ -146,22 +146,19 @@ public class TeacherController extends AbstractController {
                 .withCredentials(new Credentials()
                         .withLogin(newLogin)
                         .withPassword(newPassword));
-        newTeacher.setId(teacherID);
-        newTeacher.getCredentials().setId(credentialID);
+        newStudent.setId(teacherID);
+        newStudent.getCredentials().setId(credentialID);
 
-        if (personRepository.updateAllPersonProperties(newTeacher)) {
-            log.info("Учитель обновлён");
+        if (personRepository.updateAllPersonProperties(newStudent)) {
+            log.info("Студент обновлён");
         } else {
-            log.error("Учитель не обновлён");
+            log.error("Студент не обновлён");
         }
     }
 
-    private boolean checkTeacherInRepository(PersonRepository personRepository, Person newTeacher) {
-        Person creatableTeacher = personRepository.getPersonByName(newTeacher.getFirstName(), newTeacher.getLastName(), newTeacher.getPatronymic());
-        if (creatableTeacher != null) {
-            creatableTeacher = personRepository.getPersonByCredentials(newTeacher.getCredentials().getLogin(), newTeacher.getCredentials().getPassword());
-            return creatableTeacher != null;
-        }
-        return false;
+    private boolean checkStudentInRepository(PersonRepository personRepository, Person newStudent) {
+        log.debug("Проверяется, что пользователя с введённым логином и паролем нет в системе");
+        Person creatablePersonOptional = personRepository.getPersonByCredentials(newStudent.getCredentials().getLogin(), newStudent.getCredentials().getPassword());
+        return creatablePersonOptional != null;
     }
 }

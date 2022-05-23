@@ -36,7 +36,6 @@ public class ApplicationConfiguration implements WebMvcConfigurer {
     public InternalResourceViewResolver internalResourceViewResolver(@Autowired ApplicationContext context) {
         InternalResourceViewResolver resolver = new InternalResourceViewResolver();
         resolver.setApplicationContext(context);
-        //resolver.setPrefix("/jsp/");
         resolver.setSuffix(".jsp");
         return resolver;
     }

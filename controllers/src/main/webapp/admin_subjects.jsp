@@ -25,7 +25,7 @@
             <td><c:out value="${subject.id}"/></td>
             <td><c:out value="${subject.name}"/></td>
             <td>
-                <form action="<c:url value="/subjects/put/${subject.id}"/>" method="post">
+                <form action="<c:url value="admin/subjects/put/${subject.id}"/>" method="post">
                     <label>
                         <input style="text-align: center; display: block" type="text" name="newName" placeholder="Новое название">
                     </label>
@@ -33,7 +33,7 @@
                 </form>
             </td>
             <td>
-                <form action="<c:url value="/subjects/delete/${subject.id}"/>" method="post">
+                <form action="<c:url value="admin/subjects/delete/${subject.id}"/>" method="post">
                     <button style="align-content: center" type="submit">Удалить</button>
                 </form>
             </td>
@@ -42,7 +42,7 @@
 </table>
 
 <h4>Создать предмет</h4>
-<form action="<c:url value="/subjects/post"/>" method="post">
+<form action="<c:url value="admin/subjects/post"/>" method="post">
     <label>
         Новое название:
         <input style="text-align: center; display: block" type="text" name="newName">

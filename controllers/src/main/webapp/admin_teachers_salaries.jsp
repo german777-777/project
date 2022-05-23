@@ -7,7 +7,7 @@
 <body>
 <h1>Страница зарплат</h1>
 
-<form action="<c:url value="/teachers/${teacher.id}/salaries/patch"/>" method="post">
+<form action="<c:url value="admin/teachers/${teacher.id}/salaries/patch"/>" method="post">
     <button style="align-content: center" type="submit">Рассчитать среднюю зарплату</button>
 </form>
 
@@ -36,12 +36,12 @@
             <td><c:out value="${salary.dateOfSalary}"/></td>
             <td><c:out value="${salary.salary}"/></td>
             <td>
-                <form action="<c:url value="/teachers/${teacher.id}/salaries/${salary.id}/delete"/>" method="post">
+                <form action="<c:url value="admin/teachers/${teacher.id}/salaries/${salary.id}/delete"/>" method="post">
                     <button style="align-content: center" type="submit">Удалить</button>
                 </form>
             </td>
             <td>
-                <form action="<c:url value="/teachers/${teacher.id}/salaries/${salary.id}/put"/>" method="post">
+                <form action="<c:url value="admin/teachers/${teacher.id}/salaries/${salary.id}/put"/>" method="post">
                     <label>
                         <input style="text-align: center; display: block" type="text"
                                name="newSalary" placeholder="Новая зарплата">
@@ -58,7 +58,7 @@
 </table>
 
 <h4>Добавить зарплату</h4>
-<form action="<c:url value="/teachers/${teacher.id}/salaries/post"/>" method="post">
+<form action="<c:url value="admin/teachers/${teacher.id}/salaries/post"/>" method="post">
     <label>
         Дата выдачи: <input style="display: block; text-align: center" type="date" name="newDateOfSalary">
     </label>
@@ -68,7 +68,7 @@
     <button style="display: block; align-content: center" type="submit">Добавить зарплату</button>
 </form>
 
-<form action="<c:url value="/teachers/get"/>" method="get">
+<form action="<c:url value="admin/teachers/get"/>" method="get">
     <button type="submit" style="align-content: center">Назад</button>
 </form>
 </body>

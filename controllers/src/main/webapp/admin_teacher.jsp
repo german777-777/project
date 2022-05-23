@@ -34,12 +34,12 @@
             <td><c:out value="${teacher.patronymic}"/></td>
             <td><c:out value="${teacher.dateOfBirth}"/></td>
             <td>
-                <form action="<c:url value="/teachers/delete/${teacher.id}"/>" method="post">
+                <form action="<c:url value="admin/teachers/delete/${teacher.id}"/>" method="post">
                     <button style="align-content: center" type="submit">Удалить</button>
                 </form>
             </td>
             <td>
-                <form action="<c:url value="/teachers/put/${teacher.id}"/>" method="post">
+                <form action="<c:url value="admin/teachers/put/${teacher.id}"/>" method="post">
                     <input type="hidden" name="credentialID" value="${teacher.credentials.id}">
                     <label>
                         <input style="text-align: center; display: block" type="text" name="newLastName"
@@ -69,7 +69,7 @@
                 </form>
             </td>
             <td>
-                <form action="<c:url value="/teachers/${teacher.id}/salaries"/>" method="get">
+                <form action="<c:url value="admin/teachers/${teacher.id}/salaries"/>" method="get">
                     <button style="align-content: center" type="submit">Зарплаты</button>
                 </form>
             </td>
@@ -80,7 +80,7 @@
 <h4>
     Добавление нового учителя
 </h4>
-<form action="<c:url value="/teachers/post"/>" method="post">
+<form action="<c:url value="admin/teachers/post"/>" method="post">
     <label>
         Фамилия: <input style="text-align: center; display: block" type="text" name="newLastName">
     </label>

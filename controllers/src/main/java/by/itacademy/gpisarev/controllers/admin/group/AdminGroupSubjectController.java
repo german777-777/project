@@ -1,4 +1,4 @@
-package by.itacademy.gpisarev.controllers.group;
+package by.itacademy.gpisarev.controllers.admin.group;
 
 import by.itacademy.gpisarev.controllers.AbstractController;
 import by.itacademy.gpisarev.group.GroupRepository;
@@ -22,8 +22,8 @@ import java.util.Set;
 
 @Slf4j
 @Controller
-@RequestMapping("groups/{groupID}/subjects")
-public class GroupSubjectController extends AbstractController {
+@RequestMapping("admin/groups/{groupID}/subjects")
+public class AdminGroupSubjectController extends AbstractController {
 
     private static final String GROUP_REPO_PREFIX = "groupRepository";
     private static final String SUBJECT_REPO_PREFIX = "subjectRepository";
@@ -35,8 +35,8 @@ public class GroupSubjectController extends AbstractController {
     private volatile SubjectRepository subjectRepository;
 
     @Autowired
-    public GroupSubjectController(Map<String, GroupRepository> groupRepositoryMap,
-                                  Map<String, SubjectRepository> subjectRepositoryMap) {
+    public AdminGroupSubjectController(Map<String, GroupRepository> groupRepositoryMap,
+                                       Map<String, SubjectRepository> subjectRepositoryMap) {
         this.groupRepositoryMap = groupRepositoryMap;
         this.subjectRepositoryMap = subjectRepositoryMap;
     }

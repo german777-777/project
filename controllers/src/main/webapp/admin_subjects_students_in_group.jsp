@@ -22,7 +22,7 @@
             <td><c:out value="${subject.id}"/></td>
             <td><c:out value="${subject.name}"/></td>
             <td>
-                <form action="<c:url value="/groups/${group.id}/subjects/${subject.id}/delete"/>" method="post">
+                <form action="<c:url value="admin/groups/${group.id}/subjects/${subject.id}/delete"/>" method="post">
                     <button style="align-content: center" type="submit">Удалить предмет</button>
                 </form>
             </td>
@@ -32,7 +32,7 @@
 </table>
 
 <h4>Добавить предмет к группе</h4>
-<form action="<c:url value="/groups/${group.id}/subjects/post"/>" method="post">
+<form action="<c:url value="admin/groups/${group.id}/subjects/post"/>" method="post">
     <label>
         Название: <input style="text-align: center; display: block" type="text" name="newName">
     </label>
@@ -64,7 +64,7 @@
             <td><c:out value="${student.credentials.password}"/></td>
             <td><c:out value="${student.dateOfBirth}"/></td>
             <td>
-                <form action="<c:url value="/groups/${group.id}/students/${student.id}/delete"/>" method="post">
+                <form action="<c:url value="admin/groups/${group.id}/students/${student.id}/delete"/>" method="post">
                     <button style="align-content: center" type="submit">Удалить студента</button>
                 </form>
             </td>
@@ -73,7 +73,7 @@
 </table>
 
 <h4>Добавить студента к группе</h4>
-<form action="<c:url value="/groups/${group.id}/students/post"/>" method="post">
+<form action="<c:url value="admin/groups/${group.id}/students/post"/>" method="post">
     <label>
         Фамилия: <input style="text-align: center; display: block" type="text" name="newLastName">
     </label>
@@ -86,7 +86,7 @@
     <button style="align-content: center" type="submit">Добавить студента к группе</button>
 </form>
 
-<form action="<c:url value="/groups/get"/>" method="get">
+<form action="<c:url value="admin/groups"/>" method="get">
     <button type="submit" style="align-content: center">Назад</button>
 </form>
 

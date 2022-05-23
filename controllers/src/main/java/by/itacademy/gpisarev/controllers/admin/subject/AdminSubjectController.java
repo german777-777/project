@@ -1,4 +1,4 @@
-package by.itacademy.gpisarev.controllers.subject;
+package by.itacademy.gpisarev.controllers.admin.subject;
 
 import by.itacademy.gpisarev.controllers.AbstractController;
 import by.itacademy.gpisarev.secondary.Subject;
@@ -20,8 +20,8 @@ import java.util.Set;
 
 @Slf4j
 @Controller
-@RequestMapping("subjects")
-public class SubjectController extends AbstractController {
+@RequestMapping("admin/subjects")
+public class AdminSubjectController extends AbstractController {
 
     private static final String SUBJECT_REPO_PREFIX = "subjectRepository";
 
@@ -30,7 +30,7 @@ public class SubjectController extends AbstractController {
     private volatile SubjectRepository subjectRepository;
 
     @Autowired
-    public SubjectController(Map<String, SubjectRepository> subjectRepositoryMap) {
+    public AdminSubjectController(Map<String, SubjectRepository> subjectRepositoryMap) {
         this.subjectRepositoryMap = subjectRepositoryMap;
     }
 

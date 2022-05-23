@@ -39,17 +39,17 @@
                 </c:if>
             </td>
             <td>
-                <form action="<c:url value="/groups/${group.id}/subjects"/>" method="get">
+                <form action="<c:url value="admin/groups/${group.id}/subjects"/>" method="get">
                     <button style="align-content: center; display: block" type="submit">Предметы</button>
                 </form>
             </td>
             <td>
-                <form action="<c:url value="/groups/${group.id}/students"/>" method="get">
+                <form action="<c:url value="admin/groups/${group.id}/students"/>" method="get">
                     <button style="align-content: center; display: block" type="submit">Студенты</button>
                 </form>
             </td>
             <td>
-                <form action="<c:url value="/groups/put/${group.id}"/>" method="post">
+                <form action="<c:url value="admin/groups/put/${group.id}"/>" method="post">
                     <label style="display: block; text-align: center; align-content: center">
                         Новый учитель ('фамилия' 'имя' 'отчество'):
                         <input style="display: block; text-align: center; align-content: center"
@@ -67,7 +67,7 @@
                 </form>
             </td>
             <td>
-                <form action="<c:url value="/groups/delete/${group.id}"/>" method="post">
+                <form action="<c:url value="admin/groups/delete/${group.id}"/>" method="post">
                     <button style="align-content: center; display: block" type="submit">Удалить</button>
                 </form>
             </td>
@@ -77,7 +77,7 @@
 <h4>
     Добавление новой группы
 </h4>
-<form action="<c:url value="/groups/post"/>" method="post">
+<form action="<c:url value="admin/groups/post"/>" method="post">
     <label>
         Название: <input style="text-align: center; display: block" type="text" name="newName">
     </label>
