@@ -1,9 +1,9 @@
-package by.itacademy.gpisarev.controllers.teacher.person;
+package by.itacademy.gpisarev.controllers.student.person;
 
 import by.itacademy.gpisarev.controllers.AbstractController;
 import by.itacademy.gpisarev.group.GroupRepository;
 import by.itacademy.gpisarev.secondary.Group;
-import by.itacademy.gpisarev.users.Teacher;
+import by.itacademy.gpisarev.users.Student;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,17 +19,15 @@ import java.util.Map;
 
 @Slf4j
 @Controller
-@RequestMapping("teacher/students")
-public class TeacherStudentController extends AbstractController {
-
+@RequestMapping("student/students")
+public class StudentStudentsController extends AbstractController {
     private static final String GROUP_REPO_PREFIX = "groupRepository";
-
     private final Map<String, GroupRepository> groupRepositoryMap;
 
     private volatile GroupRepository groupRepository;
 
     @Autowired
-    public TeacherStudentController(Map<String, GroupRepository> groupRepositoryMap) {
+    public StudentStudentsController(Map<String, GroupRepository> groupRepositoryMap) {
         this.groupRepositoryMap = groupRepositoryMap;
     }
 
@@ -40,21 +38,21 @@ public class TeacherStudentController extends AbstractController {
 
     @GetMapping
     public ModelAndView get(HttpSession session) {
-        ModelAndView modelAndView = new ModelAndView("/teacher_student");
+        ModelAndView modelAndView = new ModelAndView("/student_students");
 
-        Teacher teacher = (Teacher) session.getAttribute("user");
-        Group groupWithTeacher = groupRepository.getAllGroups()
+        Student student = (Student) session.getAttribute("user");
+        Group groupWithStudent = groupRepository.getAllGroups()
                 .stream()
-                .filter(group -> group.getTeacher().equals(teacher))
+                .filter(group -> group.getStudents().contains(student))
                 .findAny().orElse(null);
 
-        if (groupWithTeacher == null) {
+        if (groupWithStudent == null) {
             modelAndView.getModel().put("allStudents", new HashSet<>());
-            modelAndView.getModel().put("messageFromStudents", "Вы не ведёте ни у какой группы...");
+            modelAndView.getModel().put("messageFromStudents", "Вы не состоите ни в одной группе...");
             return modelAndView;
         }
 
-        modelAndView.getModel().put("allStudents", groupWithTeacher.getStudents());
+        modelAndView.getModel().put("allStudents", groupWithStudent.getStudents());
         modelAndView.getModel().put("messageFromStudents", "Все студенты");
         return modelAndView;
     }

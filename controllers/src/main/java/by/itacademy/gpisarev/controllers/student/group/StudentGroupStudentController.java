@@ -1,10 +1,10 @@
-package by.itacademy.gpisarev.controllers.teacher.group;
+package by.itacademy.gpisarev.controllers.student.group;
 
 import by.itacademy.gpisarev.controllers.AbstractController;
 import by.itacademy.gpisarev.group.GroupRepository;
+import by.itacademy.gpisarev.person.PersonRepository;
 import by.itacademy.gpisarev.secondary.Group;
-import by.itacademy.gpisarev.secondary.Subject;
-import by.itacademy.gpisarev.subject.SubjectRepository;
+import by.itacademy.gpisarev.users.Student;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,31 +20,29 @@ import java.util.Set;
 
 @Slf4j
 @Controller
-@RequestMapping("teacher/groups/{groupID}/subjects")
-public class TeacherGroupSubjectController extends AbstractController {
-
+@RequestMapping("student/groups/{groupID}/students")
+public class StudentGroupStudentController extends AbstractController {
     private static final String GROUP_REPO_PREFIX = "groupRepository";
-    private static final String SUBJECT_REPO_PREFIX = "subjectRepository";
+    private static final String PERSON_REPO_PREFIX = "personRepository";
 
     private final Map<String, GroupRepository> groupRepositoryMap;
-    private final Map<String, SubjectRepository> subjectRepositoryMap;
+    private final Map<String, PersonRepository> personRepositoryMap;
 
     private volatile GroupRepository groupRepository;
-    private volatile SubjectRepository subjectRepository;
+    private volatile PersonRepository personRepository;
 
     @Autowired
-    public TeacherGroupSubjectController(Map<String, GroupRepository> groupRepositoryMap,
-                                         Map<String, SubjectRepository> subjectRepositoryMap) {
+    public StudentGroupStudentController(Map<String, GroupRepository> groupRepositoryMap,
+                                         Map<String, PersonRepository> personRepositoryMap) {
         this.groupRepositoryMap = groupRepositoryMap;
-        this.subjectRepositoryMap = subjectRepositoryMap;
+        this.personRepositoryMap = personRepositoryMap;
     }
 
     @PostConstruct
     public void init() {
         groupRepository = groupRepositoryMap.get(GROUP_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
-        subjectRepository = subjectRepositoryMap.get(SUBJECT_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
+        personRepository = personRepositoryMap.get(PERSON_REPO_PREFIX + StringUtils.capitalize(type) + REPO_SUFFIX);
     }
-
 
     @GetMapping
     public ModelAndView get(@PathVariable("groupID") int groupID) {
@@ -52,15 +50,15 @@ public class TeacherGroupSubjectController extends AbstractController {
         Group group = groupRepository.getGroupById(groupID);
 
         if (group != null) {
-            Set<Subject> subjects = subjectRepository.getSubjectsByGroupID(groupID);
-            group.setSubjects(subjects);
+            Set<Student> students = personRepository.getStudentsByGroupID(groupID);
+            group.setStudents(students);
 
-            modelAndView.setViewName("/teacher_subjects_students_in_group");
+            modelAndView.setViewName("/student_subjects_students_in_group");
             modelAndView.getModel().put("group", group);
-            modelAndView.getModel().put("messageFromGroupSubject", "Все предметы в группе");
+            modelAndView.getModel().put("messageFromGroupStudent", "Все студенты в группе");
         } else {
-            log.error("Возврат. Группа не найдена");
-            modelAndView.setViewName("/teacher_groups");
+            log.error("Возврат");
+            modelAndView.setViewName("/student_groups");
         }
         return modelAndView;
     }

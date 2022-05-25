@@ -87,11 +87,11 @@ public class Student extends Person {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Student student = (Student) o;
-        return role == student.role && marks.equals(student.marks);
+        return role == student.role;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), role, marks);
+        return Objects.hash(super.hashCode(), role);
     }
 }

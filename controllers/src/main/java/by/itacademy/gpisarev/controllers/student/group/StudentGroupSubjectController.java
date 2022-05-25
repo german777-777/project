@@ -1,4 +1,4 @@
-package by.itacademy.gpisarev.controllers.teacher.group;
+package by.itacademy.gpisarev.controllers.student.group;
 
 import by.itacademy.gpisarev.controllers.AbstractController;
 import by.itacademy.gpisarev.group.GroupRepository;
@@ -20,9 +20,8 @@ import java.util.Set;
 
 @Slf4j
 @Controller
-@RequestMapping("teacher/groups/{groupID}/subjects")
-public class TeacherGroupSubjectController extends AbstractController {
-
+@RequestMapping("student/groups/{groupID}/subjects")
+public class StudentGroupSubjectController extends AbstractController {
     private static final String GROUP_REPO_PREFIX = "groupRepository";
     private static final String SUBJECT_REPO_PREFIX = "subjectRepository";
 
@@ -33,7 +32,7 @@ public class TeacherGroupSubjectController extends AbstractController {
     private volatile SubjectRepository subjectRepository;
 
     @Autowired
-    public TeacherGroupSubjectController(Map<String, GroupRepository> groupRepositoryMap,
+    public StudentGroupSubjectController(Map<String, GroupRepository> groupRepositoryMap,
                                          Map<String, SubjectRepository> subjectRepositoryMap) {
         this.groupRepositoryMap = groupRepositoryMap;
         this.subjectRepositoryMap = subjectRepositoryMap;
@@ -55,12 +54,12 @@ public class TeacherGroupSubjectController extends AbstractController {
             Set<Subject> subjects = subjectRepository.getSubjectsByGroupID(groupID);
             group.setSubjects(subjects);
 
-            modelAndView.setViewName("/teacher_subjects_students_in_group");
+            modelAndView.setViewName("/student_subjects_students_in_group");
             modelAndView.getModel().put("group", group);
             modelAndView.getModel().put("messageFromGroupSubject", "Все предметы в группе");
         } else {
             log.error("Возврат. Группа не найдена");
-            modelAndView.setViewName("/teacher_groups");
+            modelAndView.setViewName("/student_groups");
         }
         return modelAndView;
     }

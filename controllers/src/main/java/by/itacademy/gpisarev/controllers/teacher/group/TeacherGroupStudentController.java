@@ -59,7 +59,7 @@ public class TeacherGroupStudentController extends AbstractController {
             modelAndView.getModel().put("messageFromGroupStudent", "Все студенты в группе");
         } else {
             log.error("Возврат");
-            modelAndView.setViewName("teacher_groups");
+            modelAndView.setViewName("/teacher_groups");
         }
         return modelAndView;
     }
