@@ -87,7 +87,7 @@ public class AdminSalaryController extends AbstractController {
         return getAllTeacherSalaries(teacherID, "Все зарплаты учителя №" + teacherID);
     }
 
-    @PostMapping("/post")
+    @PostMapping
     public ModelAndView post(@RequestParam("newDateOfSalary") String newDateOfSalary, @RequestParam("newSalary") int newSalary,
                              @PathVariable("teacherID") int teacherID) {
         String message;

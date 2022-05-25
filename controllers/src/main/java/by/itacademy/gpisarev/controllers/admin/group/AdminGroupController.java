@@ -56,7 +56,13 @@ public class AdminGroupController extends AbstractController {
         return modelAndView;
     }
 
-    @PostMapping("/post")
+
+    @GetMapping
+    public ModelAndView get(){
+        return getAllGroups("Все группы");
+    }
+
+    @PostMapping
     public ModelAndView post(@RequestParam("lastFirstPatronymic") String lastFirstPatronymic,
                                @RequestParam("newName") String newName)
     {
@@ -137,10 +143,5 @@ public class AdminGroupController extends AbstractController {
             return getAllGroups("Группа не найдена. Удаления не произошло");
         }
         return getAllGroups("Группа удалена");
-    }
-
-    @GetMapping
-    public ModelAndView get(){
-        return getAllGroups("Все группы");
     }
 }

@@ -100,7 +100,7 @@ public class AdminGroupSubjectController extends AbstractController {
         return getGroup(groupID, "Все предметы в группе");
     }
 
-    @PostMapping("/post")
+    @PostMapping
     public ModelAndView post(@PathVariable("groupID") int groupID,
                              @RequestParam("newName") String name) {
         Group group = getGroupByID(groupID);

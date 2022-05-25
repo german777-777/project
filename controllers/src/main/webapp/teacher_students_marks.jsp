@@ -47,7 +47,7 @@
                 </form>
             </td>
             <td>
-                <form action="<c:url value="teacher/students/${student.id}/marks/${mark.id}/delete"/>" method="post">
+                <form action="<c:url value="/teacher/students/${student.id}/marks/${mark.id}/delete"/>" method="post">
                     <button style="align-content: center" type="submit">Удалить</button>
                 </form>
             </td>

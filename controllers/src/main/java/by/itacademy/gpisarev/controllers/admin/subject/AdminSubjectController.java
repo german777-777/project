@@ -47,12 +47,12 @@ public class AdminSubjectController extends AbstractController {
         return modelAndView;
     }
 
-    @GetMapping("/get")
+    @GetMapping
     public ModelAndView get() {
         return getAllSubjects("Все предметы");
     }
 
-    @PostMapping("/post")
+    @PostMapping
     public ModelAndView post(@RequestParam("newName") String newName) {
         log.debug("Создание предмета");
         Subject subject = new Subject()

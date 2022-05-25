@@ -93,7 +93,7 @@ public class AdminMarksController extends AbstractController {
         return getAllStudentMarks(studentID, "Все оценки студента №" + studentID);
     }
 
-    @PostMapping("/post")
+    @PostMapping
     public ModelAndView post(@PathVariable("studentID") int studentID,
                              @RequestParam("newMark") int newMark,
                              @RequestParam("newDate") String newDate,

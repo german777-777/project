@@ -45,7 +45,6 @@ import java.util.Objects;
         @NamedQuery(name = "getPersonByCredentials", query = "from Person p where p.credentials.login = :login and p.credentials.password = :password")
 })
 public abstract class Person extends AbstractEntity {
-
     @Transient
     protected Role role;
 
@@ -73,11 +72,11 @@ public abstract class Person extends AbstractEntity {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Person person = (Person) o;
-        return firstName.equals(person.firstName) && lastName.equals(person.lastName) && patronymic.equals(person.patronymic) && dateOfBirth.equals(person.dateOfBirth) && credentials.equals(person.credentials);
+        return firstName.equals(person.firstName) && lastName.equals(person.lastName) && credentials.equals(person.credentials);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), firstName, lastName, patronymic, dateOfBirth, credentials);
+        return Objects.hash(super.hashCode(), firstName, lastName, credentials);
     }
 }

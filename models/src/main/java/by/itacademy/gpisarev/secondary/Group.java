@@ -107,13 +107,4 @@ public class Group extends AbstractEntity {
     public void addStudent(Student student) {
         this.students.add(student);
     }
-
-    public void removeSubject(Subject subject) {
-        this.subjects.remove(subject);
-    }
-
-    public void removeStudent(Student student) {
-        this.students.remove(student);
-    }
-
 }

@@ -111,7 +111,7 @@ public class AdminGroupStudentController extends AbstractController {
         return getGroup(groupID, "Все студенты в группе");
     }
 
-    @PostMapping("/post")
+    @PostMapping
     public ModelAndView post(@PathVariable("groupID") int groupID,
                              @RequestParam("newLastName") String newLastName,
                              @RequestParam("newFirstName") String newFirstName,

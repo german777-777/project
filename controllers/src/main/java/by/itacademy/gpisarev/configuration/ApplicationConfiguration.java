@@ -10,7 +10,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import java.beans.PropertyVetoException;
@@ -19,7 +18,7 @@ import java.beans.PropertyVetoException;
 @Configuration
 @EnableWebMvc
 @PropertySource("classpath:repository.properties")
-public class ApplicationConfiguration implements WebMvcConfigurer {
+public class ApplicationConfiguration {
     @Value("${driver}")
     private String driver;
 

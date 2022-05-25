@@ -55,7 +55,7 @@ public class AdminTeacherController extends AbstractController {
         return modelAndView;
     }
 
-    @GetMapping("/get")
+    @GetMapping
     public ModelAndView get() {
         return getAllTeachers("Все учителя");
     }

@@ -12,21 +12,21 @@
     </h3>
 
     <h2>
-        <form action="${pageContext.request.contextPath}admin/students/get" method="get">
+        <form action="<c:url value="/admin/students"/>" method="get">
             <button type="submit" style="align-content: center">На страницу со всеми студентами</button>
         </form>
-        <form action="${pageContext.request.contextPath}admin/teachers/get" method="get">
+        <form action="<c:url value="/admin/teachers"/>" method="get">
             <button type="submit" style="align-content: center">На страницу со всеми учителями</button>
         </form>
-        <form action="${pageContext.request.contextPath}admin/groups" method="get">
+        <form action="<c:url value="/admin/groups"/>" method="get">
             <button type="submit" style="align-content: center">На страницу со всеми группами</button>
         </form>
-        <form action="${pageContext.request.contextPath}admin/subjects/get" method="get">
+        <form action="<c:url value="/admin/subjects"/>" method="get">
             <button type="submit" style="align-content: center">На страницу со всеми предметами</button>
         </form>
     </h2>
-    <h3>
-        <a href="${pageContext.request.contextPath}/logout">Выход из аккаунта</a>
-    </h3>
+    <form action="<c:url value="/logout"/>" method="get">
+        <button type="submit" style="align-content: center">Выход из аккаунта</button>
+    </form>
 </body>
 </html>

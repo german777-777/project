@@ -55,12 +55,12 @@ public class AdminStudentController extends AbstractController {
         return modelAndView;
     }
 
-    @GetMapping("/get")
+    @GetMapping
     public ModelAndView get(){
         return getAllStudents("Все студенты");
     }
 
-    @PostMapping("/post")
+    @PostMapping
     public ModelAndView post(@RequestParam("newLastName") String newLastName,
                              @RequestParam("newFirstName") String newFirstName,
                              @RequestParam("newPatronymic") String newPatronymic,

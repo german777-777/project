@@ -13,10 +13,10 @@
 
 <h2>
     <form action="<c:url value="/teacher/salary"/>" method="get">
-        <button type="submit" style="align-content: center">На страницу моих зарплат</button>
+        <button type="submit" style="align-content: center">На страницу ваших зарплат</button>
     </form>
     <form action="<c:url value="/teacher/students"/>" method="get">
-        <button type="submit" style="align-content: center">На страницу со всеми студентами</button>
+        <button type="submit" style="align-content: center">На страницу со студентами из вашей группы</button>
     </form>
     <form action="<c:url value="/teacher/teachers"/>" method="get">
         <button type="submit" style="align-content: center">На страницу со всеми учителями</button>

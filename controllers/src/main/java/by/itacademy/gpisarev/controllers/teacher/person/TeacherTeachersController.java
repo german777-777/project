@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Controller
 @RequestMapping("teacher/teachers")
-public class TeacherController extends AbstractController {
+public class TeacherTeachersController extends AbstractController {
 
     private static final String PERSON_REPO_PREFIX = "personRepository";
 
@@ -29,7 +29,7 @@ public class TeacherController extends AbstractController {
     private volatile PersonRepository personRepository;
 
     @Autowired
-    public TeacherController(Map<String, PersonRepository> personRepositoryMap) {
+    public TeacherTeachersController(Map<String, PersonRepository> personRepositoryMap) {
         this.personRepositoryMap = personRepositoryMap;
     }
 

@@ -69,7 +69,7 @@
                 </form>
             </td>
             <td>
-                <form action="<c:url value="admin/teachers/${teacher.id}/salaries"/>" method="get">
+                <form action="<c:url value="/admin/teachers/${teacher.id}/salaries"/>" method="get">
                     <button style="align-content: center" type="submit">Зарплаты</button>
                 </form>
             </td>

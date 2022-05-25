@@ -30,7 +30,7 @@
             <td><c:out value="${mark.dateOfMark}"/></td>
             <td><c:out value="${mark.subject.name}"/></td>
             <td>
-                <form action="<c:url value="admin/students/${student.id}/marks/${mark.id}/put"/>" method="post">
+                <form action="<c:url value="/admin/students/${student.id}/marks/${mark.id}/put"/>" method="post">
                     <label style="display: block; align-content: center; text-align: center">
                         Новая оценка:
                         <input style="text-align: center; display: block" type="text" name="newMark">
@@ -47,7 +47,7 @@
                 </form>
             </td>
             <td>
-                <form action="<c:url value="admin/students/${student.id}/marks/${mark.id}/delete"/>" method="post">
+                <form action="<c:url value="/admin/students/${student.id}/marks/${mark.id}/delete"/>" method="post">
                     <button style="align-content: center" type="submit">Удалить</button>
                 </form>
             </td>
@@ -56,7 +56,7 @@
 </table>
 
 <h4>Добавить оценку студенту</h4>
-<form action="<c:url value="admin/students/${student.id}/marks/post"/>" method="post">
+<form action="<c:url value="/admin/students/${student.id}/marks"/>" method="post">
     <label>
         Новая оценка:
         <input style="text-align: center; display: block" type="text" name="newMark">
@@ -72,7 +72,7 @@
     <button style="align-content: center" type="submit">Создать</button>
 </form>
 
-<form action="<c:url value="admin/students/get"/>" method="get">
+<form action="<c:url value="/admin/students"/>" method="get">
     <button type="submit" style="align-content: center">Назад</button>
 </form>
 </body>

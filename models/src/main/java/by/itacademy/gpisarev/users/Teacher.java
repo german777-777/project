@@ -30,7 +30,6 @@ import java.util.Set;
 @DiscriminatorValue("Учитель")
 @Entity
 public class Teacher extends Person {
-
     @Transient
     private final Role role = Role.TEACHER;
 
@@ -86,12 +85,12 @@ public class Teacher extends Person {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Teacher teacher = (Teacher) o;
-        return role == teacher.role && salaries.equals(teacher.salaries);
+        return role == teacher.role;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), role, salaries);
+        return Objects.hash(super.hashCode(), role);
     }
 
 
